@@ -1,5 +1,5 @@
 <template>
-  <StarterPostList />
+  <ShuimoPostList />
 </template>
 
 <route lang="yaml">

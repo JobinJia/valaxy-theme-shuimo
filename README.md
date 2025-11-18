@@ -1,22 +1,56 @@
 <p align="center">
-Valaxy-Theme-Starter<sup><em>(vue)</em></sup>
+Valaxy-Theme-Shuimo<sup><em>(vue)</em></sup>
 </p>
 
-[![npm](https://img.shields.io/npm/v/valaxy-theme-starter)](https://www.npmjs.com/package/valaxy-theme-starter)
-[![npm dev dependency version](https://img.shields.io/npm/dependency-version/valaxy-theme-starter/dev/valaxy)](https://github.com/YunYouJun/valaxy)
+[![npm](https://img.shields.io/npm/v/valaxy-theme-shuimo)](https://www.npmjs.com/package/valaxy-theme-shuimo)
+[![npm dev dependency version](https://img.shields.io/npm/dependency-version/valaxy-theme-shuimo/dev/valaxy)](https://github.com/YunYouJun/valaxy)
 
-> This is a template for creating a [valaxy](https://github.com/YunYouJun/valaxy) theme.
+> A Chinese ink wash painting style theme for [valaxy](https://github.com/YunYouJun/valaxy).
 
-## Usage
+## Installation
+
+Install the theme in your Valaxy project:
+
+```bash
+pnpm add valaxy-theme-shuimo
+# or
+npm install valaxy-theme-shuimo
+```
+
+Then configure it in your `valaxy.config.ts`:
+
+```ts
+import { defineValaxyConfig } from 'valaxy'
+import type { ThemeConfig } from 'valaxy-theme-shuimo'
+
+export default defineValaxyConfig<ThemeConfig>({
+  theme: 'shuimo',
+
+  themeConfig: {
+    // your theme config here
+  },
+})
+```
+
+## Features
+
+- Chinese ink wash painting inspired design
+- Fully responsive layout
+- Dark mode support
+- Customizable color scheme
+- Built with Vue 3, Vite, and UnoCSS
+- TypeScript support
+
+## Development
 
 ### Clone to local
 
 > Use [pnpm](https://pnpm.io/), because we need its workspace.
 
 ```bash
-npx degit YunYouJun/valaxy-theme-starter valaxy-theme-name
+npx degit YunYouJun/valaxy-theme-shuimo valaxy-theme-shuimo
 
-cd valaxy-theme-name
+cd valaxy-theme-shuimo
 
 # If you don't have pnpm installed
 npm install -g pnpm
@@ -24,7 +58,7 @@ npm install -g pnpm
 pnpm i
 ```
 
-### Development
+### Run development server
 
 ```bash
 # dev node
@@ -63,33 +97,6 @@ Add `New repository secret`:
 npm run release
 # choose your version to automatic release
 ```
-
-## Checklist
-
-- [ ] Change the author name in `LICENSE` & `package.json` & `.github`
-- [ ] Write `ThemeConfig` & Other init content
-- [ ] Rename `valaxy-theme-starter` to `valaxy-theme-<name>` (custom it)
-- [ ] Change `theme: 'starter'` to `theme: <name>` in `valaxy.config.ts`
-- [ ] Each of your Vue components should have a namespace
-  - For example: `YunTest.vue` for `valaxy-theme-yun`
-
-### About Checklist Rename
-
-Rename `valaxy-theme-starter` with `valaxy-theme-name` in the `package.json` and `valaxy.config.ts` files.
-
-PS: there are a total of four files that need to be rename
-
-```bash
-valaxy-theme-name
-  - package.json
-  - demo
-    - package.json
-    - valaxy.config.ts
-  - theme
-    - package.json
-```
-
-Let's write the theme & docs!
 
 ## Thanks
 

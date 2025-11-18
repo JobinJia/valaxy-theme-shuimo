@@ -60,3 +60,7 @@ build/
 
 # plugins
 .VSCodeCounter
+
+# AI
+.mcp.json
+CLAUDE.md

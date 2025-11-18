@@ -1,7 +1,7 @@
 <template>
   <div class="antialiased">
     <div class="mx-auto max-w-3xl px-4 xl:max-w-5xl sm:px-6 xl:px-0">
-      <StarterNav />
+      <ShuimoNav />
     </div>
 
     <main class="mx-auto max-w-3xl px-4 xl:max-w-5xl sm:px-6 xl:px-0">
@@ -41,10 +41,10 @@
       </slot>
     </main>
 
-    <StarterHelper />
+    <ShuimoHelper />
 
-    <StarterFooter>
+    <ShuimoFooter>
       <slot name="footer" />
-    </StarterFooter>
+    </ShuimoFooter>
   </div>
 </template>

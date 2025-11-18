@@ -20,7 +20,7 @@
     "eslint": "^9.37.0",
     "eslint-plugin-format": "^1.0.2",
     "typescript": "^5.9.3",
-    "valaxy-theme-starter": "workspace:*",
+    "valaxy-theme-shuimo": "workspace:*",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.1.1"
   }

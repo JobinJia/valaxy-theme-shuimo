@@ -15,13 +15,13 @@ English
 **English Bold**
 
 ```ts
-import type { ThemeConfig } from 'valaxy-theme-starter'
+import type { ThemeConfig } from 'valaxy-theme-shuimo'
 import { defineConfig } from 'valaxy'
 
 export default defineConfig<ThemeConfig>({
   // your theme name
   // valaxy-theme-yun name is 'yun'
-  theme: 'starter',
+  theme: 'shuimo',
 
   themeConfig: {
     banner: {

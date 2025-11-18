@@ -20,7 +20,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
 <template>
   <article class="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
     <header class="pt-6 text-center space-y-1 xl:pb-10">
-      <StarterDate :date="frontmatter.date" />
+      <ShuimoDate :date="frontmatter.date" />
       <h1
         class="st-text text-3xl font-extrabold leading-9 tracking-tight md:text-5xl sm:text-4xl md:leading-14 sm:leading-10"
       >
@@ -32,7 +32,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
       class="pb-16 xl:grid xl:grid-cols-4 xl:gap-x-10 divide-y divide-gray-200 xl:pb-20 xl:divide-y-0 dark:divide-gray-700"
       style="grid-template-rows: auto 1fr"
     >
-      <StarterAuthor v-if="frontmatter.author" :frontmatter="frontmatter" />
+      <ShuimoAuthor v-if="frontmatter.author" :frontmatter="frontmatter" />
       <div class="xl:col-span-3 xl:row-span-2 divide-y divide-gray-200 xl:pb-0 dark:divide-gray-700">
         <slot />
       </div>
