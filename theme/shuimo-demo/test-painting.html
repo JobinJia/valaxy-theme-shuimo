@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>山水画生成测试</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0f0f0;
+      font-family: sans-serif;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .info {
+      margin: 20px 0;
+      padding: 10px;
+      background: #f8f8f8;
+      border-left: 4px solid #666;
+    }
+    #painting {
+      width: 100%;
+      border: 2px solid #ddd;
+      background: #fafafa;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🖼️ 山水画生成测试</h1>
+    <div>
+      <button onclick="generateNew()">🎲 生成新画</button>
+      <button onclick="downloadSVG()">💾 下载 SVG</button>
+    </div>
+    <div class="info">
+      <div>元素数量: <strong id="elementCount">-</strong></div>
+      <div>SVG 大小: <strong id="svgSize">-</strong></div>
+      <div>当前种子: <strong id="currentSeed">-</strong></div>
+    </div>
+    <div id="painting"></div>
+  </div>
+
+  <script type="module">
+    // 简单的 PRNG 实现
+    class SimplePRNG {
+      constructor() {
+        this.s = 1234
+        this.p = 999979
+        this.q = 999983
+        this.m = this.p * this.q
+      }
+
+      hash(x) {
+        const y = btoa(JSON.stringify(x))
+        let z = 0
+        for (let i = 0; i < y.length; i++) {
+          z += y.charCodeAt(i) * Math.pow(128, i)
+        }
+        return z
+      }
+
+      seed(x) {
+        if (x === undefined) {
+          x = new Date().getTime()
+        }
+        let y = 0
+        let z = 0
+        const redo = () => {
+          y = (this.hash(x) + z) % this.m
+          z += 1
+        }
+        while (y % this.p === 0 || y % this.q === 0 || y === 0 || y === 1) {
+          redo()
+        }
+        this.s = y
+        console.log('🎲 随机种子:', this.s)
+        for (let i = 0; i < 10; i++) {
+          this.next()
+        }
+      }
+
+      next() {
+        this.s = (this.s * this.s) % this.m
+        return this.s / this.m
+      }
+    }
+
+    const prng = new SimplePRNG()
+    const originalRandom = Math.random
+    Math.random = () => prng.next()
+
+    let currentSVG = ''
+
+    function generateNew() {
+      const seed = Date.now()
+      const numericSeed = String(seed).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+
+      console.log('🎨 开始生成山水画...')
+      prng.seed(numericSeed)
+
+      const svg = generateTestSVG(1000, 600)
+      currentSVG = svg
+
+      document.getElementById('painting').innerHTML = svg
+      document.getElementById('currentSeed').textContent = seed
+
+      // 统计元素
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(svg, 'image/svg+xml')
+      const elements = doc.querySelectorAll('path, polyline, polygon')
+
+      document.getElementById('elementCount').textContent = elements.length
+      document.getElementById('svgSize').textContent = (svg.length / 1024).toFixed(2) + ' KB'
+
+      console.log('✅ 生成完成！元素数:', elements.length)
+    }
+
+    function generateTestSVG(width, height) {
+      const elements = []
+
+      // 测试：生成一个简单的山峰看看
+      console.log('生成测试山峰...')
+
+      // 直接画一个简单的三角形测试
+      elements.push(`<polygon points="500,200 400,400 600,400" fill="none" stroke="rgba(100,100,100,0.5)" stroke-width="2"/>`)
+      elements.push(`<polyline points="100,500 200,450 300,480 400,460 500,470 600,450 700,460 800,440 900,450" fill="none" stroke="rgba(100,100,100,0.3)" stroke-width="1.5"/>`)
+
+      console.log('生成的元素数:', elements.length)
+
+      return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+        ${elements.join('\n')}
+      </svg>`
+    }
+
+    function downloadSVG() {
+      if (!currentSVG) {
+        alert('请先生成画作')
+        return
+      }
+
+      const blob = new Blob([currentSVG], { type: 'image/svg+xml' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `shanshui-${Date.now()}.svg`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+
+    // 页面加载时自动生成
+    window.generateNew = generateNew
+    window.downloadSVG = downloadSVG
+    generateNew()
+  </script>
+</body>
+</html>
