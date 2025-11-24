@@ -17,7 +17,7 @@ Math.random = () => prng.next()
  * Main painting generation function
  */
 export function useShanShuiPainting() {
-  function generate(seed: string | number, width: number = 1000, height: number = 500, paperTextureDataUrl?: string): string {
+  function generate(seed: string | number, width: number = 1000, height: number = 500, paperTextureDataUrl?: string, bgColor: string = 'rgb(245, 232, 207)'): string {
     // Initialize random seed
     const numericSeed = typeof seed === 'string' ? seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : seed
     prng.seed(numericSeed)
@@ -73,7 +73,7 @@ export function useShanShuiPainting() {
           `
             : ''}
         </defs>
-        <rect width="100%" height="100%" fill="${paperTextureDataUrl ? 'url(#paperTexture)' : 'rgb(245, 232, 207)'}" />
+        <rect width="100%" height="100%" fill="${paperTextureDataUrl ? 'url(#paperTexture)' : bgColor}" />
         <g transform="translate(${hPadding}, ${vPadding})">
           <svg width="${width - 2 * hPadding}" height="${height - 2 * vPadding}" viewBox="0 0 ${width - 2 * hPadding} ${height - 2 * vPadding}" overflow="visible">
           ${elements.join('\n')}

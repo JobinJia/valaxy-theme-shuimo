@@ -21,7 +21,7 @@ const paintingUrl = ref('')
 const containerRef = ref<HTMLElement | null>(null)
 
 // 使用 shuimo-core 重构后的山水画生成器
-const { generate, generatePaperTexture, cleanup } = useShuimoPainting()
+const { generate, cleanup } = useShuimoPainting()
 
 // 使用今日诗词 API
 const { data: poem, load: loadPoem } = useJinrishici()
@@ -94,9 +94,8 @@ async function createPainting() {
     const seed = Date.now()
 
     // 生成真实的山水画 (1100x600 适配卷轴比例)
-    // 先生成优化后的纸张纹理 (128x128 以提高性能)
-    const textureUrl = generatePaperTexture(128, 128)
-    const svgString = generate(seed, 1100, 600, textureUrl)
+    // 使用白色背景，不使用纸张纹理
+    const svgString = generate(seed, 1100, 600, undefined, '#fff')
 
     // 预渲染 SVG 为 PNG，提高动画性能
     const pngUrl = await svgToPng(svgString, 1100, 600)
@@ -105,20 +104,13 @@ async function createPainting() {
       URL.revokeObjectURL(paintingUrl.value)
     }
     paintingUrl.value = pngUrl
-
-    // 应用纸张纹理到容器背景
-    if (textureUrl && containerRef.value) {
-      containerRef.value.style.backgroundImage = `url(${textureUrl})`
-      containerRef.value.style.backgroundSize = '8em 8em'
-    }
   }
   catch (error) {
     console.error('❌ 生成山水画失败:', error)
     // 降级方案：直接使用 SVG
     try {
       const seed = Date.now()
-      const textureUrl = generatePaperTexture(128, 128)
-      const svgString = generate(seed, 1100, 600, textureUrl)
+      const svgString = generate(seed, 1100, 600, undefined, '#fff')
       const blob = new Blob([svgString], { type: 'image/svg+xml' })
       paintingUrl.value = URL.createObjectURL(blob)
     }
@@ -227,7 +219,7 @@ onBeforeUnmount(() => {
   width: 100vw;
   height: 100vh;
   z-index: 9999;
-  background: #f5f5f0;
+  background: #fff;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -340,6 +332,7 @@ onBeforeUnmount(() => {
 .painting-wrapper {
   width: 100%;
   height: 100%;
+  background-color: #fff;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

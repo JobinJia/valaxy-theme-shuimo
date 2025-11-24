@@ -15,9 +15,11 @@ export function useShuimoPainting() {
      * @param seed - 随机种子（数字）
      * @param width - 画布宽度
      * @param height - 画布高度
+     * @param paperTextureDataUrl - 纸张纹理
+     * @param bgColor - 背景色
      */
-    generate(seed: number, width: number, height: number, paperTextureDataUrl?: string): string {
-      return generateSVG(`shuimo-${seed}`, width, height, paperTextureDataUrl)
+    generate(seed: number, width: number, height: number, paperTextureDataUrl?: string, bgColor?: string): string {
+      return generateSVG(`shuimo-${seed}`, width, height, paperTextureDataUrl, bgColor)
     },
 
     /**
