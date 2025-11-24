@@ -117,7 +117,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
+// 响应式基准字体大小
+// 使用 CSS 变量统一管理尺寸，便于在不同分辨率下调整
 .scroll-animation-container {
+  // 基准字体大小，所有 em 单位基于此计算
+  // 默认 16px，在不同屏幕尺寸下自适应
+  --scroll-base-font: clamp(12px, 1vw + 0.5vh, 18px);
+  // 线条左右边界偏移，等于卷轴轴杆宽度，让线条紧贴卷轴内侧
+  --scroll-bar-offset: 5.5em; // 微调后的卷轴轴杆宽度
+  --scroll-content-offset: 7.1875em; // 内容区域边界偏移
+
+  font-size: var(--scroll-base-font);
   position: fixed;
   top: 0;
   left: 0;
@@ -163,7 +173,7 @@ onBeforeUnmount(() => {
   height: 80vh;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0.3125em 0.9375em rgba(0, 0, 0, 0.3));
 }
 
 // 上下连接线
@@ -189,7 +199,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: auto;
   object-fit: fill;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 0.125em 0.5em rgba(0, 0, 0, 0.2));
 }
 
 // 中间内容区域 - 山水画
@@ -206,8 +216,8 @@ onBeforeUnmount(() => {
   // 可用区域：100% - 14.3% - 13.3% = 72.4%
   top: 15%;
   bottom: 14%;
-  left: 115px; // 与线条左边界对齐
-  right: 115px; // 与线条右边界对齐
+  left: var(--scroll-content-offset); // 与线条左边界对齐
+  right: var(--scroll-content-offset); // 与线条右边界对齐
   width: auto;
   height: auto;
   margin: 1.5em 0 1.5em;
@@ -250,15 +260,16 @@ onBeforeUnmount(() => {
 }
 
 /* 线条通过clip-path裁剪，保持图片不变形，宽度从小到大展开 */
+/* 线条从中间向两侧展开，与卷轴动画同步 */
 @keyframes expand-line-width {
   0% {
-    left: 103px;
-    right: 103px;
-    clip-path: inset(0 calc(50% - (8vw - 103px)) 0 calc(50% - (8vw - 103px)));
+    left: var(--scroll-bar-offset);
+    right: var(--scroll-bar-offset);
+    clip-path: inset(0 calc(50% - 8vw) 0 calc(50% - 8vw));
   }
   100% {
-    left: 103px;
-    right: 103px;
+    left: var(--scroll-bar-offset);
+    right: var(--scroll-bar-offset);
     clip-path: inset(0 0 0 0);
   }
 }
@@ -284,5 +295,58 @@ onBeforeUnmount(() => {
 .fade-out-enter-from,
 .fade-out-leave-to {
   opacity: 0;
+}
+
+// 响应式媒体查询
+// 小屏幕设备 (手机)
+@media screen and (max-width: 768px) {
+  .scroll-animation-container {
+    --scroll-base-font: clamp(10px, 2vw + 0.5vh, 14px);
+    --scroll-content-offset: 4.5em;
+  }
+
+  .scroll-bar {
+    height: 70vh;
+  }
+
+  .scroll-line-top {
+    top: 18%;
+  }
+
+  .scroll-line-bottom {
+    bottom: 17%;
+  }
+
+  .scroll-content {
+    top: 19%;
+    bottom: 18%;
+  }
+}
+
+// 中等屏幕设备 (平板)
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .scroll-animation-container {
+    --scroll-base-font: clamp(12px, 1.2vw + 0.4vh, 16px);
+    --scroll-content-offset: 6em;
+  }
+
+  .scroll-bar {
+    height: 75vh;
+  }
+}
+
+// 大屏幕设备 (桌面显示器)
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+  .scroll-animation-container {
+    --scroll-base-font: clamp(14px, 1vw + 0.5vh, 18px);
+  }
+}
+
+// 超大屏幕设备 (4K 显示器)
+@media screen and (min-width: 1921px) {
+  .scroll-animation-container {
+    --scroll-base-font: clamp(16px, 0.8vw + 0.4vh, 24px);
+    --scroll-content-offset: 9em;
+  }
 }
 </style>
