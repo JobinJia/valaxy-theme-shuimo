@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useJinrishici } from '../composables'
 
 const emit = defineEmits<{
   complete: []
@@ -8,7 +9,12 @@ const emit = defineEmits<{
 const isAnimating = ref(true)
 const animationDuration = 2000 // 2秒
 
-onMounted(() => {
+const { data: poem, load: loadPoem } = useJinrishici()
+
+onMounted(async () => {
+  // 加载诗词
+  loadPoem()
+
   // 动画完成后触发事件
   setTimeout(() => {
     isAnimating.value = false
@@ -45,7 +51,14 @@ onMounted(() => {
 
       <!-- 中间内容区域 -->
       <div class="scroll-content">
-        <slot />
+        <slot>
+          <template v-if="poem">
+            <p class="poem-content">{{ poem.content }}</p>
+            <p class="poem-origin">
+              —— {{ poem.origin.dynasty }} · {{ poem.origin.author }}《{{ poem.origin.title }}》
+            </p>
+          </template>
+        </slot>
       </div>
     </div>
   </Transition>
@@ -129,8 +142,6 @@ onMounted(() => {
   position: absolute;
   z-index: 10;
   color: #333;
-  font-size: 3rem;
-  font-weight: bold;
   text-align: center;
   opacity: 0;
   animation: fade-in 0.5s ease-in 0.5s forwards;
@@ -138,6 +149,22 @@ onMounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  max-width: 80%;
+
+  .poem-content {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.8;
+    letter-spacing: 0.1em;
+  }
+
+  .poem-origin {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-top: 1rem;
+    opacity: 0.7;
+  }
 }
 
 /* 左侧bar从中间向左移动 */

@@ -53,6 +53,9 @@ importers:
       '@iconify-json/simple-icons':
         specifier: ^1.2.54
         version: 1.2.54
+      jinrishici:
+        specifier: ^1.0.6
+        version: 1.0.6
       shuimo-core:
         specifier: workspace:*
         version: link:shuimo-core
@@ -2909,6 +2912,9 @@ packages:
     resolution: {integrity: sha512-wpHYzhxiVQL+IV05BLE2Xn34zW1S223hvjtqk0+gsPrwd/8JNLXJgZZM/iPFsYc1xyphF+6M6EvdE5E9MBGkDA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  jinrishici@1.0.6:
+    resolution: {integrity: sha512-4Bk5VHo6xg9DspGS8y8I7D6kftA6DYy4rSvwpdtxFvh9DidXMgf+NSZKAXrcLTi8S5NjqmwkpAKYPHXRURH64Q==}
 
   jiti@2.6.0:
     resolution: {integrity: sha512-VXe6RjJkBPj0ohtqaO8vSWP3ZhAKo66fKrFNCll4BTcwljPLz03pCbaNKfzGP5MbrCYcbJ7v0nOYYwUzTEIdXQ==}
@@ -7614,6 +7620,8 @@ snapshots:
       async: 3.2.6
       filelist: 1.0.4
       picocolors: 1.1.1
+
+  jinrishici@1.0.6: {}
 
   jiti@2.6.0: {}
 

@@ -7,7 +7,8 @@
  *
  * @emits complete - 动画完成时触发
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useJinrishici } from '../composables/useJinrishici'
 import { useShuimoPainting } from '../composables/useShuimoPainting'
 
 const emit = defineEmits<{
@@ -21,6 +22,22 @@ const containerRef = ref<HTMLElement | null>(null)
 
 // 使用 shuimo-core 重构后的山水画生成器
 const { generate, generatePaperTexture, cleanup } = useShuimoPainting()
+
+// 使用今日诗词 API
+const { data: poem, load: loadPoem } = useJinrishici()
+
+/**
+ * 去除标点符号的诗词内容
+ */
+const poemContent = computed(() => {
+  if (!poem.value)
+    return ''
+  // 去除中英文标点符号
+  const punctuation = /[，。！？、；：""''【】《》（）\[\],.!?;:'"()—\-…]/g
+  return poem.value.origin.content
+    .join('\n')
+    .replace(punctuation, '')
+})
 
 /**
  * 将 SVG 预渲染为 PNG 图片
@@ -115,6 +132,9 @@ onMounted(() => {
   // 立即生成画作
   createPainting()
 
+  // 加载今日诗词
+  loadPoem()
+
   // 动画完成后触发事件
   setTimeout(() => {
     // isAnimating.value = false
@@ -138,33 +158,40 @@ onBeforeUnmount(() => {
       <div class="scroll-frame">
         <!-- 左侧卷轴轴杆 -->
         <div class="scroll-bar-wrapper scroll-bar-left">
-          <img src="../assets/bar.png" alt="left-bar" class="scroll-bar">
+          <div class="scroll-bar" />
         </div>
 
         <!-- 右侧卷轴轴杆 -->
         <div class="scroll-bar-wrapper scroll-bar-right">
-          <img src="../assets/bar.png" alt="right-bar" class="scroll-bar">
+          <div class="scroll-bar" />
         </div>
 
         <!-- 上边连接线 -->
         <div class="scroll-line-clip scroll-line-top">
           <div class="scroll-line-wrapper">
-            <img src="../assets/line.png" alt="top-line" class="scroll-line">
+            <div class="scroll-line" />
           </div>
         </div>
 
         <!-- 下边连接线 -->
         <div class="scroll-line-clip scroll-line-bottom">
           <div class="scroll-line-wrapper">
-            <img src="../assets/line.png" alt="bottom-line" class="scroll-line">
+            <div class="scroll-line" />
           </div>
         </div>
 
         <!-- 中间内容区域 - 山水画 -->
         <div class="scroll-content-clip">
           <div class="scroll-content">
-            <div class="painting-wrapper">
-              <img :src="paintingUrl" class="painting-image" alt="Shuimo Painting">
+            <div class="painting-wrapper" :style="{ backgroundImage: `url(${paintingUrl})` }">
+              <div v-if="poem" class="poem-container">
+                <p class="poem-content">
+                  {{ poemContent }}
+                </p>
+                <p class="poem-origin">
+                  &emsp;&emsp;&emsp;&emsp;{{ poem.origin.dynasty }}{{ poem.origin.author }}{{ poem.origin.title }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -174,6 +201,15 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
+// 引入字体
+@font-face {
+  font-family: 'MaterialIcons';
+  src: url('../assets/fonts/lantingxu.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 // 响应式基准字体大小
 // 使用 CSS 变量统一管理尺寸，便于在不同分辨率下调整
 .scroll-animation-container {
@@ -228,8 +264,11 @@ onBeforeUnmount(() => {
 
 .scroll-bar {
   height: 80vh;
-  width: auto;
-  object-fit: contain;
+  width: 6em; // 卷轴宽度
+  background-image: url('../assets/bar.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   filter: drop-shadow(0 0.3125em 0.9375em rgba(0, 0, 0, 0.3));
 }
 
@@ -265,8 +304,10 @@ onBeforeUnmount(() => {
 
 .scroll-line {
   width: 100%;
-  height: auto;
-  object-fit: fill;
+  height: 1.5em; // 线条高度
+  background-image: url('../assets/line.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   filter: drop-shadow(0 0.125em 0.5em rgba(0, 0, 0, 0.2));
 }
 
@@ -299,15 +340,36 @@ onBeforeUnmount(() => {
 .painting-wrapper {
   width: 100%;
   height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
 
-  .painting-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; // Use cover to fill space better in fullscreen
+.poem-container {
+  // 中国传统文字排列：从右到左，从上到下
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  padding: 2em;
+  max-height: 90%;
+
+  .poem-content {
+    font-family: 'MaterialIcons', 'KaiTi', '楷体', 'STKaiti', serif;
+    font-size: 1.8em;
+    color: rgba(0, 0, 0, 0.8);
+    line-height: 2;
+    letter-spacing: 0.2em;
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  .poem-origin {
+    font-family: 'MaterialIcons', 'KaiTi', '楷体', 'STKaiti', serif;
+    font-size: 1em;
+    color: rgba(0, 0, 0, 0.6);
+    margin-right: 1.5em;
   }
 }
 
