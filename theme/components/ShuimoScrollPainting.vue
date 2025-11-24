@@ -23,40 +23,91 @@ const containerRef = ref<HTMLElement | null>(null)
 const { generate, generatePaperTexture, cleanup } = useShuimoPainting()
 
 /**
+ * 将 SVG 预渲染为 PNG 图片
+ * 通过 Canvas 将 SVG 转换为位图，避免动画过程中 SVG 重绘
+ */
+function svgToPng(svgString: string, width: number, height: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      reject(new Error('Canvas context not available'))
+      return
+    }
+
+    // 设置 canvas 尺寸
+    canvas.width = width
+    canvas.height = height
+
+    // 创建 SVG Blob URL
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+    const svgUrl = URL.createObjectURL(svgBlob)
+
+    const img = new Image()
+    img.onload = () => {
+      // 绘制到 canvas
+      ctx.drawImage(img, 0, 0, width, height)
+      URL.revokeObjectURL(svgUrl)
+
+      // 转换为 PNG Blob URL
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(URL.createObjectURL(blob))
+        }
+        else {
+          reject(new Error('Failed to create PNG blob'))
+        }
+      }, 'image/png')
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(svgUrl)
+      reject(new Error('Failed to load SVG'))
+    }
+    img.src = svgUrl
+  })
+}
+
+/**
  * 生成山水画
  * 每次页面刷新都会生成不同的画作
  */
-function createPainting() {
+async function createPainting() {
   try {
     // 使用当前时间戳作为种子，确保每次刷新都不同
     const seed = Date.now()
 
-    // console.log('🎨 正在生成山水画，种子:', seed)
-
-    // 生成真实的山水画 (1000x600 适配卷轴比例)
+    // 生成真实的山水画 (1100x600 适配卷轴比例)
     // 先生成优化后的纸张纹理 (128x128 以提高性能)
     const textureUrl = generatePaperTexture(128, 128)
     const svgString = generate(seed, 1100, 600, textureUrl)
 
-    // 转换为 Blob URL 以提高渲染性能
-    const blob = new Blob([svgString], { type: 'image/svg+xml' })
+    // 预渲染 SVG 为 PNG，提高动画性能
+    const pngUrl = await svgToPng(svgString, 1100, 600)
+
     if (paintingUrl.value) {
       URL.revokeObjectURL(paintingUrl.value)
     }
-    paintingUrl.value = URL.createObjectURL(blob)
+    paintingUrl.value = pngUrl
 
     // 应用纸张纹理到容器背景
     if (textureUrl && containerRef.value) {
       containerRef.value.style.backgroundImage = `url(${textureUrl})`
-      containerRef.value.style.backgroundSize = '128px 128px' // Match texture size for consistency
+      containerRef.value.style.backgroundSize = '8em 8em'
     }
-
-    // console.log('✅ 山水画生成完成!')
   }
   catch (error) {
     console.error('❌ 生成山水画失败:', error)
-    // 降级方案 - 显示简单提示
-    // paintingUrl.value = generateFallbackSVG() // Fallback logic needs update if used
+    // 降级方案：直接使用 SVG
+    try {
+      const seed = Date.now()
+      const textureUrl = generatePaperTexture(128, 128)
+      const svgString = generate(seed, 1100, 600, textureUrl)
+      const blob = new Blob([svgString], { type: 'image/svg+xml' })
+      paintingUrl.value = URL.createObjectURL(blob)
+    }
+    catch {
+      // 静默失败
+    }
   }
 }
 
@@ -96,19 +147,25 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 上边连接线 -->
-        <div class="scroll-line-wrapper scroll-line-top">
-          <img src="../assets/line.png" alt="top-line" class="scroll-line">
+        <div class="scroll-line-clip scroll-line-top">
+          <div class="scroll-line-wrapper">
+            <img src="../assets/line.png" alt="top-line" class="scroll-line">
+          </div>
         </div>
 
         <!-- 下边连接线 -->
-        <div class="scroll-line-wrapper scroll-line-bottom">
-          <img src="../assets/line.png" alt="bottom-line" class="scroll-line">
+        <div class="scroll-line-clip scroll-line-bottom">
+          <div class="scroll-line-wrapper">
+            <img src="../assets/line.png" alt="bottom-line" class="scroll-line">
+          </div>
         </div>
 
         <!-- 中间内容区域 - 山水画 -->
-        <div class="scroll-content">
-          <div class="painting-wrapper">
-            <img :src="paintingUrl" class="painting-image" alt="Shuimo Painting">
+        <div class="scroll-content-clip">
+          <div class="scroll-content">
+            <div class="painting-wrapper">
+              <img :src="paintingUrl" class="painting-image" alt="Shuimo Painting">
+            </div>
           </div>
         </div>
       </div>
@@ -125,7 +182,7 @@ onBeforeUnmount(() => {
   --scroll-base-font: clamp(12px, 1vw + 0.5vh, 18px);
   // 线条左右边界偏移，等于卷轴轴杆宽度，让线条紧贴卷轴内侧
   --scroll-bar-offset: 5.5em; // 微调后的卷轴轴杆宽度
-  --scroll-content-offset: 7.1875em; // 内容区域边界偏移
+  --scroll-content-offset: 5.8em; // 内容区域边界偏移，略大于线条偏移
 
   font-size: var(--scroll-base-font);
   position: fixed;
@@ -176,15 +233,19 @@ onBeforeUnmount(() => {
   filter: drop-shadow(0 0.3125em 0.9375em rgba(0, 0, 0, 0.3));
 }
 
-// 上下连接线
-.scroll-line-wrapper {
+// 上下连接线 - 外层裁剪容器
+.scroll-line-clip {
   position: absolute;
-  display: flex;
-  justify-content: center;
+  left: var(--scroll-bar-offset);
+  right: var(--scroll-bar-offset);
   overflow: hidden;
   z-index: 1;
+  // 使用 GPU 加速
   will-change: clip-path;
-  animation: expand-line-width 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform: translateZ(0);
+  animation: expand-clip 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  // 初始裁剪状态
+  clip-path: inset(0 50% 0 50%);
 }
 
 .scroll-line-top {
@@ -195,6 +256,13 @@ onBeforeUnmount(() => {
   bottom: 13.3%;
 }
 
+// 内层线条容器 - 保持内容不变形
+.scroll-line-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .scroll-line {
   width: 100%;
   height: auto;
@@ -202,25 +270,30 @@ onBeforeUnmount(() => {
   filter: drop-shadow(0 0.125em 0.5em rgba(0, 0, 0, 0.2));
 }
 
-// 中间内容区域 - 山水画
-// 画布大小精确匹配上下两根线之间的区域
-.scroll-content {
+// 中间内容区域 - 外层裁剪容器
+.scroll-content-clip {
   position: absolute;
+  overflow: hidden;
   z-index: 1;
+  // 使用 GPU 加速
   will-change: clip-path;
-  // opacity: 0;
-  // animation: fade-in 0.8s ease-in 0.8s forwards;
-  animation: expand-line-width 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform: translateZ(0);
+  animation: expand-clip 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
   // 上边线位置：14.3%，下边线位置：13.3%
-  // 可用区域：100% - 14.3% - 13.3% = 72.4%
   top: 15%;
   bottom: 14%;
-  left: var(--scroll-content-offset); // 与线条左边界对齐
-  right: var(--scroll-content-offset); // 与线条右边界对齐
-  width: auto;
-  height: auto;
-  margin: 1.5em 0 1.5em;
+  left: var(--scroll-content-offset);
+  right: var(--scroll-content-offset);
+  margin: 1.5em 0;
+  // 初始裁剪状态
+  clip-path: inset(0 50% 0 50%);
+}
+
+// 内层内容容器 - 保持山水画不变形
+.scroll-content {
+  width: 100%;
+  height: 100%;
 }
 
 .painting-wrapper {
@@ -230,7 +303,6 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  padding: 0.5vh 0.3vw; // Minimal viewport-relative padding
 
   .painting-image {
     width: 100%;
@@ -259,17 +331,13 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 线条通过clip-path裁剪，保持图片不变形，宽度从小到大展开 */
-/* 线条从中间向两侧展开，与卷轴动画同步 */
-@keyframes expand-line-width {
+/* 使用 clip-path 展开动画 - 从中间向两侧 */
+/* translateZ(0) 强制 GPU 加速，提升 clip-path 动画性能 */
+@keyframes expand-clip {
   0% {
-    left: var(--scroll-bar-offset);
-    right: var(--scroll-bar-offset);
-    clip-path: inset(0 calc(50% - 8vw) 0 calc(50% - 8vw));
+    clip-path: inset(0 50% 0 50%);
   }
   100% {
-    left: var(--scroll-bar-offset);
-    right: var(--scroll-bar-offset);
     clip-path: inset(0 0 0 0);
   }
 }
@@ -317,7 +385,7 @@ onBeforeUnmount(() => {
     bottom: 17%;
   }
 
-  .scroll-content {
+  .scroll-content-clip {
     top: 19%;
     bottom: 18%;
   }
