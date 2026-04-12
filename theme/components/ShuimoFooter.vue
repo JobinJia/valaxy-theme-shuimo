@@ -15,39 +15,7 @@ const year = new Date().getFullYear()
       class="shuimo-footer__line"
     />
     <div class="shuimo-footer__content">
-      <span v-if="themeConfig?.footer?.since">
-        &copy; {{ themeConfig.footer.since }}-{{ year }}
-      </span>
-      <span v-else>
-        &copy; {{ year }}
-      </span>
-
-      <span v-if="themeConfig?.header?.title" class="shuimo-footer__name">
-        {{ themeConfig.header.title }}
-      </span>
-
-      <template v-if="themeConfig?.footer?.powered !== false">
-        <span class="shuimo-footer__sep">&middot;</span>
-        <span>
-          Powered by
-          <a href="https://valaxy.site" target="_blank" rel="noopener noreferrer">Valaxy</a>
-        </span>
-        <span class="shuimo-footer__sep">&middot;</span>
-        <span>Theme Shuimo</span>
-      </template>
-
-      <div
-        v-if="themeConfig?.footer?.beian?.enable"
-        class="shuimo-footer__beian"
-      >
-        <a
-          href="https://beian.miit.gov.cn/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ themeConfig.footer.beian.icp }}
-        </a>
-      </div>
+      <span>&copy;{{ year }} 落梅听风雪</span>
     </div>
   </footer>
 </template>
