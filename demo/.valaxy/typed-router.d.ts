@@ -51,9 +51,37 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/posts/autumn-thoughts': RouteRecordInfo<
+      '/posts/autumn-thoughts',
+      '/posts/autumn-thoughts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/posts/hello': RouteRecordInfo<
       '/posts/hello',
       '/posts/hello',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/moonlight': RouteRecordInfo<
+      '/posts/moonlight',
+      '/posts/moonlight',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/snow-coding': RouteRecordInfo<
+      '/posts/snow-coding',
+      '/posts/snow-coding',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/spring-rain': RouteRecordInfo<
+      '/posts/spring-rain',
+      '/posts/spring-rain',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -90,7 +118,7 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    '../theme/pages/about.vue': {
+    'pages/about.md': {
       routes:
         | '/about'
       views:
@@ -102,9 +130,33 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
+    'pages/posts/autumn-thoughts.md': {
+      routes:
+        | '/posts/autumn-thoughts'
+      views:
+        | never
+    }
     'pages/posts/hello.md': {
       routes:
         | '/posts/hello'
+      views:
+        | never
+    }
+    'pages/posts/moonlight.md': {
+      routes:
+        | '/posts/moonlight'
+      views:
+        | never
+    }
+    'pages/posts/snow-coding.md': {
+      routes:
+        | '/posts/snow-coding'
+      views:
+        | never
+    }
+    'pages/posts/spring-rain.md': {
+      routes:
+        | '/posts/spring-rain'
       views:
         | never
     }

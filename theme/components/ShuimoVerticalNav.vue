@@ -24,8 +24,17 @@ const subtitleParts = computed(() => {
 
 <template>
   <aside class="shuimo-vnav" :class="[`side-${blankSide}`, { revealed }]">
-    <!-- 题款布局：固定5列竖排，从右往左 -->
+    <!-- 题款布局：多列竖排，从右往左 -->
     <div class="shuimo-vnav__columns">
+      <!-- 头像（点击回首页，在标题右侧） -->
+      <router-link v-if="themeConfig?.sidebar?.author?.avatar" to="/" class="shuimo-vnav__avatar-link">
+        <img
+          :src="themeConfig.sidebar.author.avatar"
+          :alt="themeConfig.sidebar.author.name || ''"
+          class="shuimo-vnav__avatar"
+        >
+      </router-link>
+
       <!-- 第一列：站名 -->
       <router-link
         to="/"
@@ -107,8 +116,17 @@ const subtitleParts = computed(() => {
     right: 0;
   }
 
+  &__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(139, 69, 19, 0.2);
+    margin-bottom: 16px;
+  }
+
   // 所有可交互子元素恢复点击
-  a, button, :deep(.shuimo-stamp) {
+  a, button, :deep(.shuimo-stamp), &__avatar-link {
     pointer-events: auto;
   }
 

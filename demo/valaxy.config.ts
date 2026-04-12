@@ -21,10 +21,6 @@ export default defineConfig<ThemeConfig>({
 
     nav: [
       {
-        text: '首页',
-        link: '/',
-      },
-      {
         text: '归档',
         link: '/archives/',
       },
@@ -41,8 +37,9 @@ export default defineConfig<ThemeConfig>({
 
     sidebar: {
       author: {
-        name: '墨客',
-        motto: '以码为墨，以屏为纸',
+        name: '月牙',
+        motto: '落梅听风雪，隔窗枕雨眠',
+        avatar: '/assets/images/yueya.jpg',
       },
     },
 

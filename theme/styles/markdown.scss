@@ -19,21 +19,8 @@
     letter-spacing: 2px;
     margin: 2em 0 1em;
     padding-left: 12px;
-    position: relative;
     font-weight: 600;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 4px;
-      width: 4px;
-      height: 1.2em;
-      // 优先使用 shuimo-core 生成的笔触，fallback 到 CSS 渐变
-      background: var(--sm-brush-h2-accent, linear-gradient(180deg, var(--sm-ink-dark), transparent));
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
+    border-left: 5px solid var(--sm-ink-dark, #2A2520);
   }
 
   h3 {
@@ -42,20 +29,8 @@
     letter-spacing: 1.5px;
     margin: 1.5em 0 0.8em;
     padding-left: 10px;
-    position: relative;
     font-weight: 600;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 4px;
-      width: 3px;
-      height: 1em;
-      background: var(--sm-brush-h3-accent, linear-gradient(180deg, var(--sm-ink-medium), transparent));
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
+    border-left: 4px solid var(--sm-ink-medium, #6B5E50);
   }
 
   // 代码块

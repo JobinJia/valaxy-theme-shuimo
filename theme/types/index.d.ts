@@ -45,6 +45,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
       name: string
       motto: string
       stamp?: string
+      avatar?: string
     }
     showCategories: boolean
     showTags: boolean

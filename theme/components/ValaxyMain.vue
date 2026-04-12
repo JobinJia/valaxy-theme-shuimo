@@ -8,19 +8,12 @@ defineProps<{
 </script>
 
 <template>
-  <main class="shuimo-article-content xuan-paper-light" p="x-4 y-6">
-    <slot name="main-header" />
-
-    <slot name="main">
-      <slot name="main-content">
-        <ValaxyMd :frontmatter="frontmatter" />
-      </slot>
-
-      <slot name="main-nav-before" />
-      <slot name="main-nav" />
-      <slot name="main-nav-after" />
+  <main class="shuimo-article-content">
+    <slot name="main-content">
+      <ValaxyMd :frontmatter="frontmatter">
+        <slot name="main-content-md" />
+        <slot />
+      </ValaxyMd>
     </slot>
-
-    <slot name="comment" />
   </main>
 </template>
