@@ -192,7 +192,7 @@ function planScene(
  */
 async function generateScene(W: number, H: number): Promise<string> {
   const { noise } = await import('@jobinjia/shuimo-core/foundation')
-  const { Mount, Arch, water } = await import('@jobinjia/shuimo-core/elements')
+  const { Mount, Arch } = await import('@jobinjia/shuimo-core/elements')
   const seed = Math.floor(Math.random() * 99999)
 
   // 随机选择留白方向：左上或右上，并通知布局层
@@ -214,7 +214,6 @@ async function generateScene(W: number, H: number): Promise<string> {
         tex: 200,
         veg: true,
       }))
-      svgParts.push(water(item.x, item.y, s))
     }
     else if (item.tag === 'flatmount') {
       svgParts.push(Mount.flatMount(item.x, item.y, s, {
