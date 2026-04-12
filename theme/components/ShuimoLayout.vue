@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { provideBlankSide, useThemeConfig } from '../composables'
 
 const props = defineProps<{
@@ -10,6 +11,7 @@ const props = defineProps<{
 const themeConfig = useThemeConfig()
 const { blankSide } = provideBlankSide()
 const revealed = ref(false)
+const route = useRoute()
 
 // 加载外部字体
 const fontUrl = computed(() => themeConfig.value?.fonts?.url)
@@ -22,6 +24,15 @@ function onLandscapeReady() {
     revealed.value = true
   })
 }
+
+// 路由切换时重新播放幕布动画：先合拢，再展开
+watch(() => route.path, () => {
+  revealed.value = false
+  // 等幕布合拢完成（0.5s）后再展开
+  setTimeout(() => {
+    revealed.value = true
+  }, 550)
+})
 </script>
 
 <template>
@@ -92,7 +103,8 @@ function onLandscapeReady() {
   z-index: 9999;
   pointer-events: none;
   will-change: transform;
-  transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  // 关闭（合拢）快，打开（展开）慢
+  transition: transform 0.5s ease-in;
 
   &--left {
     left: 0;
@@ -103,6 +115,9 @@ function onLandscapeReady() {
   }
 
   &.revealed {
+    // 展开用慢速优雅过渡
+    transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
     &.shuimo-curtain--left {
       transform: translateX(-100%);
     }
