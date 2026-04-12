@@ -13,10 +13,16 @@ export interface ThemeConfig extends DefaultTheme.Config {
     stamp: string
   }
 
-  fonts: {
+  fonts: Partial<{
     /** 衬线字体 */
     serif: string
-  }
+    /** 标题字体（如篆书） */
+    title: string
+    /** 正文字体 */
+    body: string
+    /** 外部字体 URL（如 Google Fonts） */
+    url: string
+  }>
 
   header: {
     /** 站名 */

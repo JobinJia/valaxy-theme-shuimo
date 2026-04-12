@@ -1,14 +1,11 @@
 <template>
-  <ShuimoLayout>
-    <template #main>
-      <div class="shuimo-main-layout">
-        <div class="shuimo-content">
-          <slot>
-            <RouterView />
-          </slot>
-        </div>
-        <ShuimoSidebar />
+  <ShuimoLayout vertical-nav>
+    <div class="shuimo-main-layout">
+      <div class="shuimo-content">
+        <slot>
+          <RouterView />
+        </slot>
       </div>
-    </template>
+    </div>
   </ShuimoLayout>
 </template>

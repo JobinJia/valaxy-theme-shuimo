@@ -10,9 +10,14 @@ export default defineConfig<ThemeConfig>({
       stamp: '#C8102E',
     },
 
+    fonts: {
+      title: '"Ma Shan Zheng", cursive',
+      url: 'https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap',
+    },
+
     header: {
-      title: '墨韵书斋',
-      subtitle: '以墨会友 · 以文载道',
+      title: '落梅听雪阁',
+      subtitle: '落梅听风雪，隔窗枕雨眠',
     },
 
     nav: [

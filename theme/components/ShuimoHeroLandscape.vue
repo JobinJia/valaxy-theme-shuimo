@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useBlankSide } from '../composables'
 
 const svgContainer = ref<HTMLDivElement>()
+const { setBlankSide } = useBlankSide()
 
 const emit = defineEmits<{
   ready: []
@@ -36,12 +38,16 @@ function blankWeight(x: number, y: number, W: number, H: number, side: 'left' | 
   if (nx >= blankEdge)
     return 1 // 实侧，正常绘制
 
-  // 在留白区内：越靠边缘、越靠上方 → 权重越低
-  const xFade = nx / blankEdge // 0（边缘）→ 1（过渡线）
-  const yFade = ny // 0（顶部）→ 1（底部）
+  // 题款安全区：留白侧内侧 35% × 上方 60%，绝对禁止放任何元素
+  // 这是文字出现的区域，必须完全干净
+  if (nx < 0.35 && ny < 0.6)
+    return 0
 
-  // 上半部分几乎全空，下半部分允许少量淡远山
-  return xFade * xFade * yFade
+  // 安全区外的留白区域：渐变过渡
+  const xFade = nx / blankEdge // 0（边缘）→ 1（过渡线）
+  const yFade = Math.max(0, (ny - 0.6) / 0.4) // 0.6 以上才开始允许
+
+  return xFade * yFade
 }
 
 /**
@@ -181,8 +187,9 @@ async function generateScene(W: number, H: number): Promise<string> {
   const { Mount, Arch, water } = await import('@jobinjia/shuimo-core/elements')
   const seed = Math.floor(Math.random() * 99999)
 
-  // 随机选择留白方向：左上或右上
+  // 随机选择留白方向：左上或右上，并通知布局层
   const blankSide: 'left' | 'right' = Math.random() > 0.5 ? 'left' : 'right'
+  setBlankSide(blankSide)
 
   const noiseFn = (x: number, y: number, z?: number) => noise.noise(x, y, z ?? 0)
   const plan = planScene(W, H, seed, noiseFn, blankSide)
