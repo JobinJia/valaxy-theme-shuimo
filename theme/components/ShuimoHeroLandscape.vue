@@ -3,6 +3,10 @@ import { onMounted, ref } from 'vue'
 
 const svgContainer = ref<HTMLDivElement>()
 
+const emit = defineEmits<{
+  ready: []
+}>()
+
 interface PlanItem {
   tag: string
   x: number
@@ -242,6 +246,8 @@ onMounted(async () => {
     const W = Math.min(window.innerWidth, 1920)
     const H = Math.min(window.innerHeight, 1080)
     el.innerHTML = await generateScene(W, H)
+    // 通知父组件画面已就绪，可以开幕
+    emit('ready')
   }
   catch (e) {
     console.error('[shuimo] 山水画生成失败', e)
@@ -253,10 +259,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    ref="svgContainer"
-    class="shuimo-hero-landscape"
-  />
+  <div ref="svgContainer" class="shuimo-hero-landscape" />
 </template>
 
 <style scoped>
