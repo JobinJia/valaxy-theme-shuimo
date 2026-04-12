@@ -1,0 +1,167 @@
+// Markdown 排版 — 宣纸古卷风
+.shuimo-article-content {
+  font-family: var(--va-font-family-base);
+  color: var(--sm-ink-medium);
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 0.3px;
+
+  p {
+    text-indent: 2em;
+    margin-bottom: 1em;
+    text-align: justify;
+  }
+
+  // 标题装饰
+  h2 {
+    font-size: 1.4em;
+    color: var(--sm-ink-dark);
+    letter-spacing: 2px;
+    margin: 2em 0 1em;
+    padding-left: 12px;
+    position: relative;
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 4px;
+      height: 1.2em;
+      // 优先使用 shuimo-core 生成的笔触，fallback 到 CSS 渐变
+      background: var(--sm-brush-h2-accent, linear-gradient(180deg, var(--sm-ink-dark), transparent));
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+  }
+
+  h3 {
+    font-size: 1.2em;
+    color: var(--sm-ink-dark);
+    letter-spacing: 1.5px;
+    margin: 1.5em 0 0.8em;
+    padding-left: 10px;
+    position: relative;
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 3px;
+      height: 1em;
+      background: var(--sm-brush-h3-accent, linear-gradient(180deg, var(--sm-ink-medium), transparent));
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+  }
+
+  // 代码块
+  pre {
+    background: var(--sm-paper-card);
+    border-left: 3px solid var(--sm-ink-light);
+    border-radius: 3px;
+    padding: 12px 16px;
+    margin: 1.2em 0;
+    overflow-x: auto;
+    font-family: var(--sm-font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  code:not(pre code) {
+    background: var(--sm-paper-card);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family: var(--sm-font-mono);
+    font-size: 0.9em;
+    color: var(--sm-ink-dark);
+  }
+
+  // 引用
+  blockquote {
+    border-left: 3px solid var(--sm-ink-light);
+    padding: 8px 16px;
+    margin: 1.2em 0;
+    color: var(--sm-ink-light);
+    background: rgba(236, 230, 216, 0.3);
+    border-radius: 0 3px 3px 0;
+
+    p {
+      text-indent: 0;
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // 链接
+  a {
+    color: var(--sm-accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+
+    &:hover {
+      border-bottom-color: var(--sm-accent);
+    }
+  }
+
+  // 列表
+  ul, ol {
+    padding-left: 2em;
+    margin: 0.8em 0;
+
+    li {
+      text-indent: 0;
+      margin-bottom: 0.3em;
+    }
+  }
+
+  // 图片
+  img {
+    max-width: 100%;
+    border-radius: 3px;
+    margin: 1em auto;
+    display: block;
+  }
+
+  // 分隔线
+  hr {
+    border: none;
+    // 当 --sm-brush-hr 存在时使用笔触，否则 fallback 到渐变
+    height: 16px;
+    background: var(--sm-brush-hr, linear-gradient(90deg, transparent 0%, var(--sm-ink-light) 20%, var(--sm-ink-light) 80%, transparent 100%));
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.4;
+    margin: 2em auto;
+    max-width: 300px;
+  }
+
+  // 表格
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 14px;
+
+    th, td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--sm-c-border);
+      text-align: left;
+      text-indent: 0;
+    }
+
+    th {
+      color: var(--sm-ink-dark);
+      font-weight: 600;
+      border-bottom-width: 2px;
+    }
+  }
+}

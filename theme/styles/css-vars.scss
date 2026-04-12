@@ -1,0 +1,61 @@
+@use './vars' as *;
+@use 'valaxy/client/styles/mixins/index.scss' as * with (
+  $namespace: 'sm'
+);
+
+:root {
+  --un-prose-links: var(--sm-c-link);
+
+  @include set-css-var-from-map($common);
+  @include set-css-var-from-map($z-index, 'z');
+}
+
+:root {
+  @include set-css-var-from-map($light);
+}
+
+html.dark {
+  @include set-css-var-from-map($dark);
+}
+
+:root {
+  // 衬线字体
+  --va-font-family-base:
+    'Noto Serif SC', 'Source Han Serif SC', 'SimSun',
+    Georgia, 'Times New Roman', serif;
+
+  // 等宽字体
+  --sm-font-mono:
+    'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  // 配色快捷变量
+  --sm-ink-dark: #2A2520;
+  --sm-ink-medium: #6B5E50;
+  --sm-ink-light: #8A7E70;
+  --sm-accent: var(--sm-c-brand);
+  --sm-stamp: var(--sm-c-stamp);
+  --sm-paper: #F5F0E6;
+  --sm-paper-light: #FAF7F0;
+  --sm-paper-card: #ECE6D8;
+
+  // 半透明层（内容区背景，让山水画透出来）
+  --sm-paper-overlay: rgba(245, 240, 230, 0.82);
+  --sm-content-bg: rgba(250, 247, 240, 0.6);
+  --sm-card-bg: rgba(250, 247, 240, 0.5);
+  --sm-sidebar-bg: rgba(250, 247, 240, 0.45);
+}
+
+// 暗色模式快捷变量
+html.dark {
+  --sm-ink-dark: #D5D0C6;
+  --sm-ink-medium: #A89E90;
+  --sm-ink-light: #8A7E70;
+  --sm-paper: #1A1816;
+  --sm-paper-light: #222018;
+  --sm-paper-card: #2A2520;
+
+  --sm-paper-overlay: rgba(26, 24, 22, 0.85);
+  --sm-content-bg: rgba(30, 28, 24, 0.7);
+  --sm-card-bg: rgba(30, 28, 24, 0.6);
+  --sm-sidebar-bg: rgba(30, 28, 24, 0.55);
+}

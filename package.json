@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "build": "npm run build:demo",
+    "build:demo": "npm -C demo run build",
+    "ci:publish": "pnpm -r publish --access public --no-git-checks",
+    "dev": "npm run demo",
+    "demo": "npm -C demo run dev",
+    "lint": "eslint .",
+    "release": "cd theme && git add -A && bumpp --all",
+    "typecheck": "vue-tsc --noEmit --skipLibCheck"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:",
+    "@unocss/eslint-plugin": "catalog:",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "typescript": "catalog:",
+    "valaxy-theme-shuimo1": "workspace:*",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

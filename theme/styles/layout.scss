@@ -1,0 +1,40 @@
+// 双栏布局
+.shuimo-main-layout {
+  display: flex;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  gap: 24px;
+}
+
+.shuimo-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.shuimo-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+// 响应式
+@media (max-width: 1023px) and (min-width: 768px) {
+  .shuimo-sidebar {
+    width: 160px;
+  }
+}
+
+@media (max-width: 767px) {
+  .shuimo-main-layout {
+    flex-direction: column;
+    padding: 16px 12px;
+  }
+
+  .shuimo-sidebar {
+    width: 100%;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--sm-c-border);
+  }
+}

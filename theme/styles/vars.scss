@@ -1,0 +1,45 @@
+@use 'sass:map';
+
+// 水墨主题配色 — 古卷暖棕
+// 用户可通过 CSS 自定义属性覆盖配色
+$common: () !default;
+$common: map.merge((), $common);
+
+$light: (
+  // 墨色系
+  'c-brand': #8B4513,
+  'c-link': 'var(--sm-c-brand)',
+  'c-text': #2A2520,
+  'c-text-secondary': #6B5E50,
+  'c-text-muted': #8A7E70,
+
+  // 背景
+  'c-bg': #F5F0E6,
+  'c-bg-light': #FAF7F0,
+  'c-bg-card': #ECE6D8,
+
+  // 边框
+  'c-border': rgba(107, 94, 80, 0.15),
+  'c-border-medium': rgba(107, 94, 80, 0.25),
+
+  // 印章
+  'c-stamp': #C8102E,
+) !default;
+$light: map.merge((), $light);
+
+$dark: (
+  'c-text': #D5D0C6,
+  'c-text-secondary': #A89E90,
+  'c-text-muted': #8A7E70,
+  'c-bg': #1A1816,
+  'c-bg-light': #222018,
+  'c-bg-card': #2A2520,
+  'c-border': rgba(200, 190, 170, 0.12),
+  'c-border-medium': rgba(200, 190, 170, 0.2),
+  'c-brand': #B8784A,
+  'c-stamp': #D4302E,
+) !default;
+$dark: map.merge((), $dark);
+
+$z-index: () !default;
+$z-index: map.merge((), $z-index);
