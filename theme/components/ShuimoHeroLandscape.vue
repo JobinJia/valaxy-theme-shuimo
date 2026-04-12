@@ -27,27 +27,35 @@ interface PlanItem {
  * @param side    留白方向 'left' | 'right'
  * @returns 0~1 的权重，0 = 完全留白，1 = 正常绘制
  */
-function blankWeight(x: number, y: number, W: number, H: number, side: 'left' | 'right'): number {
-  // 归一化坐标 0~1
-  const nx = side === 'left' ? x / W : 1 - x / W // 0 = 留白侧边缘
-  const ny = y / H // 0 = 顶部
+/**
+ * 留白权重：检查元素整体（含宽度）是否侵入留白区
+ * @param x       元素中心 x
+ * @param y       元素 y 坐标
+ * @param W       画布宽
+ * @param H       画布高
+ * @param side    留白方向
+ * @param halfW   元素半宽（默认 300，山的典型半宽）
+ */
+function blankWeight(x: number, y: number, W: number, H: number, side: 'left' | 'right', halfW = 0): number {
+  // 取元素最靠近留白侧的边缘
+  const edgeX = side === 'left' ? x - halfW : x + halfW
+  const nx = side === 'left' ? edgeX / W : 1 - edgeX / W
+  const ny = y / H
 
-  // 留白区占画面约 45% 宽度
-  const blankEdge = 0.45
+  const blankEdge = 0.38
 
   if (nx >= blankEdge)
-    return 1 // 实侧，正常绘制
+    return 1
 
-  // 题款安全区：留白侧内侧 35% × 上方 60%，绝对禁止放任何元素
-  // 这是文字出现的区域，必须完全干净
-  if (nx < 0.35 && ny < 0.6)
+  // 题款安全区：留白侧内 25% × 上方 50%，绝对禁止（只保护文字区域）
+  if (nx < 0.25 && ny < 0.5)
     return 0
 
-  // 安全区外的留白区域：渐变过渡
-  const xFade = nx / blankEdge // 0（边缘）→ 1（过渡线）
-  const yFade = Math.max(0, (ny - 0.6) / 0.4) // 0.6 以上才开始允许
+  // 渐变过渡，让画面自然分布
+  const xFade = nx / blankEdge
+  const yFade = Math.max(0, (ny - 0.3) / 0.7)
 
-  return xFade * yFade
+  return xFade * xFade * yFade
 }
 
 /**
@@ -105,8 +113,8 @@ function planScene(
       if (locmax(i, j, 2)) {
         const xof = i + 2 * (Math.random() - 0.5) * W * 0.3
         const yof = j + H * 0.4
-        // 留白权重过滤
-        if (Math.random() > blankWeight(xof, yof, W, H, blankSide))
+        // 留白权重过滤（山半宽约 300px）
+        if (Math.random() > blankWeight(xof, yof, W, H, blankSide, 300))
           continue
         const res = chadd({ tag: 'mount', x: xof, y: yof, h: ns(i, j) })
         if (res) {
@@ -122,7 +130,7 @@ function planScene(
   for (let i = 0; i < W; i += W * 0.15) {
     const fx = i + (Math.random() - 0.5) * W * 0.1
     const fy = H * 0.3 + Math.random() * H * 0.1
-    if (Math.random() < 0.5 && Math.random() < blankWeight(fx, fy, W, H, blankSide)) {
+    if (Math.random() < 0.5 && Math.random() < blankWeight(fx, fy, W, H, blankSide, 400)) {
       chadd({ tag: 'flatmount', x: fx, y: fy }, 150)
     }
   }
@@ -134,7 +142,7 @@ function planScene(
         for (let j = 0; j < 3 * Math.random(); j++) {
           const fx = i + 2 * (Math.random() - 0.5) * W * 0.4
           const fy = H * 0.55 + H * 0.15 - j * 50
-          if (Math.random() > blankWeight(fx, fy, W, H, blankSide))
+          if (Math.random() > blankWeight(fx, fy, W, H, blankSide, 400))
             continue
           chadd({ tag: 'flatmount', x: fx, y: fy, h: ns(i, j) })
         }

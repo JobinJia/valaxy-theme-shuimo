@@ -40,6 +40,7 @@ const subtitleParts = computed(() => {
         v-for="(part, i) in subtitleParts"
         :key="i"
         class="shuimo-vnav__subtitle"
+        :style="titleFont ? { fontFamily: titleFont } : undefined"
       >
         {{ part }}
       </span>
