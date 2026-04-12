@@ -2,6 +2,15 @@
 @use './layout';
 @use './markdown';
 
+// 义山碑篆体
+@font-face {
+  font-family: 'YiShanBeiZhuan';
+  src: url('../assets/fonts/yishanbeizhuanti.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 // 全局基础样式
 body {
   background-color: var(--sm-paper);

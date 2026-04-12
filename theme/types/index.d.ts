@@ -60,6 +60,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
     author: string
     /** 阴章/阳章 @default 'yin' */
     type: 'yin' | 'yang'
+    /** 印章形状 @default 'auto' */
+    shape: 'auto' | 'circle' | 'ellipse'
   }>
 
   /** 画面装饰配置 */

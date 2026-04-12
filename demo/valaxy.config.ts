@@ -11,8 +11,7 @@ export default defineConfig<ThemeConfig>({
     },
 
     fonts: {
-      title: '"Ma Shan Zheng", cursive',
-      url: 'https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap',
+      title: 'YiShanBeiZhuan',
     },
 
     header: {
@@ -49,8 +48,9 @@ export default defineConfig<ThemeConfig>({
 
     stamp: {
       enable: true,
-      author: '墨',
+      author: '隔窗,听雨',
       type: 'yin',
+      shape: 'ellipse',
     },
   },
 })

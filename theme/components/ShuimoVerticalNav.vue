@@ -64,6 +64,16 @@ const subtitleParts = computed(() => {
         </a>
       </template>
 
+      <!-- 印章：盖在题款末尾 -->
+      <ShuimoStamp
+        v-if="themeConfig?.stamp?.enable !== false"
+        :text="themeConfig?.stamp?.author || '墨'"
+        :type="themeConfig?.stamp?.type || 'yin'"
+        :shape="themeConfig?.stamp?.shape || 'auto'"
+        :font-family="titleFont || 'YiShanBeiZhuan, serif'"
+        :size="80"
+        class="shuimo-vnav__stamp"
+      />
     </div>
   </aside>
 </template>
@@ -157,7 +167,10 @@ const subtitleParts = computed(() => {
     }
   }
 
-
+  &__stamp {
+    align-self: flex-end;
+    writing-mode: horizontal-tb !important; // 印章不竖排
+  }
 }
 
 // 移动端隐藏

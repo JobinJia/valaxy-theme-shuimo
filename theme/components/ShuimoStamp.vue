@@ -4,14 +4,18 @@ import { onMounted, ref } from 'vue'
 const props = withDefaults(defineProps<{
   text?: string
   type?: 'yin' | 'yang'
+  shape?: 'auto' | 'circle' | 'ellipse'
+  fontFamily?: string
   size?: number
 }>(), {
   text: '墨',
   type: 'yin',
+  shape: 'auto',
+  fontFamily: 'serif',
   size: 56,
 })
 
-const stampSrc = ref<string | null>(null)
+const stampSvg = ref<string | null>(null)
 const hasShuimoCore = ref(false)
 
 onMounted(async () => {
@@ -19,15 +23,30 @@ onMounted(async () => {
     const { generateStampAsync } = await import('@jobinjia/shuimo-core/drawing')
     hasShuimoCore.value = true
 
-    const canvas = await generateStampAsync({
-      text: props.text,
+    await document.fonts.ready
+
+    // 支持逗号分列：'隔窗,听雨' → ['隔窗', '听雨']
+    const textArray = Array.isArray(props.text)
+      ? props.text
+      : props.text.includes(',') || props.text.includes('，')
+        ? props.text.split(/[,，]/).map(s => s.trim())
+        : [props.text]
+    const result = await generateStampAsync({
+      text: textArray,
       type: props.type,
+      shape: props.shape,
+      fontFamily: props.fontFamily,
       width: props.size * 2,
       height: props.size * 2,
     })
 
-    if (canvas)
-      stampSrc.value = canvas.toDataURL()
+    if (typeof result === 'string') {
+      stampSvg.value = result
+    }
+    else if (result?.toDataURL) {
+      // Canvas fallback - 用 data URL
+      stampSvg.value = `<img src="${result.toDataURL()}" width="100%" height="100%" />`
+    }
   }
   catch {
     hasShuimoCore.value = false
@@ -40,13 +59,12 @@ onMounted(async () => {
     class="shuimo-stamp"
     :style="{ width: `${size}px`, height: `${size}px` }"
   >
-    <!-- shuimo-core 生成的印章 -->
-    <img
-      v-if="stampSrc"
-      :src="stampSrc"
-      :alt="`印章: ${text}`"
-      class="shuimo-stamp__img"
-    >
+    <!-- shuimo-core 生成的印章：直接注入 SVG 到 DOM，可访问页面字体 -->
+    <div
+      v-if="stampSvg"
+      class="shuimo-stamp__svg"
+      v-html="stampSvg"
+    />
     <!-- CSS Fallback 印章 -->
     <div
       v-else
@@ -62,10 +80,14 @@ onMounted(async () => {
 .shuimo-stamp {
   display: inline-block;
 
-  &__img {
+  &__svg {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+
+    :deep(svg) {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   &__fallback {
