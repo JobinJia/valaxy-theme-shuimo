@@ -127,7 +127,7 @@ const subtitleParts = computed(() => {
   &__title {
     font-size: 26px;
     letter-spacing: 10px;
-    color: var(--sm-ink-dark);
+    color: #1a1410;
     text-decoration: none;
     font-weight: bold;
     transition: color 0.2s;
@@ -159,6 +159,7 @@ const subtitleParts = computed(() => {
     font-size: 13px;
     letter-spacing: 4px;
     color: var(--sm-ink-medium);
+    font-family: "楷体", "KaiTi", "STKaiti", serif;
     text-decoration: none;
     transition: color 0.2s;
 
