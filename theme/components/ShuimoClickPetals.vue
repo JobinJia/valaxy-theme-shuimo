@@ -5,15 +5,13 @@ function createPetal(x: number, y: number) {
   const petal = document.createElement('div')
   petal.className = 'shuimo-petal'
 
-  // 随机参数
   const size = 6 + Math.random() * 8
-  const dx = (Math.random() - 0.5) * 80 // 水平漂移
-  const dy = 60 + Math.random() * 100 // 下落距离
+  const dx = (Math.random() - 0.5) * 80
+  const dy = 60 + Math.random() * 100
   const rotate = Math.random() * 360
   const duration = 1.2 + Math.random() * 0.8
   const delay = Math.random() * 0.15
 
-  // 起始位置围绕点击点散开
   const startX = x + (Math.random() - 0.5) * 30
   const startY = y + (Math.random() - 0.5) * 30
 
@@ -35,15 +33,11 @@ function createPetal(x: number, y: number) {
   `
 
   document.body.appendChild(petal)
-
-  // 动画结束后移除
-  setTimeout(() => {
-    petal.remove()
-  }, (duration + delay) * 1000 + 100)
+  setTimeout(() => petal.remove(), (duration + delay) * 1000 + 100)
 }
 
 function onClick(e: MouseEvent) {
-  const count = 5 + Math.floor(Math.random() * 4)
+  const count = 10 + Math.floor(Math.random() * 7)
   for (let i = 0; i < count; i++) {
     createPetal(e.clientX, e.clientY)
   }
@@ -63,7 +57,6 @@ onUnmounted(() => {
 </template>
 
 <style>
-/* 全局动画（不能 scoped，因为花瓣直接插入 body） */
 @keyframes shuimo-petal-fall {
   0% {
     opacity: 1;

@@ -18,6 +18,7 @@ function goBack() {
 </script>
 
 <template>
+  <ShuimoClickPetals />
   <div class="shuimo-page">
     <div class="shuimo-post-page">
       <!-- 头像回首页 -->

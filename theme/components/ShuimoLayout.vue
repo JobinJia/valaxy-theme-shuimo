@@ -38,7 +38,6 @@ watch(() => route.path, () => {
 <template>
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]">
     <ShuimoHeroLandscape @ready="onLandscapeReady" />
-    <ShuimoClickPetals />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="revealed" />

@@ -17,6 +17,8 @@ const pageType = computed(() => {
 </script>
 
 <template>
+  <ShuimoClickPetals />
+
   <!-- 首页：山水画 + 竖排导航 -->
   <ShuimoLayout v-if="pageType === 'home'" vertical-nav>
     <slot>

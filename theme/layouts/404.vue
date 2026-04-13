@@ -5,6 +5,7 @@ const router = useRouter()
 </script>
 
 <template>
+  <ShuimoClickPetals />
   <ShuimoLayout>
     <div class="shuimo-404">
       <!-- 迷雾山水背景 -->
