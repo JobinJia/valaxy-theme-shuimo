@@ -37,6 +37,7 @@ watch(() => route.path, () => {
 
 <template>
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]">
+    <ShuimoThemeToggle />
     <ShuimoHeroLandscape @ready="onLandscapeReady" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
@@ -77,7 +78,7 @@ watch(() => route.path, () => {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: rgba(245, 240, 230, 0.55);
+    background-color: var(--sm-paper-overlay);
   }
 
   &__footer {
@@ -99,7 +100,7 @@ watch(() => route.path, () => {
   top: 0;
   width: 50%;
   height: 100%;
-  background: rgb(245, 232, 207);
+  background: var(--sm-paper);
   z-index: 9999;
   pointer-events: none;
   will-change: transform;
@@ -133,16 +134,21 @@ watch(() => route.path, () => {
   display: none;
 }
 
-// 移动端回退
+// 移动端
 @media (max-width: 767px) {
-  // 移动端恢复水平 header
+  // 首页：竖排导航改为流式展示，隐藏横排 header
   .shuimo-header--hidden-desktop {
-    display: block;
+    display: none;
   }
 
+  // 移动端首页：隐藏 paper 层，只保留竖排导航 + 山水画
   .shuimo-app.has-vertical-nav .shuimo-app__paper {
-    display: flex;
-    background-color: rgba(245, 240, 230, 0.55);
+    display: none;
+  }
+
+  // 移动端不需要幕布蒙层
+  .shuimo-curtain {
+    display: none;
   }
 }
 </style>

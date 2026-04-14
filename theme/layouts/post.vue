@@ -19,7 +19,7 @@ function goBack() {
 
 <template>
   <ShuimoClickPetals />
-  <div class="shuimo-page">
+  <ShuimoLayout>
     <div class="shuimo-post-page">
       <!-- 头像回首页 -->
       <router-link v-if="author?.avatar" to="/" class="shuimo-post-page__avatar-link">
@@ -46,17 +46,16 @@ function goBack() {
 
       <!-- 返回上一页 -->
       <a href="#" class="shuimo-post-page__back" @click.prevent="goBack">
-        ← 返回
+        归去来兮 ←
       </a>
     </div>
-  </div>
+  </ShuimoLayout>
 </template>
 
 <style lang="scss" scoped>
-.shuimo-page {
-  min-height: 100vh;
-  background: #F5F0E6;
-  color: #2A2520;
+// 隐藏 Header（站名/副标题/导航）
+:deep(.shuimo-header) {
+  display: none;
 }
 
 .shuimo-post-page {
@@ -83,7 +82,7 @@ function goBack() {
   &__title {
     font-size: 22px;
     font-weight: bold;
-    color: #1a1410;
+    color: var(--sm-ink-dark);
     letter-spacing: 4px;
     margin: 0 0 12px;
     text-align: center;
@@ -109,7 +108,7 @@ function goBack() {
 
     :deep(h2) {
       font-size: 18px;
-      color: #1a1410;
+      color: var(--sm-ink-dark);
       letter-spacing: 3px;
       margin: 32px 0 16px;
       font-weight: bold;
@@ -117,7 +116,7 @@ function goBack() {
 
     :deep(h3) {
       font-size: 16px;
-      color: #1a1410;
+      color: var(--sm-ink-dark);
       letter-spacing: 2px;
       margin: 24px 0 12px;
     }
@@ -138,7 +137,7 @@ function goBack() {
     }
 
     :deep(pre) {
-      background: rgba(42, 37, 32, 0.04);
+      background: var(--sm-paper-card);
       border-radius: 4px;
       padding: 16px;
       overflow-x: auto;
@@ -148,7 +147,7 @@ function goBack() {
     }
 
     :deep(code:not(pre code)) {
-      background: rgba(42, 37, 32, 0.06);
+      background: var(--sm-paper-card);
       padding: 2px 6px;
       border-radius: 3px;
       font-size: 0.9em;
@@ -172,6 +171,70 @@ function goBack() {
 
     &:hover {
       color: var(--sm-accent);
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .shuimo-post-page {
+    padding: 40px 16px 32px;
+
+    &__avatar {
+      width: 36px;
+      height: 36px;
+    }
+
+    &__avatar-link {
+      margin-bottom: 16px;
+    }
+
+    &__title {
+      font-size: 18px;
+      letter-spacing: 2px;
+      margin: 0 0 8px;
+    }
+
+    &__meta {
+      font-size: 11px;
+      margin-bottom: 16px;
+    }
+
+    &__line {
+      margin-bottom: 20px;
+    }
+
+    &__content {
+      font-size: 14px;
+      line-height: 1.9;
+
+      :deep(h2) {
+        font-size: 16px;
+        letter-spacing: 2px;
+        margin: 24px 0 12px;
+      }
+
+      :deep(h3) {
+        font-size: 15px;
+        letter-spacing: 1px;
+        margin: 20px 0 10px;
+      }
+
+      :deep(p) {
+        text-indent: 2em;
+      }
+
+      :deep(pre) {
+        padding: 12px;
+        font-size: 12px;
+      }
+
+      :deep(blockquote) {
+        padding: 8px 12px;
+      }
+    }
+
+    &__back {
+      margin-top: 32px;
     }
   }
 }

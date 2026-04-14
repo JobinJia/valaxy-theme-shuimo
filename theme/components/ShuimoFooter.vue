@@ -1,21 +1,28 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useThemeConfig } from '../composables'
 
 const themeConfig = useThemeConfig()
 
 const year = new Date().getFullYear()
+const since = computed(() => themeConfig.value?.footer?.since)
+const powered = computed(() => themeConfig.value?.footer?.powered !== false)
+const beian = computed(() => themeConfig.value?.footer?.beian)
+const siteName = computed(() => themeConfig.value?.header?.title || '')
 </script>
 
 <template>
   <footer class="shuimo-footer">
-    <ShuimoBrushLine
-      variant="light"
-      :length="400"
-      :width="1"
-      class="shuimo-footer__line"
-    />
     <div class="shuimo-footer__content">
-      <span>&copy;{{ year }} 落梅听风雪</span>
+      <span>&copy;{{ year }}</span>
+      <span v-if="siteName"> {{ siteName }}</span>
+    </div>
+    <div v-if="powered" class="shuimo-footer__powered">
+      Powered by <a href="https://valaxy.site/" target="_blank">Valaxy</a>
+      · Theme <a href="https://github.com/JobinJia/valaxy-theme-shuimo1" target="_blank">Shuimo</a>
+    </div>
+    <div v-if="beian?.enable && beian?.icp" class="shuimo-footer__beian">
+      <a href="https://beian.miit.gov.cn/" target="_blank">{{ beian.icp }}</a>
     </div>
   </footer>
 </template>
@@ -32,13 +39,11 @@ const year = new Date().getFullYear()
     letter-spacing: 1px;
   }
 
-  &__name {
-    margin-left: 4px;
-  }
-
-  &__sep {
-    margin: 0 6px;
-    opacity: 0.5;
+  &__powered {
+    font-size: 11px;
+    color: var(--sm-ink-light);
+    margin-top: 6px;
+    opacity: 0.7;
   }
 
   a {
@@ -51,7 +56,8 @@ const year = new Date().getFullYear()
   }
 
   &__beian {
-    margin-top: 4px;
+    margin-top: 6px;
+    font-size: 11px;
   }
 }
 </style>

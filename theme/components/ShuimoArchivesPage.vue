@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { usePostList } from 'valaxy'
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useThemeConfig } from '../composables'
+
+const router = useRouter()
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push('/')
+}
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
@@ -38,10 +45,10 @@ function formatDate(date: string | Date) {
 
     <!-- 标题 -->
     <h1 class="shuimo-archives-page__title" :style="titleFont ? { fontFamily: titleFont } : undefined">
-      归档
+      栖墨斋
     </h1>
 
-    <ShuimoBrushLine variant="light" :length="180" :width="1" class="shuimo-archives-page__line" />
+    <!-- 分隔线已移除 -->
 
     <!-- 时间轴 -->
     <div class="shuimo-archives-page__timeline">
@@ -69,9 +76,9 @@ function formatDate(date: string | Date) {
     </div>
 
     <!-- 返回 -->
-    <router-link to="/" class="shuimo-archives-page__back">
-      ← 返回
-    </router-link>
+    <a href="#" class="shuimo-archives-page__back" @click.prevent="goBack">
+      归去来兮 ←
+    </a>
   </div>
 </template>
 
@@ -101,7 +108,7 @@ function formatDate(date: string | Date) {
   &__title {
     font-size: 20px;
     font-weight: bold;
-    color: #1a1410;
+    color: var(--sm-ink-dark);
     letter-spacing: 8px;
     margin: 0 0 16px;
   }
@@ -120,7 +127,7 @@ function formatDate(date: string | Date) {
 
   &__year {
     font-size: 16px;
-    color: #1a1410;
+    color: var(--sm-ink-dark);
     letter-spacing: 4px;
     margin: 0 0 12px;
     padding-left: 4px;
@@ -197,6 +204,27 @@ function formatDate(date: string | Date) {
 
     &:hover {
       color: var(--sm-accent);
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .shuimo-archives-page {
+    padding: 60px 16px 32px;
+
+    &__title {
+      font-size: 18px;
+      letter-spacing: 4px;
+    }
+
+    &__post-link {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    &__post-date {
+      font-size: 11px;
     }
   }
 }

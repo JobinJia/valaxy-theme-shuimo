@@ -15,7 +15,7 @@
     "vue"
   ],
   "main": "client/index.ts",
-  "types": "types/index.d.ts",
+  "types": "types/index.ts",
   "dependencies": {
     "@iconify-json/ant-design": "catalog:",
     "@iconify-json/simple-icons": "catalog:"

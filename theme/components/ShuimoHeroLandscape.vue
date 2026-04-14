@@ -273,10 +273,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div ref="svgContainer" class="shuimo-hero-landscape" />
+  <div class="shuimo-hero-landscape">
+    <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
+    <!-- 暗色模式：月亮 + 月光 -->
+    <div class="shuimo-moon">
+      <div class="shuimo-moon__body" />
+      <div class="shuimo-moon__glow" />
+    </div>
+  </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .shuimo-hero-landscape {
   position: fixed;
   top: 0;
@@ -286,6 +293,80 @@ onMounted(async () => {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background: rgb(245, 232, 207);
+  background: var(--sm-paper);
+  transition: background 0.5s ease;
+}
+
+.shuimo-hero-landscape__svg {
+  width: 100%;
+  height: 100%;
+}
+
+// 月亮：位置（显隐由全局样式控制）
+.shuimo-moon {
+  position: absolute;
+  top: 8%;
+  left: 18%;
+  z-index: 1;
+}
+
+// 月亮本体
+.shuimo-moon__body {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    #F5F0E0 0%,
+    #E8E0C8 40%,
+    #D5C8A0 100%
+  );
+  box-shadow:
+    0 0 20px 8px rgba(240, 230, 200, 0.3),
+    0 0 60px 20px rgba(240, 230, 200, 0.15);
+  position: relative;
+}
+
+// 月光散射 — 大范围微光
+.shuimo-moon__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(220, 215, 180, 0.12) 0%,
+    rgba(220, 215, 180, 0.05) 30%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: moon-pulse 6s ease-in-out infinite;
+}
+
+@keyframes moon-pulse {
+  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+}
+</style>
+
+<style>
+/* 暗色模式（全局，不受 scoped 限制） */
+html.dark .shuimo-hero-landscape {
+  background: var(--sm-paper);
+}
+html.dark .shuimo-hero-landscape__svg {
+  filter: invert(0.88) hue-rotate(180deg);
+}
+/* 月亮：默认透明，暗色模式下渐显，不参与切换动画 */
+.shuimo-moon {
+  opacity: 0;
+  transition: opacity 1s ease 0.3s;
+  pointer-events: none;
+}
+html.dark .shuimo-moon {
+  opacity: 1;
 }
 </style>

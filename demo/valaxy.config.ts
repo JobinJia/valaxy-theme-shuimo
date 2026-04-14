@@ -21,17 +21,17 @@ export default defineConfig<ThemeConfig>({
 
     nav: [
       {
-        text: '归档',
-        link: '/archives/',
+        text: '栖墨斋',
+        link: '/archives',
       },
       {
-        text: '关于',
-        link: '/about/',
+        text: '暗香阁',
+        link: '/about',
       },
     ],
 
     footer: {
-      since: 2024,
+      since: 2026,
       powered: true,
     },
 

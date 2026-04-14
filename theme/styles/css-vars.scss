@@ -29,9 +29,9 @@ html.dark {
     'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
   // 配色快捷变量
-  --sm-ink-dark: #2A2520;
-  --sm-ink-medium: #6B5E50;
-  --sm-ink-light: #8A7E70;
+  --sm-ink-dark: #111111;
+  --sm-ink-medium: #1a1410;
+  --sm-ink-light: #55493d;
   --sm-accent: var(--sm-c-brand);
   --sm-stamp: var(--sm-c-stamp);
   --sm-paper: #F5F0E6;
@@ -45,17 +45,21 @@ html.dark {
   --sm-sidebar-bg: rgba(250, 247, 240, 0.45);
 }
 
-// 暗色模式快捷变量
+// 暗色模式快捷变量 — 墨纸反转：暗底白墨
 html.dark {
-  --sm-ink-dark: #D5D0C6;
-  --sm-ink-medium: #A89E90;
-  --sm-ink-light: #8A7E70;
-  --sm-paper: #1A1816;
-  --sm-paper-light: #222018;
-  --sm-paper-card: #2A2520;
+  --sm-ink-dark: #E8E2D6;
+  --sm-ink-medium: #D5CFC0;
+  --sm-ink-light: #8A8070;
+  --sm-paper: #151210;
+  --sm-paper-light: #1C1914;
+  --sm-paper-card: #252118;
 
-  --sm-paper-overlay: rgba(26, 24, 22, 0.85);
-  --sm-content-bg: rgba(30, 28, 24, 0.7);
-  --sm-card-bg: rgba(30, 28, 24, 0.6);
-  --sm-sidebar-bg: rgba(30, 28, 24, 0.55);
+  --sm-paper-overlay: rgba(21, 18, 16, 0.90);
+  --sm-content-bg: rgba(25, 22, 18, 0.75);
+  --sm-card-bg: rgba(28, 25, 20, 0.65);
+  --sm-sidebar-bg: rgba(28, 25, 20, 0.55);
+
+  // 边框在暗色下微亮
+  --sm-c-border: rgba(200, 190, 170, 0.15);
+  --sm-c-border-medium: rgba(200, 190, 170, 0.25);
 }

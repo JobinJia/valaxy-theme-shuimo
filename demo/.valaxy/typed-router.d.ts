@@ -51,6 +51,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/categories/': RouteRecordInfo<
+      '/categories/',
+      '/categories',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/categories/[name]': RouteRecordInfo<
+      '/categories/[name]',
+      '/categories/:name',
+      { name: ParamValue<true> },
+      { name: ParamValue<false> },
+      | never
+    >,
     '/posts/autumn-thoughts': RouteRecordInfo<
       '/posts/autumn-thoughts',
       '/posts/autumn-thoughts',
@@ -93,6 +107,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/tags/': RouteRecordInfo<
+      '/tags/',
+      '/tags',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/tags/[name]': RouteRecordInfo<
+      '/tags/[name]',
+      '/tags/:name',
+      { name: ParamValue<true> },
+      { name: ParamValue<false> },
+      | never
+    >,
   }
 
   /**
@@ -130,6 +158,18 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
+    '../theme/pages/categories/index.vue': {
+      routes:
+        | '/categories/'
+      views:
+        | never
+    }
+    '../theme/pages/categories/[name].vue': {
+      routes:
+        | '/categories/[name]'
+      views:
+        | never
+    }
     'pages/posts/autumn-thoughts.md': {
       routes:
         | '/posts/autumn-thoughts'
@@ -163,6 +203,18 @@ declare module 'vue-router/auto-routes' {
     'pages/posts/tech-shuimo.md': {
       routes:
         | '/posts/tech-shuimo'
+      views:
+        | never
+    }
+    '../theme/pages/tags/index.vue': {
+      routes:
+        | '/tags/'
+      views:
+        | never
+    }
+    '../theme/pages/tags/[name].vue': {
+      routes:
+        | '/tags/[name]'
       views:
         | never
     }

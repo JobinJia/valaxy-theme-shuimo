@@ -78,4 +78,24 @@ const router = useRouter()
     }
   }
 }
+
+@media (max-width: 767px) {
+  .shuimo-404 {
+    padding: 48px 16px;
+
+    &__icon {
+      margin-bottom: 16px;
+    }
+
+    &__title {
+      font-size: 22px;
+      letter-spacing: 4px;
+    }
+
+    &__desc {
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+  }
+}
 </style>

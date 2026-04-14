@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push('/')
+}
 
 const route = useRoute()
 
@@ -12,6 +18,8 @@ const pageType = computed(() => {
     return 'about'
   if (path === '/archives')
     return 'archives'
+  if (path.startsWith('/categories') || path.startsWith('/tags'))
+    return 'cat-tag'
   return 'other'
 })
 </script>
@@ -26,52 +34,68 @@ const pageType = computed(() => {
     </slot>
   </ShuimoLayout>
 
-  <!-- 关于页 -->
+  <!-- 关于页：不带标题/副标题 -->
   <div v-else-if="pageType === 'about'" class="shuimo-page">
+    <ShuimoThemeToggle />
     <ShuimoAboutPage>
       <RouterView />
     </ShuimoAboutPage>
   </div>
 
-  <!-- 归档页 -->
+  <!-- 归档页：不带标题/副标题 -->
   <div v-else-if="pageType === 'archives'" class="shuimo-page">
+    <ShuimoThemeToggle />
     <ShuimoArchivesPage />
   </div>
 
-  <!-- 其他页面 -->
-  <div v-else class="shuimo-page shuimo-page--plain">
+  <!-- 分类/标签页：不带标题/副标题 -->
+  <div v-else-if="pageType === 'cat-tag'" class="shuimo-page">
+    <ShuimoThemeToggle />
     <RouterView />
-    <router-link to="/" class="shuimo-page__back">
-      ← 返回
-    </router-link>
   </div>
+
+  <!-- 其他页面 -->
+  <ShuimoLayout v-else>
+    <div class="shuimo-page--plain">
+      <RouterView />
+      <a href="#" class="shuimo-page__back" @click.prevent="goBack">
+        归去来兮 ←
+      </a>
+    </div>
+  </ShuimoLayout>
 </template>
 
 <style lang="scss" scoped>
 .shuimo-page {
   min-height: 100vh;
-  background: #F5F0E6;
-  color: #2A2520;
+  background: var(--sm-paper);
+  color: var(--sm-ink-dark);
+}
 
-  &--plain {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 60px 20px;
+.shuimo-page--plain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.shuimo-page__back {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--sm-ink-light);
+  text-decoration: none;
+  letter-spacing: 2px;
+  font-family: "楷体", "KaiTi", "STKaiti", serif;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--sm-accent);
   }
+}
 
-  &__back {
-    margin-top: 24px;
-    font-size: 13px;
-    color: var(--sm-ink-light);
-    text-decoration: none;
-    letter-spacing: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
-    transition: color 0.2s;
-
-    &:hover {
-      color: var(--sm-accent);
-    }
+@media (max-width: 767px) {
+  .shuimo-page--plain {
+    padding: 40px 16px;
   }
 }
 </style>

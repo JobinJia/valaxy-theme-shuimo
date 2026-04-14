@@ -68,9 +68,7 @@ export const defaultThemeConfig: ThemeConfig = {
   },
 }
 
-export function themePlugin(options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
-  const themeConfig = options.config.themeConfig || {}
-
+export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
   return {
     name: 'valaxy-theme-shuimo1',
 
@@ -86,10 +84,6 @@ export function themePlugin(options: ResolvedValaxyOptions<ThemeConfig>): Plugin
 
 export function generateSafelist(themeConfig: ThemeConfig) {
   const safelist: string[] = []
-
-  const footerIcon = themeConfig.footer?.icon?.name
-  if (footerIcon)
-    safelist.push(footerIcon)
 
   themeConfig.nav?.forEach((item) => {
     if (item.icon)

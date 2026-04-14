@@ -103,4 +103,19 @@ defineProps<{
     }
   }
 }
+
+@media (max-width: 767px) {
+  .shuimo-card {
+    padding: 16px;
+    margin-bottom: 20px;
+
+    &__title {
+      font-size: 16px;
+    }
+
+    &__excerpt {
+      font-size: 13px;
+    }
+  }
+}
 </style>

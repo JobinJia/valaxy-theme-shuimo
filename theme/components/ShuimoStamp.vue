@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { useDark } from '@vueuse/core'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const props = withDefaults(defineProps<{
   text?: string
@@ -15,10 +16,18 @@ const props = withDefaults(defineProps<{
   size: 56,
 })
 
+const isDark = useDark()
+// 暗色模式：阴阳互换
+const actualType = computed(() => {
+  if (isDark.value)
+    return props.type === 'yin' ? 'yang' : 'yin'
+  return props.type
+})
+
 const stampSvg = ref<string | null>(null)
 const hasShuimoCore = ref(false)
 
-onMounted(async () => {
+async function renderStamp(type: 'yin' | 'yang') {
   try {
     const { generateStampAsync } = await import('@jobinjia/shuimo-core/drawing')
     hasShuimoCore.value = true
@@ -33,7 +42,7 @@ onMounted(async () => {
         : [props.text]
     const result = await generateStampAsync({
       text: textArray,
-      type: props.type,
+      type,
       shape: props.shape,
       fontFamily: props.fontFamily,
       width: props.size * 2,
@@ -44,13 +53,19 @@ onMounted(async () => {
       stampSvg.value = result
     }
     else if (result?.toDataURL) {
-      // Canvas fallback - 用 data URL
       stampSvg.value = `<img src="${result.toDataURL()}" width="100%" height="100%" />`
     }
   }
   catch {
     hasShuimoCore.value = false
   }
+}
+
+onMounted(() => renderStamp(actualType.value))
+
+// 暗色模式切换时重新生成印章
+watch(actualType, (newType) => {
+  renderStamp(newType)
 })
 </script>
 
@@ -69,7 +84,7 @@ onMounted(async () => {
     <div
       v-else
       class="shuimo-stamp__fallback"
-      :class="[`shuimo-stamp--${type}`]"
+      :class="[`shuimo-stamp--${actualType}`]"
     >
       {{ text.slice(0, 2) }}
     </div>

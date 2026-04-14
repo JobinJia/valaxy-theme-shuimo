@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 767
+
 function createPetal(x: number, y: number) {
   const petal = document.createElement('div')
   petal.className = 'shuimo-petal'
 
-  const size = 6 + Math.random() * 8
-  const dx = (Math.random() - 0.5) * 80
-  const dy = 60 + Math.random() * 100
+  const size = isMobile ? (4 + Math.random() * 5) : (6 + Math.random() * 8)
+  const dx = (Math.random() - 0.5) * (isMobile ? 50 : 80)
+  const dy = (isMobile ? 40 : 60) + Math.random() * (isMobile ? 60 : 100)
   const rotate = Math.random() * 360
   const duration = 1.2 + Math.random() * 0.8
   const delay = Math.random() * 0.15
 
-  const startX = x + (Math.random() - 0.5) * 30
-  const startY = y + (Math.random() - 0.5) * 30
+  const startX = x + (Math.random() - 0.5) * (isMobile ? 15 : 30)
+  const startY = y + (Math.random() - 0.5) * (isMobile ? 15 : 30)
 
   petal.style.cssText = `
     position: fixed;
@@ -36,8 +38,17 @@ function createPetal(x: number, y: number) {
   setTimeout(() => petal.remove(), (duration + delay) * 1000 + 100)
 }
 
+let lastClick = 0
 function onClick(e: MouseEvent) {
-  const count = 10 + Math.floor(Math.random() * 7)
+  // 移动端节流：至少间隔 300ms
+  if (isMobile) {
+    const now = Date.now()
+    if (now - lastClick < 300)
+      return
+    lastClick = now
+  }
+
+  const count = isMobile ? (4 + Math.floor(Math.random() * 3)) : (10 + Math.floor(Math.random() * 7))
   for (let i = 0; i < count; i++) {
     createPetal(e.clientX, e.clientY)
   }

@@ -139,4 +139,10 @@ onMounted(async () => {
     right: 0;
   }
 }
+
+@media (max-width: 767px) {
+  .shuimo-decoration {
+    display: none;
+  }
+}
 </style>

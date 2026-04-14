@@ -108,18 +108,30 @@ const themeConfig = useThemeConfig()
 
 @media (max-width: 767px) {
   .shuimo-header {
-    padding: 24px 16px 12px;
+    padding: 28px 16px 14px;
 
     &__title {
       font-size: 24px;
       letter-spacing: 6px;
     }
 
+    &__subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    &__brush {
+      max-width: 160px;
+      margin-top: 10px;
+    }
+
     &__nav {
-      gap: 12px;
+      gap: 14px;
       font-size: 12px;
       letter-spacing: 2px;
       flex-wrap: wrap;
+      margin-top: 10px;
     }
   }
 }
