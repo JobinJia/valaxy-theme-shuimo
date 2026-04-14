@@ -5,7 +5,6 @@ import { useThemeConfig } from '../composables'
 const themeConfig = useThemeConfig()
 
 const year = new Date().getFullYear()
-const since = computed(() => themeConfig.value?.footer?.since)
 const powered = computed(() => themeConfig.value?.footer?.powered !== false)
 const beian = computed(() => themeConfig.value?.footer?.beian)
 const siteName = computed(() => themeConfig.value?.header?.title || '')

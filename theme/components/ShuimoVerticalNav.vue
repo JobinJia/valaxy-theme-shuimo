@@ -169,7 +169,7 @@ const subtitleParts = computed(() => {
     height: 64px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(139, 69, 19, 0.2);
+    border: 2px solid var(--sm-primary-light);
     margin-bottom: 16px;
   }
 
@@ -213,7 +213,7 @@ const subtitleParts = computed(() => {
     font-size: 13px;
     letter-spacing: 4px;
     color: var(--sm-ink-medium);
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     text-decoration: none;
     transition: color 0.2s;
 

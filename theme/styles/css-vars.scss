@@ -28,6 +28,14 @@ html.dark {
   --sm-font-mono:
     'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
+  // 楷体
+  --sm-font-kai: "楷体", "KaiTi", "STKaiti", serif;
+
+  // 主色 rgba 衍生（用于 border/dot/selection 等半透明场景）
+  --sm-primary-faint: rgba(139, 69, 19, 0.1);
+  --sm-primary-light: rgba(139, 69, 19, 0.15);
+  --sm-primary-medium: rgba(139, 69, 19, 0.3);
+
   // 配色快捷变量
   --sm-ink-dark: #111111;
   --sm-ink-medium: #1a1410;
@@ -62,4 +70,9 @@ html.dark {
   // 边框在暗色下微亮
   --sm-c-border: rgba(200, 190, 170, 0.15);
   --sm-c-border-medium: rgba(200, 190, 170, 0.25);
+
+  // 主色衍生（暗色模式）
+  --sm-primary-faint: rgba(184, 120, 74, 0.1);
+  --sm-primary-light: rgba(184, 120, 74, 0.15);
+  --sm-primary-medium: rgba(184, 120, 74, 0.3);
 }

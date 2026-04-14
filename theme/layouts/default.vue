@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { useGoBack } from '../composables'
 
-const router = useRouter()
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
-}
+const { goBack } = useGoBack()
 
 const route = useRoute()
 
@@ -85,7 +82,7 @@ const pageType = computed(() => {
   color: var(--sm-ink-light);
   text-decoration: none;
   letter-spacing: 2px;
-  font-family: "楷体", "KaiTi", "STKaiti", serif;
+  font-family: var(--sm-font-kai);
   transition: color 0.2s;
 
   &:hover {

@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useGoBack, useThemeConfig } from '../composables'
 
-const router = useRouter()
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
-}
+const { goBack } = useGoBack()
 
 const props = defineProps<{
   title: string
@@ -87,7 +82,7 @@ function formatDate(date: string | Date) {
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(139, 69, 19, 0.15);
+    border: 2px solid var(--sm-primary-light);
   }
 
   &__title {
@@ -103,7 +98,7 @@ function formatDate(date: string | Date) {
     color: var(--sm-ink-light);
     letter-spacing: 2px;
     margin: 0 0 28px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
   }
 
   &__list {
@@ -127,7 +122,7 @@ function formatDate(date: string | Date) {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(139, 69, 19, 0.3);
+    background: var(--sm-primary-medium);
     flex-shrink: 0;
   }
 
@@ -135,7 +130,7 @@ function formatDate(date: string | Date) {
     flex: 1;
     font-size: 14px;
     color: var(--sm-ink-medium);
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     letter-spacing: 1px;
     transition: color 0.2s;
   }
@@ -151,7 +146,7 @@ function formatDate(date: string | Date) {
     text-align: center;
     color: var(--sm-ink-light);
     font-size: 14px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
   }
 
   &__back {
@@ -160,7 +155,7 @@ function formatDate(date: string | Date) {
     color: var(--sm-ink-light);
     text-decoration: none;
     letter-spacing: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     transition: color 0.2s;
 
     &:hover {

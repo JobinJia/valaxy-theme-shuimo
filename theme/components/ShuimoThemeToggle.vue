@@ -39,8 +39,8 @@ const { isDark, toggleDarkWithTransition } = useValaxyDark({ circleTransition: t
 <style lang="scss" scoped>
 .shuimo-theme-toggle {
   position: fixed;
-  top: 16px;
-  right: 16px;
+  top: 8px;
+  right: 8px;
   z-index: 100;
   width: 36px;
   height: 36px;
@@ -106,8 +106,8 @@ const { isDark, toggleDarkWithTransition } = useValaxyDark({ circleTransition: t
 
 @media (max-width: 767px) {
   .shuimo-theme-toggle {
-    top: 12px;
-    right: 12px;
+    top: 6px;
+    right: 6px;
     width: 28px;
     height: 28px;
   }

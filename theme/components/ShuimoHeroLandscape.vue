@@ -107,13 +107,14 @@ function planScene(
     planmtx[Math.floor(i / xstep)] = 0
   }
 
-  // 主峰（留白侧抑制）
+  // === 长卷构图：元素集中在画面中下部（H*0.5 ~ H*0.85），上方留天 ===
+
+  // 主峰（集中在中下部横向带状区域）
   for (let i = 0; i < W; i += xstep) {
-    for (let j = 0; j < yr(i) * H * 0.6; j += 30) {
+    for (let j = 0; j < yr(i) * H * 0.3; j += 30) {
       if (locmax(i, j, 2)) {
-        const xof = i + 2 * (Math.random() - 0.5) * W * 0.3
-        const yof = j + H * 0.4
-        // 留白权重过滤（山半宽约 300px）
+        const xof = i + 2 * (Math.random() - 0.5) * W * 0.2
+        const yof = H * 0.55 + j * 0.5
         if (Math.random() > blankWeight(xof, yof, W, H, blankSide, 300))
           continue
         const res = chadd({ tag: 'mount', x: xof, y: yof, h: ns(i, j) })
@@ -126,22 +127,33 @@ function planScene(
     }
   }
 
-  // 远山（留白侧抑制）
-  for (let i = 0; i < W; i += W * 0.15) {
-    const fx = i + (Math.random() - 0.5) * W * 0.1
-    const fy = H * 0.3 + Math.random() * H * 0.1
-    if (Math.random() < 0.5 && Math.random() < blankWeight(fx, fy, W, H, blankSide, 400)) {
-      chadd({ tag: 'flatmount', x: fx, y: fy }, 150)
+  // 保底：主峰不够时强制补山（至少 3 座）
+  const minMounts = 3
+  const currentMounts = plan.filter(p => p.tag === 'mount').length
+  if (currentMounts < minMounts) {
+    for (let n = 0; n < minMounts - currentMounts; n++) {
+      const fx = W * (0.2 + n * 0.3) + (Math.random() - 0.5) * W * 0.1
+      const fy = H * 0.58 + Math.random() * H * 0.1
+      chadd({ tag: 'mount', x: fx, y: fy, h: 0.5 + Math.random() * 0.5 }, 80)
     }
   }
 
-  // 空旷区域补平山（留白侧抑制）
+  // 远山（在主峰稍上方，形成层次，提高生成概率）
+  for (let i = 0; i < W; i += W * 0.12) {
+    const fx = i + (Math.random() - 0.5) * W * 0.1
+    const fy = H * 0.45 + Math.random() * H * 0.08
+    if (Math.random() < 0.7 && Math.random() < blankWeight(fx, fy, W, H, blankSide, 400)) {
+      chadd({ tag: 'flatmount', x: fx, y: fy }, 120)
+    }
+  }
+
+  // 空旷区域补平山（提高填充概率）
   for (let i = 0; i < W; i += xstep) {
     if ((planmtx[Math.floor(i / xstep)] || 0) === 0) {
-      if (Math.random() < 0.04) {
-        for (let j = 0; j < 3 * Math.random(); j++) {
-          const fx = i + 2 * (Math.random() - 0.5) * W * 0.4
-          const fy = H * 0.55 + H * 0.15 - j * 50
+      if (Math.random() < 0.08) {
+        for (let j = 0; j < 2 + Math.random() * 2; j++) {
+          const fx = i + 2 * (Math.random() - 0.5) * W * 0.25
+          const fy = H * 0.62 + H * 0.1 - j * 25
           if (Math.random() > blankWeight(fx, fy, W, H, blankSide, 400))
             continue
           chadd({ tag: 'flatmount', x: fx, y: fy, h: ns(i, j) })
@@ -150,16 +162,25 @@ function planScene(
     }
   }
 
-  // 船（放在留白侧的水面上，呼应留白意境）
+  // 保底：远山/平山也至少 2 座
+  const flatCount = plan.filter(p => p.tag === 'flatmount').length
+  if (flatCount < 2) {
+    for (let n = 0; n < 2 - flatCount; n++) {
+      const fx = W * (0.15 + n * 0.5) + (Math.random() - 0.5) * W * 0.1
+      const fy = H * 0.48 + Math.random() * H * 0.06
+      chadd({ tag: 'flatmount', x: fx, y: fy }, 100)
+    }
+  }
+
+  // 船（在山脚水面上）
   const maxBoats = 1 + Math.floor(Math.random() * 2)
   const boatPos: number[] = []
   for (let i = 0; i < maxBoats; i++) {
-    // 船偏向留白侧下方的开阔水面
     const bx = blankSide === 'left'
       ? W * (0.1 + Math.random() * 0.35)
       : W * (0.55 + Math.random() * 0.35)
     if (!boatPos.some(p => Math.abs(p - bx) < W * 0.2)) {
-      plan.push({ tag: 'boat', x: bx, y: H * 0.6 + Math.random() * H * 0.1 })
+      plan.push({ tag: 'boat', x: bx, y: H * 0.75 + Math.random() * H * 0.05 })
       boatPos.push(bx)
     }
   }
@@ -209,9 +230,9 @@ async function generateScene(W: number, H: number): Promise<string> {
 
     if (item.tag === 'mount') {
       svgParts.push(Mount.mountain(item.x, item.y, s, {
-        hei: 100 + Math.random() * 400,
-        wid: 400 + Math.random() * 200,
-        tex: 200,
+        hei: 80 + Math.random() * 250,
+        wid: 350 + Math.random() * 200,
+        tex: 180,
         veg: true,
       }))
     }

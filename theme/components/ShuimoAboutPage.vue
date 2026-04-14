@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { useCategories, usePostList, useTags } from 'valaxy'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useGoBack, useThemeConfig } from '../composables'
 
-const router = useRouter()
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
-}
+const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
@@ -99,7 +94,7 @@ const tagCount = computed(() => tags.value?.size || 0)
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(139, 69, 19, 0.15);
+    border: 2px solid var(--sm-primary-light);
   }
 
   &__name {
@@ -115,19 +110,15 @@ const tagCount = computed(() => tags.value?.size || 0)
     color: var(--sm-ink-light);
     letter-spacing: 2px;
     margin: 0 0 24px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
-  }
-
-  &__line {
-    margin-bottom: 24px;
+    font-family: var(--sm-font-kai);
   }
 
   &__stats {
     display: flex;
     gap: 1px;
-    width: 100%;
+    width: 60%;
     margin-bottom: 24px;
-    border: 1px solid var(--sm-c-border, rgba(139, 69, 19, 0.1));
+    border: 1px solid var(--sm-c-border);
     border-radius: 4px;
     overflow: hidden;
   }
@@ -137,7 +128,7 @@ const tagCount = computed(() => tags.value?.size || 0)
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 8px;
+    padding: 6px 4px;
     text-decoration: none;
     background: var(--sm-card-bg);
     transition: background 0.2s;
@@ -147,19 +138,19 @@ const tagCount = computed(() => tags.value?.size || 0)
     }
 
     &:not(:last-child) {
-      border-right: 1px solid var(--sm-c-border, rgba(139, 69, 19, 0.1));
+      border-right: 1px solid var(--sm-c-border);
     }
   }
 
   &__stat-label {
-    font-size: 12px;
+    font-size: 10px;
     color: var(--sm-ink-light);
-    letter-spacing: 2px;
-    margin-bottom: 4px;
+    letter-spacing: 1px;
+    margin-bottom: 1px;
   }
 
   &__stat-count {
-    font-size: 20px;
+    font-size: 13px;
     font-weight: bold;
     color: var(--sm-ink-dark);
   }
@@ -171,7 +162,7 @@ const tagCount = computed(() => tags.value?.size || 0)
     line-height: 2;
     letter-spacing: 1px;
     text-align: left;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
 
     :deep(p) {
       margin: 10px 0;
@@ -195,7 +186,7 @@ const tagCount = computed(() => tags.value?.size || 0)
     color: var(--sm-ink-light);
     text-decoration: none;
     letter-spacing: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     transition: color 0.2s;
 
     &:hover {

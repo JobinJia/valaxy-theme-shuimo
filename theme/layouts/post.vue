@@ -65,6 +65,7 @@ function goBack() {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden;
 
   &__avatar-link {
     display: block;
@@ -76,7 +77,7 @@ function goBack() {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(139, 69, 19, 0.15);
+    border: 2px solid var(--sm-primary-light);
   }
 
   &__title {
@@ -129,11 +130,26 @@ function goBack() {
     :deep(blockquote) {
       margin: 16px 0;
       padding: 12px 20px;
-      border-left: 3px solid rgba(139, 69, 19, 0.2);
+      border-left: 3px solid var(--sm-c-border-medium);
       color: var(--sm-ink-light);
       font-style: italic;
 
       p { text-indent: 0; }
+    }
+
+    :deep(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 3px;
+      display: block;
+      margin: 16px auto;
+    }
+
+    :deep(table) {
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      -webkit-overflow-scrolling: touch;
     }
 
     :deep(pre) {
@@ -166,7 +182,7 @@ function goBack() {
     color: var(--sm-ink-light);
     text-decoration: none;
     letter-spacing: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     transition: color 0.2s;
 
     &:hover {
@@ -177,39 +193,43 @@ function goBack() {
 
 @media (max-width: 767px) {
   .shuimo-post-page {
-    padding: 40px 16px 32px;
+    padding: 32px 16px 28px;
+    box-sizing: border-box;
+    width: 100%;
 
     &__avatar {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
     }
 
     &__avatar-link {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     &__title {
       font-size: 18px;
       letter-spacing: 2px;
       margin: 0 0 8px;
+      line-height: 1.5;
     }
 
     &__meta {
       font-size: 11px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     &__line {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     &__content {
-      font-size: 14px;
-      line-height: 1.9;
+      font-size: 15px;
+      line-height: 1.85;
+      letter-spacing: 0.3px;
 
       :deep(h2) {
-        font-size: 16px;
-        letter-spacing: 2px;
+        font-size: 17px;
+        letter-spacing: 1.5px;
         margin: 24px 0 12px;
       }
 
@@ -221,20 +241,47 @@ function goBack() {
 
       :deep(p) {
         text-indent: 2em;
+        margin: 10px 0;
       }
 
       :deep(pre) {
-        padding: 12px;
+        padding: 12px 10px;
         font-size: 12px;
+        overflow-x: auto;
       }
 
       :deep(blockquote) {
         padding: 8px 12px;
+        margin: 12px 0;
+      }
+
+      :deep(img) {
+        max-width: 100%;
+        height: auto;
+      }
+
+      :deep(table) {
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+
+        th, td {
+          padding: 6px 8px;
+        }
+      }
+
+      :deep(ul), :deep(ol) {
+        padding-left: 1.5em;
+      }
+
+      :deep(code:not(pre code)) {
+        font-size: 0.85em;
+        padding: 1px 4px;
       }
     }
 
     &__back {
-      margin-top: 32px;
+      margin-top: 28px;
     }
   }
 }

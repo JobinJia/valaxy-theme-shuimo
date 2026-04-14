@@ -12,6 +12,11 @@
 }
 
 // 全局基础样式
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   background-color: var(--sm-paper);
   color: var(--sm-ink-medium);
@@ -28,7 +33,7 @@ body {
 
 // 选中文字颜色
 ::selection {
-  background: rgba(139, 69, 19, 0.15);
+  background: var(--sm-primary-light);
   color: var(--sm-ink-dark);
 }
 

@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { useTags } from 'valaxy'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useThemeConfig } from '../../composables'
+import { useGoBack, useThemeConfig } from '../../composables'
 
-const router = useRouter()
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
-}
+const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
@@ -77,7 +72,7 @@ meta:
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(139, 69, 19, 0.15);
+    border: 2px solid var(--sm-primary-light);
   }
 
   &__title {
@@ -100,9 +95,9 @@ meta:
     font-size: 13px;
     color: var(--sm-ink-medium);
     text-decoration: none;
-    border: 1px solid var(--sm-c-border, rgba(139, 69, 19, 0.1));
+    border: 1px solid var(--sm-c-border);
     border-radius: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     letter-spacing: 1px;
     transition: all 0.2s;
 
@@ -124,7 +119,7 @@ meta:
     color: var(--sm-ink-light);
     text-decoration: none;
     letter-spacing: 2px;
-    font-family: "楷体", "KaiTi", "STKaiti", serif;
+    font-family: var(--sm-font-kai);
     transition: color 0.2s;
     &:hover { color: var(--sm-accent); }
   }
