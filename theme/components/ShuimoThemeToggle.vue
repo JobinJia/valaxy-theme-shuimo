@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
 
-const { isDark, toggleDarkWithTransition } = useValaxyDark({ circleTransition: true })
+const { isDark, toggleDark } = useValaxyDark()
 </script>
 
 <template>
   <button
     class="shuimo-theme-toggle"
     :title="isDark ? '切换亮色' : '切换暗色'"
-    @click="toggleDarkWithTransition($event)"
+    @click="toggleDark()"
   >
     <div class="shuimo-theme-toggle__icons">
       <!-- 亮色模式：太阳 -->

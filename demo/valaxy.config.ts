@@ -1,8 +1,8 @@
-import type { ThemeConfig } from 'valaxy-theme-shuimo1'
+import type { ThemeConfig } from 'valaxy-theme-shuimo'
 import { defineConfig } from 'valaxy'
 
 export default defineConfig<ThemeConfig>({
-  theme: 'shuimo1',
+  theme: 'shuimo',
 
   themeConfig: {
     colors: {

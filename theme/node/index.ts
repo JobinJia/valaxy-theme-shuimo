@@ -70,7 +70,7 @@ export const defaultThemeConfig: ThemeConfig = {
 
 export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
   return {
-    name: 'valaxy-theme-shuimo1',
+    name: 'valaxy-theme-shuimo',
 
     config() {
       return {
