@@ -56,6 +56,13 @@ body {
 }
 
 // 覆盖 Valaxy 默认 footer 横线
-.va-footer {
-  border-top: none;
+.va-footer,
+.shuimo-app__footer {
+  border-top: none !important;
+}
+
+// 移除 footer 上方可能存在的分隔线
+hr + .shuimo-footer,
+.shuimo-app__footer hr {
+  display: none;
 }
