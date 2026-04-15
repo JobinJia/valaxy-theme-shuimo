@@ -54,3 +54,8 @@ body {
     background: var(--sm-ink-medium);
   }
 }
+
+// 覆盖 Valaxy 默认 footer 横线
+.va-footer {
+  border-top: none;
+}
