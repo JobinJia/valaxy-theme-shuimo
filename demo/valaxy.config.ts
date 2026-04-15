@@ -4,6 +4,10 @@ import { defineConfig } from 'valaxy'
 export default defineConfig<ThemeConfig>({
   theme: 'shuimo',
 
+  siteConfig: {
+    url: 'https://jobinjia.com/',
+  },
+
   themeConfig: {
     colors: {
       primary: '#8B4513',
