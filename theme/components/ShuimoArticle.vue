@@ -51,12 +51,6 @@ const frontmatter = computed(() => route.meta.frontmatter as any)
     </div>
 
     <!-- 上/下篇导航 -->
-    <ShuimoBrushLine
-      variant="light"
-      :length="300"
-      :width="1"
-      class="shuimo-article__nav-line"
-    />
     <nav class="shuimo-article__nav">
       <router-link
         v-if="prev"
