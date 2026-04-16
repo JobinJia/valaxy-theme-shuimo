@@ -129,6 +129,10 @@ pnpm typecheck
 pnpm build
 ```
 
+## 致谢 / Credits
+
+- [shan-shui-inf](https://github.com/LingDong-/shan-shui-inf) — 山水画生成算法参考
+
 ## License
 
 MIT
