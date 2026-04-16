@@ -6,6 +6,12 @@
 
 An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/valaxy). Xuan paper textures, brush strokes, seal stamps, and seasonal decorations.
 
+## 预览 / Preview
+
+| Light | Dark |
+|-------|------|
+| ![Light Mode](./screenshots/preview-light.png) | ![Dark Mode](./screenshots/preview-dark.png) |
+
 ## 特性 / Features
 
 - 宣纸背景纹理（支持 processed / aged / gold 变体）
