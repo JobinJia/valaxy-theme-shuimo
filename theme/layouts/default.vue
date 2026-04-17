@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useGoBack } from '../composables'
+import { useGoBack, useThemeCssVars } from '../composables'
 
 const { goBack } = useGoBack()
+const themeCssVars = useThemeCssVars()
 
 const route = useRoute()
 
@@ -32,23 +33,29 @@ const pageType = computed(() => {
   </ShuimoLayout>
 
   <!-- 关于页：不带标题/副标题 -->
-  <div v-else-if="pageType === 'about'" class="shuimo-page">
+  <div v-else-if="pageType === 'about'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
-    <ShuimoAboutPage>
-      <RouterView />
-    </ShuimoAboutPage>
+    <ShuimoXuanPaper class="shuimo-page__paper">
+      <ShuimoAboutPage>
+        <RouterView />
+      </ShuimoAboutPage>
+    </ShuimoXuanPaper>
   </div>
 
   <!-- 归档页：不带标题/副标题 -->
-  <div v-else-if="pageType === 'archives'" class="shuimo-page">
+  <div v-else-if="pageType === 'archives'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
-    <ShuimoArchivesPage />
+    <ShuimoXuanPaper class="shuimo-page__paper">
+      <ShuimoArchivesPage />
+    </ShuimoXuanPaper>
   </div>
 
   <!-- 分类/标签页：不带标题/副标题 -->
-  <div v-else-if="pageType === 'cat-tag'" class="shuimo-page">
+  <div v-else-if="pageType === 'cat-tag'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
-    <RouterView />
+    <ShuimoXuanPaper class="shuimo-page__paper">
+      <RouterView />
+    </ShuimoXuanPaper>
   </div>
 
   <!-- 其他页面 -->
@@ -67,6 +74,10 @@ const pageType = computed(() => {
   min-height: 100vh;
   background: var(--sm-paper);
   color: var(--sm-ink-dark);
+}
+
+.shuimo-page__paper {
+  min-height: 100vh;
 }
 
 .shuimo-page--plain {

@@ -10,11 +10,13 @@ export default defineConfig<ThemeConfig>({
 
   themeConfig: {
     colors: {
-      primary: '#8B4513',
-      stamp: '#C8102E',
+      primary: '#FF00AA',
+      stamp: '#D4A017',
     },
 
     fonts: {
+      serif: '"Songti SC", "Noto Serif SC", serif',
+      body: '"PingFang SC", "Noto Serif SC", serif',
       title: 'YiShanBeiZhuan',
     },
 
@@ -27,16 +29,22 @@ export default defineConfig<ThemeConfig>({
       {
         text: '栖墨斋',
         link: '/archives',
+        icon: 'i-ant-design-book-outlined',
       },
       {
         text: '暗香阁',
         link: '/about',
+        icon: 'i-ant-design-user-outlined',
       },
     ],
 
     footer: {
-      since: 2026,
+      since: 2020,
       powered: true,
+      beian: {
+        enable: true,
+        icp: '沪ICP备20260000号-1',
+      },
     },
 
     sidebar: {
@@ -44,7 +52,11 @@ export default defineConfig<ThemeConfig>({
         name: '月牙',
         motto: '落梅听风雪，隔窗枕雨眠',
         avatar: '/assets/images/yueya.jpg',
+        stamp: '听雨',
       },
+      showCategories: true,
+      showTags: true,
+      showRecent: true,
     },
 
     stamp: {
@@ -52,6 +64,22 @@ export default defineConfig<ThemeConfig>({
       author: '隔窗,听雨',
       type: 'yin',
       shape: 'ellipse',
+    },
+
+    decorations: {
+      enable: true,
+      seasonAware: false,
+      heroLandscape: true,
+      opacity: 0.22,
+    },
+
+    xuanPaper: {
+      enable: true,
+      variant: 'gold',
+    },
+
+    brushStrokes: {
+      enable: true,
     },
   },
 })

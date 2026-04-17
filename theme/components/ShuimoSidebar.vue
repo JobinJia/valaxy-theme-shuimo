@@ -27,8 +27,9 @@ const recentPosts = computed(() => {
     <!-- 印章头像 -->
     <div class="shuimo-sidebar__author">
       <ShuimoStamp
-        :text="themeConfig?.stamp?.author || themeConfig?.sidebar?.author?.name || '墨'"
+        :text="themeConfig?.sidebar?.author?.stamp || themeConfig?.stamp?.author || themeConfig?.sidebar?.author?.name || '墨'"
         :type="themeConfig?.stamp?.type || 'yin'"
+        :shape="themeConfig?.stamp?.shape || 'auto'"
         class="shuimo-sidebar__stamp"
       />
       <div class="shuimo-sidebar__author-name">

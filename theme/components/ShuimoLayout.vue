@@ -2,15 +2,17 @@
 import { useHead } from '@unhead/vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { provideBlankSide, useThemeConfig } from '../composables'
+import { provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
 
-const props = defineProps<{
+defineProps<{
   verticalNav?: boolean
 }>()
 
 const themeConfig = useThemeConfig()
+const themeCssVars = useThemeCssVars()
 const { blankSide } = provideBlankSide()
-const revealed = ref(false)
+const heroLandscapeEnabled = computed(() => themeConfig.value?.decorations?.heroLandscape !== false)
+const revealed = ref(!heroLandscapeEnabled.value)
 const route = useRoute()
 
 // 加载外部字体
@@ -25,8 +27,17 @@ function onLandscapeReady() {
   })
 }
 
+watch(heroLandscapeEnabled, (enabled) => {
+  if (!enabled)
+    revealed.value = true
+})
+
 // 路由切换时重新播放幕布动画：先合拢，再展开
 watch(() => route.path, () => {
+  if (!heroLandscapeEnabled.value) {
+    revealed.value = true
+    return
+  }
   revealed.value = false
   // 等幕布合拢完成（0.5s）后再展开
   setTimeout(() => {
@@ -36,22 +47,24 @@ watch(() => route.path, () => {
 </script>
 
 <template>
-  <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]">
+  <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]" :style="themeCssVars">
     <ShuimoThemeToggle />
-    <ShuimoHeroLandscape @ready="onLandscapeReady" />
+    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="revealed" />
 
     <div class="shuimo-app__paper">
-      <!-- 竖排模式下桌面端隐藏 header，移动端仍显示 -->
-      <ShuimoHeader :class="{ 'shuimo-header--hidden-desktop': verticalNav }" />
+      <ShuimoXuanPaper class="shuimo-app__paper-surface">
+        <!-- 竖排模式下桌面端隐藏 header，移动端仍显示 -->
+        <ShuimoHeader :class="{ 'shuimo-header--hidden-desktop': verticalNav }" />
 
-      <slot>
-        <router-view />
-      </slot>
+        <slot>
+          <router-view />
+        </slot>
 
-      <ShuimoHelper />
+        <ShuimoHelper />
+      </ShuimoXuanPaper>
     </div>
 
     <!-- Footer 独立于 paper，始终全宽居中贴底 -->
@@ -60,8 +73,8 @@ watch(() => route.path, () => {
     </footer>
 
     <!-- 开屏幕布 -->
-    <div class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" />
-    <div class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" />
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" />
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" />
   </div>
 </template>
 
@@ -76,9 +89,13 @@ watch(() => route.path, () => {
     position: relative;
     z-index: 1;
     flex: 1;
+    background-color: var(--sm-paper-overlay);
+  }
+
+  &__paper-surface {
+    min-height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--sm-paper-overlay);
   }
 
   &__footer {

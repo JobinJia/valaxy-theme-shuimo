@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useThemeConfig } from '../composables'
+import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 
 const props = withDefaults(defineProps<{
   text?: string
@@ -17,6 +19,7 @@ const props = withDefaults(defineProps<{
 
 const stampSvg = ref<string | null>(null)
 const hasShuimoCore = ref(false)
+const themeConfig = useThemeConfig()
 
 onMounted(async () => {
   try {
@@ -30,10 +33,13 @@ onMounted(async () => {
       : props.text.includes(',') || props.text.includes('，')
         ? props.text.split(/[,，]/).map(s => s.trim())
         : [props.text]
+    const stampColor = themeConfig.value?.colors?.stamp || '#C8102E'
     const result = await generateStampAsync({
       text: textArray,
       type: props.type,
       shape: props.shape,
+      color: stampColor,
+      textColor: props.type === 'yin' ? '#FFFFFF' : stampColor,
       fontFamily: props.fontFamily,
       width: props.size * 2,
       height: props.size * 2,
@@ -46,8 +52,16 @@ onMounted(async () => {
       stampSvg.value = `<img src="${result.toDataURL()}" width="100%" height="100%" />`
     }
   }
-  catch {
+  catch (err) {
     hasShuimoCore.value = false
+    if (import.meta.env.DEV && !warnMissingShuimoCore.fired) {
+      warnMissingShuimoCore.fired = true
+      console.warn(
+        '[valaxy-theme-shuimo] ShuimoStamp fallback in use. '
+        + 'Install the optional peer dependency "@jobinjia/shuimo-core" to render SVG stamps.',
+        err,
+      )
+    }
   }
 })
 </script>
@@ -116,4 +130,3 @@ onMounted(async () => {
   }
 }
 </style>
-

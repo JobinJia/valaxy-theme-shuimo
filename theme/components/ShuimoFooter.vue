@@ -5,15 +5,24 @@ import { useThemeConfig } from '../composables'
 const themeConfig = useThemeConfig()
 
 const year = new Date().getFullYear()
+const since = computed(() => themeConfig.value?.footer?.since)
 const powered = computed(() => themeConfig.value?.footer?.powered !== false)
 const beian = computed(() => themeConfig.value?.footer?.beian)
 const siteName = computed(() => themeConfig.value?.header?.title || '')
+const copyrightYears = computed(() => {
+  const start = since.value
+
+  if (!start || start >= year)
+    return String(year)
+
+  return `${start}-${year}`
+})
 </script>
 
 <template>
   <footer class="shuimo-footer">
     <div class="shuimo-footer__content">
-      <span>&copy;{{ year }}</span>
+      <span>&copy;{{ copyrightYears }}</span>
       <span v-if="siteName"> {{ siteName }}</span>
     </div>
     <div v-if="powered" class="shuimo-footer__powered">

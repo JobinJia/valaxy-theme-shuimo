@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useThemeConfig } from '../composables/config'
 import { generateCached } from '../composables/useShuimoCache'
 import { scheduleShuimoTask } from '../composables/useShuimoScheduler'
@@ -18,7 +18,6 @@ const props = withDefaults(defineProps<{
   type: 'season',
   position: 'bottom-right',
   size: 'sm',
-  opacity: 0.12,
   name: 'decoration',
 })
 
@@ -26,6 +25,7 @@ const themeConfig = useThemeConfig()
 const svgContent = ref<string | null>(null)
 const loaded = ref(false)
 const seed = useComponentSeed(props.name)
+const resolvedOpacity = computed(() => props.opacity ?? themeConfig.value?.decorations?.opacity ?? 0.12)
 
 // 尺寸映射
 const sizeMap = {
@@ -38,8 +38,11 @@ const dimensions = sizeMap[props.size]
 
 // 解析实际的装饰类型（season 会根据季节自动选择）
 function resolveType(): Exclude<DecorationType, 'season'> {
-  if (props.type === 'season')
+  if (props.type === 'season') {
+    if (themeConfig.value?.decorations?.seasonAware === false)
+      return 'plum'
     return getSeasonFlora()
+  }
   return props.type
 }
 
@@ -96,7 +99,7 @@ onMounted(async () => {
     v-if="loaded && svgContent"
     class="shuimo-decoration"
     :class="[`shuimo-decoration--${position}`]"
-    :style="{ opacity }"
+    :style="{ opacity: resolvedOpacity }"
   >
     <svg
       :width="dimensions.w"

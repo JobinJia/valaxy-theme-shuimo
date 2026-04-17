@@ -3,13 +3,13 @@ import { useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
 import { useBlankSide, useThemeConfig } from '../composables'
 
-const themeConfig = useThemeConfig()
-const siteConfig = useSiteConfig()
-const { blankSide } = useBlankSide()
-
 defineProps<{
   revealed?: boolean
 }>()
+
+const themeConfig = useThemeConfig()
+const siteConfig = useSiteConfig()
+const { blankSide } = useBlankSide()
 
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 
@@ -61,6 +61,7 @@ const subtitleParts = computed(() => {
           :to="item.link"
           class="shuimo-vnav__link-stamp shuimo-vnav__link-stamp--mobile"
         >
+          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
             type="yang"
@@ -76,6 +77,7 @@ const subtitleParts = computed(() => {
           rel="noopener noreferrer"
           class="shuimo-vnav__link-stamp shuimo-vnav__link-stamp--mobile"
         >
+          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
             type="yang"
@@ -108,6 +110,7 @@ const subtitleParts = computed(() => {
           :to="item.link"
           class="shuimo-vnav__link-stamp"
         >
+          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
             type="yang"
@@ -123,6 +126,7 @@ const subtitleParts = computed(() => {
           rel="noopener noreferrer"
           class="shuimo-vnav__link-stamp"
         >
+          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
             type="yang"
@@ -174,7 +178,10 @@ const subtitleParts = computed(() => {
   }
 
   // 所有可交互子元素恢复点击
-  a, button, :deep(.shuimo-stamp), &__avatar-link {
+  a,
+  button,
+  :deep(.shuimo-stamp),
+  &__avatar-link {
     pointer-events: auto;
   }
 
@@ -229,6 +236,10 @@ const subtitleParts = computed(() => {
   }
 
   &__link-stamp {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
     writing-mode: horizontal-tb !important; // 印章不竖排
     text-decoration: none;
     transition: opacity 0.2s;
@@ -241,6 +252,12 @@ const subtitleParts = computed(() => {
     &--mobile {
       display: none;
     }
+  }
+
+  &__link-icon {
+    font-size: 15px;
+    color: var(--sm-ink-medium);
+    opacity: 0.8;
   }
 }
 
@@ -286,6 +303,10 @@ const subtitleParts = computed(() => {
     // 移动端显示内嵌的菜单印章
     &__link-stamp--mobile {
       display: block;
+    }
+
+    &__link-icon {
+      font-size: 13px;
     }
   }
 }

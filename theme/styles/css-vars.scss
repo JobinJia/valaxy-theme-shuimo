@@ -32,6 +32,7 @@ html.dark {
   --sm-font-kai: "楷体", "KaiTi", "STKaiti", serif;
 
   // 主色 rgba 衍生（用于 border/dot/selection 等半透明场景）
+  // 这里是 SSR/未配置时的默认值，运行时由 useThemeCssVars 根据 colors.primary 动态覆盖
   --sm-primary-faint: rgba(139, 69, 19, 0.1);
   --sm-primary-light: rgba(139, 69, 19, 0.15);
   --sm-primary-medium: rgba(139, 69, 19, 0.3);
@@ -71,8 +72,6 @@ html.dark {
   --sm-c-border: rgba(200, 190, 170, 0.15);
   --sm-c-border-medium: rgba(200, 190, 170, 0.25);
 
-  // 主色衍生（暗色模式）
-  --sm-primary-faint: rgba(184, 120, 74, 0.1);
-  --sm-primary-light: rgba(184, 120, 74, 0.15);
-  --sm-primary-medium: rgba(184, 120, 74, 0.3);
+  // 主色衍生由 useThemeCssVars 根据 colors.primary 动态注入，
+  // 不在此处硬编码覆盖，避免与用户配置冲突。
 }

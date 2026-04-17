@@ -35,6 +35,7 @@ const themeConfig = useThemeConfig()
           :to="item.link"
           class="shuimo-header__nav-item"
         >
+          <span v-if="item.icon" class="shuimo-header__nav-icon" :class="item.icon" aria-hidden="true" />
           {{ item.text }}
         </router-link>
         <a
@@ -44,6 +45,7 @@ const themeConfig = useThemeConfig()
           rel="noopener noreferrer"
           class="shuimo-header__nav-item"
         >
+          <span v-if="item.icon" class="shuimo-header__nav-icon" :class="item.icon" aria-hidden="true" />
           {{ item.text }}
         </a>
       </template>
@@ -95,6 +97,9 @@ const themeConfig = useThemeConfig()
   }
 
   &__nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     color: var(--sm-ink-medium);
     text-decoration: none;
     transition: color 0.2s;
@@ -103,6 +108,11 @@ const themeConfig = useThemeConfig()
     &.router-link-active {
       color: var(--sm-accent);
     }
+  }
+
+  &__nav-icon {
+    font-size: 1em;
+    opacity: 0.8;
   }
 }
 

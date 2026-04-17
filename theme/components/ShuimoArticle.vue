@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { usePostTitle, usePrevNext } from 'valaxy'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeConfig } from '../composables'
 
@@ -46,6 +46,7 @@ const frontmatter = computed(() => route.meta.frontmatter as any)
       <ShuimoStamp
         :text="themeConfig?.stamp?.author || '墨'"
         :type="themeConfig?.stamp?.type || 'yin'"
+        :shape="themeConfig?.stamp?.shape || 'auto'"
         :size="40"
       />
     </div>
