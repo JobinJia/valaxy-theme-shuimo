@@ -52,3 +52,44 @@
 - 开始 `P0-2` 初步审查，当前确认：
   - `theme/layouts/post.vue` 是实际文章页主入口
   - `theme/components/ShuimoArticle.vue` 当前未被引用，更像历史遗留实现
+- 继续补齐首页视觉能力：
+  - 首页幕布与首页底纸都已接入宣纸纹理
+  - 新增 `decorations.curtainPaperColor`
+  - 幕布与宣纸已支持亮/暗模式分色配置
+  - 首页印章支持 `offsetX` 偏移，便于微调视觉重心
+- 重新核对代码与 planning 后确认：
+  - `useXuanPaperTexture.ts` 已支持 `isDark`
+  - 近期首页相关改动未破坏 `pnpm build`
+  - `README` 对 `curtainColor / curtainPaperColor` 的类型说明仍落后于实现
+  - `package.json` 仍无 `test` 脚本，仓库中仍无测试文件
+- 当前下一步优先级维持不变：
+  - 主线仍是 `P0-2 文章页渲染收敛`
+  - 其后进入 `P0-3 最小验证闭环`
+- `P0-2 文章页渲染收敛` 已完成：
+  - 将落款印章（受 `stamp.*` 配置控制）与上一篇/下一篇导航（`usePrevNext`）从历史组件回收进 `theme/layouts/post.vue`
+  - 删除未被引用的 `theme/components/ShuimoArticle.vue`
+  - `pnpm build` 通过；`theme/layouts/post.vue` 局部 `eslint` 通过
+  - 更新 `planning/config-support-matrix.md` 中 `stamp.*` 的实现位置
+- `P0-3 最小验证闭环` 已完成：
+  - 根 `package.json` 补齐 `test` / `test:watch` 脚本（底层 vitest）
+  - 新增 `theme/node/index.test.ts`：
+    - `defaultThemeConfig` 关键不变量（颜色、印章、装饰、宣纸、笔触、footer、nav）
+    - `generateSafelist` 行为（空、缺失、图标提取、无图标过滤）
+  - `pnpm test` 本地一次通过，共 9 个用例
+  - 发布前最小回归链路：`pnpm lint` + `pnpm typecheck` + `pnpm build` + `pnpm test`
+- README `ThemeModeColor` 漂移已补齐：
+  - `decorations.curtainColor` / `decorations.curtainPaperColor` 在配置表中由 `string` 更正为 `ThemeModeColor`
+  - 新增 `ThemeModeColor` 小节，说明字符串与 `{ light, dark }` 两种写法并附示例
+- `P1-1 首页性能治理` 已完成：
+  - `ShuimoLayout` 新增 `heroLandscape` prop（默认 false），同时把开屏幕布、幕布 onMounted 准备和路由切换重播一起关进这个开关
+  - `home.vue` 与 `default.vue`（home 分支）显式传 `hero-landscape`
+  - post / 404 / default-other 不再挂山水与开屏幕布
+  - `ShuimoHeroLandscape` 的场景生成改由 `scheduleShuimoTask` 调度执行
+  - 新增会话级场景缓存：按 `{ W, H }` 命中，`setBlankSide` 从缓存结果显式应用，生成器不再有副作用
+  - `pnpm build` / `pnpm test` 均通过；改动文件本身 lint 干净（`ShuimoHeroLandscape.vue` 内 SCSS 月亮样式有 4 个 pre-existing `format/prettier` 报错，不在本轮范围）
+- README 与运行时的三处"承诺但不可达"已收敛：
+  - **Drift #1 ShuimoSidebar**：删除 `theme/components/ShuimoSidebar.vue`；同步移除 types / 默认配置 / demo / README 里只在死组件中被读的 4 个字段（`sidebar.author.stamp`、`sidebar.showCategories/showTags/showRecent`）。保留 `sidebar.author.{name,motto,avatar}`。
+  - **Drift #2 i18n**：`post.vue` / `default.vue` / `404.vue` 都通过 `useI18n()` 路由 `shuimo.prev_post` / `next_post` / `back`。README Feature 条目改写为"UI 基础文案随语言切换；主题其余文案仍以中文书写"。
+  - **Drift #3 四季装饰**：`default.vue` 的 about / 归档 / 分类标签三个分支挂 `<ShuimoDecoration type="season" ... />`，并给 `.shuimo-page` 补 `position: relative; overflow: hidden`。这让 `decorations.enable` / `decorations.seasonAware` / `decorations.opacity` 也随之真正作用到浏览页面。
+  - `pnpm build` / `pnpm test`（9 用例）通过，改动文件 lint 干净。
+- 下一步切入 `P1-2 动效降级与可访问性`

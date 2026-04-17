@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import { usePrevNext } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useThemeConfig } from '../composables'
 
+const { t } = useI18n()
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
+const stampConfig = computed(() => themeConfig.value?.stamp)
 const route = useRoute()
 const router = useRouter()
 const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
+const [prev, next] = usePrevNext()
 
 function goBack() {
   if (window.history.length > 1)
@@ -44,9 +49,40 @@ function goBack() {
         <RouterView />
       </article>
 
+      <!-- 落款印章 -->
+      <div v-if="stampConfig?.enable !== false" class="shuimo-post-page__stamp">
+        <ShuimoStamp
+          :text="stampConfig?.author || '墨'"
+          :type="stampConfig?.type || 'yin'"
+          :shape="stampConfig?.shape || 'auto'"
+          :size="40"
+        />
+      </div>
+
+      <!-- 上一篇 / 下一篇 -->
+      <nav v-if="prev || next" class="shuimo-post-page__nav">
+        <router-link
+          v-if="prev"
+          :to="prev.path || ''"
+          class="shuimo-post-page__nav-item shuimo-post-page__nav-prev"
+        >
+          <span class="shuimo-post-page__nav-label">{{ t('shuimo.prev_post') }}</span>
+          <span class="shuimo-post-page__nav-title">{{ prev.title }}</span>
+        </router-link>
+        <span v-else />
+        <router-link
+          v-if="next"
+          :to="next.path || ''"
+          class="shuimo-post-page__nav-item shuimo-post-page__nav-next"
+        >
+          <span class="shuimo-post-page__nav-label">{{ t('shuimo.next_post') }}</span>
+          <span class="shuimo-post-page__nav-title">{{ next.title }}</span>
+        </router-link>
+      </nav>
+
       <!-- 返回上一页 -->
       <a href="#" class="shuimo-post-page__back" @click.prevent="goBack">
-        归去来兮 ←
+        {{ t('shuimo.back') }} ←
       </a>
     </div>
   </ShuimoLayout>
@@ -134,7 +170,9 @@ function goBack() {
       color: var(--sm-ink-light);
       font-style: italic;
 
-      p { text-indent: 0; }
+      p {
+        text-indent: 0;
+      }
     }
 
     :deep(img) {
@@ -172,8 +210,52 @@ function goBack() {
     :deep(a) {
       color: var(--sm-accent);
       text-decoration: none;
-      &:hover { text-decoration: underline; }
+      &:hover {
+        text-decoration: underline;
+      }
     }
+  }
+
+  &__stamp {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+  }
+
+  &__nav {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  &__nav-item {
+    text-decoration: none;
+    max-width: 45%;
+  }
+
+  &__nav-label {
+    display: block;
+    font-size: 10px;
+    color: var(--sm-ink-light);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  &__nav-title {
+    font-size: 13px;
+    color: var(--sm-ink-medium);
+    transition: color 0.2s;
+  }
+
+  &__nav-item:hover &__nav-title {
+    color: var(--sm-accent);
+  }
+
+  &__nav-next {
+    text-align: right;
   }
 
   &__back {
@@ -265,12 +347,14 @@ function goBack() {
         display: block;
         overflow-x: auto;
 
-        th, td {
+        th,
+        td {
           padding: 6px 8px;
         }
       }
 
-      :deep(ul), :deep(ol) {
+      :deep(ul),
+      :deep(ol) {
         padding-left: 1.5em;
       }
 

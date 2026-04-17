@@ -1,6 +1,6 @@
 <template>
   <ShuimoClickPetals />
-  <ShuimoLayout vertical-nav>
+  <ShuimoLayout vertical-nav hero-landscape>
     <RouterView />
   </ShuimoLayout>
 </template>

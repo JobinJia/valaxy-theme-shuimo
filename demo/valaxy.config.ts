@@ -52,11 +52,7 @@ export default defineConfig<ThemeConfig>({
         name: '月牙',
         motto: '落梅听风雪，隔窗枕雨眠',
         avatar: '/assets/images/yueya.jpg',
-        stamp: '听雨',
       },
-      showCategories: true,
-      showTags: true,
-      showRecent: true,
     },
 
     stamp: {

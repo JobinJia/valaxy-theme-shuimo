@@ -54,12 +54,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
     author: {
       name: string
       motto: string
-      stamp?: string
       avatar?: string
     }
-    showCategories: boolean
-    showTags: boolean
-    showRecent: boolean
   }>
 
   nav: NavItem[]

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useGoBack, useThemeCssVars } from '../composables'
 
+const { t } = useI18n()
 const { goBack } = useGoBack()
 const themeCssVars = useThemeCssVars()
 
@@ -26,7 +28,7 @@ const pageType = computed(() => {
   <ShuimoClickPetals />
 
   <!-- 首页：山水画 + 竖排导航 -->
-  <ShuimoLayout v-if="pageType === 'home'" vertical-nav>
+  <ShuimoLayout v-if="pageType === 'home'" vertical-nav hero-landscape>
     <slot>
       <RouterView />
     </slot>
@@ -40,6 +42,7 @@ const pageType = computed(() => {
         <RouterView />
       </ShuimoAboutPage>
     </ShuimoXuanPaper>
+    <ShuimoDecoration type="season" position="bottom-right" size="md" name="about-season" />
   </div>
 
   <!-- 归档页：不带标题/副标题 -->
@@ -48,6 +51,7 @@ const pageType = computed(() => {
     <ShuimoXuanPaper class="shuimo-page__paper">
       <ShuimoArchivesPage />
     </ShuimoXuanPaper>
+    <ShuimoDecoration type="season" position="bottom-right" size="md" name="archives-season" />
   </div>
 
   <!-- 分类/标签页：不带标题/副标题 -->
@@ -56,6 +60,7 @@ const pageType = computed(() => {
     <ShuimoXuanPaper class="shuimo-page__paper">
       <RouterView />
     </ShuimoXuanPaper>
+    <ShuimoDecoration type="season" position="bottom-right" size="md" name="cat-tag-season" />
   </div>
 
   <!-- 其他页面 -->
@@ -63,7 +68,7 @@ const pageType = computed(() => {
     <div class="shuimo-page--plain">
       <RouterView />
       <a href="#" class="shuimo-page__back" @click.prevent="goBack">
-        归去来兮 ←
+        {{ t('shuimo.back') }} ←
       </a>
     </div>
   </ShuimoLayout>
@@ -74,6 +79,8 @@ const pageType = computed(() => {
   min-height: 100vh;
   background: var(--sm-paper);
   color: var(--sm-ink-dark);
+  position: relative;
+  overflow: hidden;
 }
 
 .shuimo-page__paper {

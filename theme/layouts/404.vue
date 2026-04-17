@@ -1,6 +1,8 @@
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+const { t } = useI18n()
 const router = useRouter()
 </script>
 
@@ -28,7 +30,7 @@ const router = useRouter()
       </p>
       <RouterView />
       <button class="shuimo-404__btn" @click="router.back()">
-        归去来兮 ←
+        {{ t('shuimo.back') }} ←
       </button>
     </div>
   </ShuimoLayout>

@@ -7,9 +7,13 @@ import { useRoute } from 'vue-router'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
 import { generateXuanPaperTexture, provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   verticalNav?: boolean
-}>()
+  heroLandscape?: boolean
+}>(), {
+  verticalNav: false,
+  heroLandscape: false,
+})
 
 function resolveModeColor(value: ThemeModeColor | undefined, dark: boolean): string | undefined {
   if (!value)
@@ -23,7 +27,9 @@ const themeConfig = useThemeConfig()
 const themeCssVars = useThemeCssVars()
 const { isDark } = useValaxyDark()
 const { blankSide } = provideBlankSide()
-const heroLandscapeEnabled = computed(() => themeConfig.value?.decorations?.heroLandscape !== false)
+const heroLandscapeEnabled = computed(() =>
+  props.heroLandscape && themeConfig.value?.decorations?.heroLandscape !== false,
+)
 const curtainStampText = computed(() => themeConfig.value?.stamp?.author || '墨')
 const curtainStampType = computed(() => themeConfig.value?.stamp?.type || 'yin')
 const curtainStampShape = computed(() => themeConfig.value?.stamp?.shape || 'auto')
@@ -110,19 +116,24 @@ function onLandscapeReady() {
 }
 
 onMounted(() => {
+  if (!heroLandscapeEnabled.value)
+    return
   ensureCurtainStampFontReady()
   ensureCurtainPaperReady()
 })
 
-// 暗色模式切换时同步幕布纸纹：暗色清空，亮色重新生成
-watch(isDark, ensureCurtainPaperReady)
+// 暗色模式切换时同步幕布纸纹：仅在本页启用了幕布时才需要
+watch(isDark, () => {
+  if (heroLandscapeEnabled.value)
+    ensureCurtainPaperReady()
+})
 
 watch(heroLandscapeEnabled, (enabled) => {
   if (!enabled)
     revealed.value = true
 })
 
-// 路由切换时重新播放幕布动画：先合拢，再展开
+// 路由切换时重新播放幕布动画：仅在本页启用了幕布时生效
 watch(() => route.path, () => {
   if (!heroLandscapeEnabled.value) {
     revealed.value = true

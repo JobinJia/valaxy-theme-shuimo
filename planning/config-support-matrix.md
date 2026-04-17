@@ -17,25 +17,21 @@
 | `footer.powered` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoFooter.vue` | 可开关 |
 | `footer.beian.enable` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoFooter.vue` | 可开关 |
 | `footer.beian.icp` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoFooter.vue` | 可显示备案号 |
-| `sidebar.author.name` | `theme/node/index.ts` | 已实现 | Sidebar / VerticalNav / About / 分类标签页 | 正常生效 |
-| `sidebar.author.motto` | `theme/node/index.ts` | 已实现 | Sidebar / About 等 | 正常生效 |
-| `sidebar.author.avatar` | 用户配置 | 已实现 | Sidebar / VerticalNav / post 布局 | 正常生效 |
-| `sidebar.author.stamp` | README / 类型声明 | 已实现 | `theme/components/ShuimoSidebar.vue` | 已优先作为侧边栏印章文案来源 |
-| `sidebar.showCategories` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoSidebar.vue` | 可开关 |
-| `sidebar.showTags` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoSidebar.vue` | 可开关 |
-| `sidebar.showRecent` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoSidebar.vue` | 可开关 |
+| `sidebar.author.name` | `theme/node/index.ts` | 已实现 | About / 归档 / 分类 / 标签 / VerticalNav / post 布局 | 正常生效 |
+| `sidebar.author.motto` | `theme/node/index.ts` | 已实现 | About 页 | 正常生效 |
+| `sidebar.author.avatar` | 用户配置 | 已实现 | 归档 / 分类 / 标签 / VerticalNav / post 布局 | 头像回首页链接 |
 | `nav[].text` | 用户配置 | 已实现 | Header / VerticalNav | 正常生效 |
 | `nav[].link` | 用户配置 | 已实现 | Header / VerticalNav | 正常生效 |
 | `nav[].icon` | 用户配置 | 已实现 | Header / VerticalNav + Uno safelist | 图标已在横向导航与首页竖排导航中渲染 |
-| `stamp.enable` | `theme/node/index.ts` | 已实现 | Article / VerticalNav 等 | 可开关 |
-| `stamp.author` | `theme/node/index.ts` | 已实现 | Sidebar / Article / VerticalNav | 正常生效 |
-| `stamp.type` | `theme/node/index.ts` | 已实现 | Sidebar / Article / VerticalNav | 正常生效 |
-| `stamp.shape` | README / 类型声明 | 已实现 | Sidebar / Article / About / VerticalNav | 主题主要印章场景已统一透传 |
+| `stamp.enable` | `theme/node/index.ts` | 已实现 | `theme/layouts/post.vue` / VerticalNav 等 | 可开关 |
+| `stamp.author` | `theme/node/index.ts` | 已实现 | Sidebar / `theme/layouts/post.vue` / VerticalNav | 正常生效 |
+| `stamp.type` | `theme/node/index.ts` | 已实现 | Sidebar / `theme/layouts/post.vue` / VerticalNav | 正常生效 |
+| `stamp.shape` | README / 类型声明 | 已实现 | Sidebar / `theme/layouts/post.vue` / About / VerticalNav | 主题主要印章场景已统一透传 |
 | `decorations.enable` | `theme/node/index.ts` | 部分实现 | `theme/components/ShuimoDecoration.vue` | 组件支持，但需确认页面是否稳定挂载 |
 | `decorations.seasonAware` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoDecoration.vue` | 关闭后回退到固定 `plum` 装饰，不再自动切季 |
 | `decorations.heroLandscape` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页山水与幕布动画已受配置开关控制 |
-| `decorations.curtainColor` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页幕布颜色可单独配置 |
-| `decorations.curtainPaperColor` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页幕布宣纸底色可单独配置 |
+| `decorations.curtainColor` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页幕布颜色可单独配置，并支持 `{ light, dark }` |
+| `decorations.curtainPaperColor` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页幕布宣纸底色可单独配置，并支持 `{ light, dark }` |
 | `decorations.opacity` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoDecoration.vue` | 未显式传入 `opacity` 时回落到主题配置 |
 | `xuanPaper.enable` | `theme/node/index.ts` | 已实现 | `ShuimoLayout` / `default` 布局 + `ShuimoXuanPaper` | 可关闭主题宣纸纹理 |
 | `xuanPaper.variant` | `theme/node/index.ts` | 已实现 | `ShuimoLayout` / `default` 布局 + `ShuimoXuanPaper` | 可切换纸张变体 |
@@ -46,6 +42,7 @@
 ### 当前剩余说明
 
 - `decorations.enable` 仍属于“组件已支持，页面使用面有待继续扩展”的状态，但不影响 `P0-1` 的配置兑现目标。
+- `README` 中 `decorations.curtainColor` / `decorations.curtainPaperColor` 已更新为 `ThemeModeColor`，并新增 `ThemeModeColor` 小节说明两种写法，文档与类型一致。
 
 ## 结论
 

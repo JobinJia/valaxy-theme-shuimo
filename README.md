@@ -20,7 +20,7 @@ An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/
 - 四季花卉装饰自动切换
 - 首页山水画英雄区
 - 深色模式支持
-- 国际化（中文 / English）
+- i18n：UI 基础文案（上一篇/下一篇/返回）随 `zh-CN` / `en` 自动切换；主题其余文案（站名、副标题、印章、装饰性 copy）仍以中文书写
 - 内置峄山碑篆书字体
 
 ## 安装 / Install
@@ -90,13 +90,9 @@ export default defineConfig<ThemeConfig>({
 | `footer.powered` | `boolean` | `true` | 显示 Valaxy 驱动标识 |
 | `footer.beian.enable` | `boolean` | `false` | 启用备案号 |
 | `footer.beian.icp` | `string` | `''` | ICP 备案号 |
-| `sidebar.author.name` | `string` | `'墨客'` | 作者名 |
+| `sidebar.author.name` | `string` | `'墨客'` | 作者名（About / 归档 / 分类 / 首页竖排导航 / 文章页均会读取） |
 | `sidebar.author.motto` | `string` | `'以码为墨，以屏为纸'` | 座右铭 |
-| `sidebar.author.avatar` | `string` | - | 头像路径 |
-| `sidebar.author.stamp` | `string` | - | 侧边栏印章文字 |
-| `sidebar.showCategories` | `boolean` | `true` | 显示分类 |
-| `sidebar.showTags` | `boolean` | `true` | 显示标签 |
-| `sidebar.showRecent` | `boolean` | `true` | 显示近作 |
+| `sidebar.author.avatar` | `string` | - | 头像路径（首页竖排导航、文章页左上角使用） |
 | `nav` | `NavItem[]` | `[]` | 导航项 `{ text, link, icon? }` |
 | `stamp.enable` | `boolean` | `true` | 启用印章 |
 | `stamp.author` | `string` | `'墨'` | 印章文字 |
@@ -105,12 +101,34 @@ export default defineConfig<ThemeConfig>({
 | `decorations.enable` | `boolean` | `true` | 启用装饰 |
 | `decorations.seasonAware` | `boolean` | `true` | 四季花卉自动切换 |
 | `decorations.heroLandscape` | `boolean` | `true` | 首页山水画 |
-| `decorations.curtainColor` | `string` | `''` | 首页幕布颜色，默认跟随纸张底色 |
-| `decorations.curtainPaperColor` | `string` | `''` | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant` |
+| `decorations.curtainColor` | `ThemeModeColor` | `''` | 首页幕布颜色，默认跟随纸张底色；支持 `string` 或 `{ light, dark }` |
+| `decorations.curtainPaperColor` | `ThemeModeColor` | `''` | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant`；支持 `string` 或 `{ light, dark }` |
 | `decorations.opacity` | `number` | `0.12` | 装饰透明度 |
 | `xuanPaper.enable` | `boolean` | `true` | 启用宣纸纹理 |
 | `xuanPaper.variant` | `'processed' \| 'aged' \| 'gold'` | `'processed'` | 纸张变体 |
 | `brushStrokes.enable` | `boolean` | `true` | 启用毛笔线条 |
+
+### `ThemeModeColor`
+
+部分颜色配置（如 `decorations.curtainColor` / `decorations.curtainPaperColor`）支持按亮/暗模式分别指定：
+
+```ts
+type ThemeModeColor = string | { light?: string, dark?: string }
+```
+
+- 传字符串：亮暗模式共用同一个值
+- 传对象：可只写 `light` 或 `dark`，未指定的一侧走主题内置默认值
+
+```ts
+themeConfig: {
+  decorations: {
+    // 单值写法
+    curtainColor: '#E8D7A5',
+    // 分模式写法
+    curtainPaperColor: { light: '#E8D7A5', dark: '#1D2230' },
+  },
+}
+```
 
 ## 开发 / Development
 

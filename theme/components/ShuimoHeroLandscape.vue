@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
 import { onMounted, ref, watch } from 'vue'
-import { generateXuanPaperTexture, useBlankSide, useThemeConfig } from '../composables'
+import { generateXuanPaperTexture, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
 
 const emit = defineEmits<{
   ready: []
 }>()
+
+interface HeroSceneCache {
+  svg: string
+  blankSide: 'left' | 'right'
+  W: number
+  H: number
+}
+
+// SVG 本身不区分亮/暗色（暗色走 CSS filter 反色），缓存只按尺寸区分
+let cachedHeroScene: HeroSceneCache | null = null
 
 const svgContainer = ref<HTMLDivElement>()
 const { setBlankSide } = useBlankSide()
@@ -212,17 +222,16 @@ function planScene(
 }
 
 /**
- * 生成山水画 SVG 字符串
+ * 生成山水画 SVG 字符串与本次留白方向
  * 直接注入 DOM，不经过 Canvas 转换（与 shan-shui-inf 同样做法）
  */
-async function generateScene(W: number, H: number): Promise<string> {
+async function buildScene(W: number, H: number): Promise<{ svg: string, blankSide: 'left' | 'right' }> {
   const { noise } = await import('@jobinjia/shuimo-core/foundation')
   const { Mount, Arch } = await import('@jobinjia/shuimo-core/elements')
   const seed = Math.floor(Math.random() * 99999)
 
-  // 随机选择留白方向：左上或右上，并通知布局层
+  // 随机选择留白方向：左上或右上
   const blankSide: 'left' | 'right' = Math.random() > 0.5 ? 'left' : 'right'
-  setBlankSide(blankSide)
 
   const noiseFn = (x: number, y: number, z?: number) => noise.noise(x, y, z ?? 0)
   const plan = planScene(W, H, seed, noiseFn, blankSide)
@@ -269,11 +278,22 @@ async function generateScene(W: number, H: number): Promise<string> {
     }
   }
 
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     style="width:100%;height:100%;mix-blend-mode:multiply"
     preserveAspectRatio="xMidYMid slice">
     ${svgParts.join('\n')}
   </svg>`
+
+  return { svg, blankSide }
+}
+
+async function getHeroScene(W: number, H: number): Promise<HeroSceneCache> {
+  if (cachedHeroScene && cachedHeroScene.W === W && cachedHeroScene.H === H)
+    return cachedHeroScene
+
+  const scene = await scheduleShuimoTask(() => buildScene(W, H))
+  cachedHeroScene = { ...scene, W, H }
+  return cachedHeroScene
 }
 
 onMounted(async () => {
@@ -295,7 +315,9 @@ onMounted(async () => {
 
     const W = Math.min(window.innerWidth, 1920)
     const H = Math.min(window.innerHeight, 1080)
-    el.innerHTML = await generateScene(W, H)
+    const scene = await getHeroScene(W, H)
+    setBlankSide(scene.blankSide)
+    el.innerHTML = scene.svg
     // 通知父组件画面已就绪，可以开幕
     emit('ready')
   }

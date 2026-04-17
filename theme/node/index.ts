@@ -38,9 +38,6 @@ export const defaultThemeConfig: ThemeConfig = {
       name: '墨客',
       motto: '以码为墨，以屏为纸',
     },
-    showCategories: true,
-    showTags: true,
-    showRecent: true,
   },
 
   nav: [],
