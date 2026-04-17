@@ -4,6 +4,14 @@ pnpm-global
 
 components.d.ts
 auto-imports.d.ts
+typed-router.d.ts
+
+# Valaxy generated output (feed, search index)
+demo/.valaxy/
+demo/public/atom.xml
+demo/public/feed.xml
+demo/public/feed.json
+demo/public/valaxy-fuse-list.json
 
 .vite-ssg-dist
 .vite-ssg-temp
