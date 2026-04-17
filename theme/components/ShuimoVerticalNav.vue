@@ -96,6 +96,7 @@ const subtitleParts = computed(() => {
         :shape="themeConfig?.stamp?.shape || 'auto'"
         :font-family="titleFont || 'YiShanBeiZhuan, serif'"
         :size="56"
+        :offset-x="-4 / 56"
         class="shuimo-vnav__stamp"
       />
     </div>

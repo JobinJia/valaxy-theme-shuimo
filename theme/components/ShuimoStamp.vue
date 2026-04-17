@@ -9,12 +9,15 @@ const props = withDefaults(defineProps<{
   shape?: 'auto' | 'circle' | 'ellipse'
   fontFamily?: string
   size?: number
+  /** 文字水平偏移，范围 -1~1；负值左移（右侧留白变大），正值右移 */
+  offsetX?: number
 }>(), {
   text: '墨',
   type: 'yin',
   shape: 'auto',
   fontFamily: 'serif',
   size: 56,
+  offsetX: 0,
 })
 
 const stampSvg = ref<string | null>(null)
@@ -44,6 +47,7 @@ onMounted(async () => {
       fontFamily: props.fontFamily,
       width: props.size * 2,
       height: props.size * 2,
+      offsetX: props.offsetX,
     })
 
     if (typeof result === 'string') {
