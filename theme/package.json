@@ -24,7 +24,7 @@
     "valaxy": "catalog:"
   },
   "peerDependencies": {
-    "@jobinjia/shuimo-core": ">=0.0.0"
+    "@jobinjia/shuimo-core": ">=0.0.3"
   },
   "peerDependenciesMeta": {
     "@jobinjia/shuimo-core": {

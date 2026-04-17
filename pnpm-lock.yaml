@@ -15,6 +15,9 @@ catalogs:
     '@iconify-json/simple-icons':
       specifier: ^1.2.61
       version: 1.2.77
+    '@jobinjia/shuimo-core':
+      specifier: ^0.0.3
+      version: 0.0.3
     '@unocss/eslint-plugin':
       specifier: ^66.5.10
       version: 66.6.8
@@ -47,6 +50,9 @@ importers:
       '@antfu/eslint-config':
         specifier: 'catalog:'
         version: 6.7.3(@typescript-eslint/rule-tester@8.58.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/typescript-estree@8.58.1(typescript@5.9.3))(@typescript-eslint/utils@8.58.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@unocss/eslint-plugin@66.6.8(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.32)(eslint-plugin-format@1.5.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)(vitest@4.1.4(@types/node@25.6.0)(jsdom@28.1.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3)))
+      '@jobinjia/valaxy-theme-shuimo':
+        specifier: workspace:*
+        version: link:theme
       '@unocss/eslint-plugin':
         specifier: 'catalog:'
         version: 66.6.8(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
@@ -62,9 +68,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
-      valaxy-theme-shuimo:
-        specifier: workspace:*
-        version: link:theme
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@25.6.0)(jsdom@28.1.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
@@ -75,14 +78,14 @@ importers:
   demo:
     dependencies:
       '@jobinjia/shuimo-core':
-        specifier: '>=0.0.0'
-        version: 0.0.0
+        specifier: 'catalog:'
+        version: 0.0.3
+      '@jobinjia/valaxy-theme-shuimo':
+        specifier: workspace:*
+        version: link:../theme
       valaxy:
         specifier: 'catalog:'
         version: 0.26.13(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.9)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3)
-      valaxy-theme-shuimo:
-        specifier: workspace:*
-        version: link:../theme
 
   theme:
     dependencies:
@@ -93,8 +96,8 @@ importers:
         specifier: 'catalog:'
         version: 1.2.77
       '@jobinjia/shuimo-core':
-        specifier: '>=0.0.0'
-        version: 0.0.0
+        specifier: '>=0.0.3'
+        version: 0.0.3
     devDependencies:
       valaxy:
         specifier: 'catalog:'
@@ -921,8 +924,8 @@ packages:
       vue-i18n:
         optional: true
 
-  '@jobinjia/shuimo-core@0.0.0':
-    resolution: {integrity: sha512-NKfJmQ4cfkmtS24gjvQ8ylVidGcPYGNg9S7NA0v2NSuyAw0CenNtp2Li8RJgw6YHcqyMsQcoBDpYM8o9dabWNQ==}
+  '@jobinjia/shuimo-core@0.0.3':
+    resolution: {integrity: sha512-tBtdvQyuOwFAekegzhWj6LRKTk6gym1t1Wr2P3kD6gyPxguhBohskQAnLvCx2tAmiR0LNLDoon7MnQM4SD9iYQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5607,7 +5610,7 @@ snapshots:
       vue: 3.5.22(typescript@5.9.3)
       vue-i18n: 11.3.2(vue@3.5.22(typescript@5.9.3))
 
-  '@jobinjia/shuimo-core@0.0.0':
+  '@jobinjia/shuimo-core@0.0.3':
     dependencies:
       opentype.js: 1.3.4
       uuid: 13.0.0
