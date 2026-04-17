@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "valaxy": "catalog:",
-    "@jobinjia/valaxy-theme-shuimo": "workspace:*",
+    "valaxy-theme-shuimo": "workspace:@jobinjia/valaxy-theme-shuimo@*",
     "@jobinjia/shuimo-core": "catalog:"
   }
 }

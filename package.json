@@ -19,7 +19,7 @@
     "eslint": "catalog:",
     "eslint-plugin-format": "catalog:",
     "typescript": "catalog:",
-    "@jobinjia/valaxy-theme-shuimo": "workspace:*",
+    "valaxy-theme-shuimo": "workspace:@jobinjia/valaxy-theme-shuimo@*",
     "vitest": "catalog:",
     "vue-tsc": "catalog:"
   }

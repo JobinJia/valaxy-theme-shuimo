@@ -50,9 +50,6 @@ importers:
       '@antfu/eslint-config':
         specifier: 'catalog:'
         version: 6.7.3(@typescript-eslint/rule-tester@8.58.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/typescript-estree@8.58.1(typescript@5.9.3))(@typescript-eslint/utils@8.58.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@unocss/eslint-plugin@66.6.8(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.32)(eslint-plugin-format@1.5.0(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)(vitest@4.1.4(@types/node@25.6.0)(jsdom@28.1.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3)))
-      '@jobinjia/valaxy-theme-shuimo':
-        specifier: workspace:*
-        version: link:theme
       '@unocss/eslint-plugin':
         specifier: 'catalog:'
         version: 66.6.8(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
@@ -68,6 +65,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      valaxy-theme-shuimo:
+        specifier: workspace:@jobinjia/valaxy-theme-shuimo@*
+        version: link:theme
       vitest:
         specifier: 'catalog:'
         version: 4.1.4(@types/node@25.6.0)(jsdom@28.1.0)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
@@ -80,12 +80,12 @@ importers:
       '@jobinjia/shuimo-core':
         specifier: 'catalog:'
         version: 0.0.3
-      '@jobinjia/valaxy-theme-shuimo':
-        specifier: workspace:*
-        version: link:../theme
       valaxy:
         specifier: 'catalog:'
         version: 0.26.13(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.9)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3)
+      valaxy-theme-shuimo:
+        specifier: workspace:@jobinjia/valaxy-theme-shuimo@*
+        version: link:../theme
 
   theme:
     dependencies:
