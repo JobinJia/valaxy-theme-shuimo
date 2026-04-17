@@ -36,6 +36,12 @@
 
 - `theme/layouts/post.vue` 与 `theme/components/ShuimoArticle.vue` 都承担文章展示职责。
 - 后续维护容易出现样式和行为分叉。
+- 当前进一步确认：
+  - `theme/layouts/post.vue` 是实际文章页主渲染入口
+  - `theme/components/ShuimoArticle.vue` 当前未被任何页面或布局引用
+- 这意味着 `P0-2` 的第一步可以更保守：
+  - 先确认 `ShuimoArticle.vue` 是否属于历史遗留死路径
+  - 再决定是删除，还是把其中少量有价值的结构回收进 `post.vue`
 
 ### 3. 首页视觉生成有性能风险
 

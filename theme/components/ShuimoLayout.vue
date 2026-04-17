@@ -3,7 +3,7 @@ import { useHead } from '@unhead/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
-import { provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
+import { generateXuanPaperTexture, provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
 
 defineProps<{
   verticalNav?: boolean
@@ -25,9 +25,15 @@ const curtainStampSize = computed(() => {
   const textLength = curtainStampText.value.replace(/[,，]/g, '').length
   return textLength > 2 ? 116 : 104
 })
+const curtainPaperUrl = ref<string | null>(null)
 const curtainStyle = computed(() => {
   const curtainColor = themeConfig.value?.decorations?.curtainColor
-  return curtainColor ? { background: curtainColor } : undefined
+  return {
+    backgroundColor: curtainColor || 'var(--sm-paper)',
+    backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
+    backgroundRepeat: curtainPaperUrl.value ? 'repeat' : undefined,
+    backgroundSize: curtainPaperUrl.value ? '512px 512px' : undefined,
+  }
 })
 const revealed = ref(!heroLandscapeEnabled.value)
 const curtainStampReady = ref(false)
@@ -59,6 +65,25 @@ async function ensureCurtainStampFontReady() {
   }
 }
 
+async function ensureCurtainPaperReady() {
+  const xuanPaper = themeConfig.value?.xuanPaper
+  if (xuanPaper?.enable === false)
+    return
+
+  try {
+    curtainPaperUrl.value = await generateXuanPaperTexture({
+      variant: xuanPaper?.variant || 'processed',
+      width: 512,
+      height: 512,
+      seed: 42,
+      baseColor: themeConfig.value?.decorations?.curtainPaperColor,
+    })
+  }
+  catch {
+    curtainPaperUrl.value = null
+  }
+}
+
 function onLandscapeReady() {
   requestAnimationFrame(() => {
     revealed.value = true
@@ -67,6 +92,7 @@ function onLandscapeReady() {
 
 onMounted(() => {
   ensureCurtainStampFontReady()
+  ensureCurtainPaperReady()
 })
 
 watch(heroLandscapeEnabled, (enabled) => {

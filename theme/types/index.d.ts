@@ -75,6 +75,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
     heroLandscape: boolean
     /** 幕布颜色，默认跟随纸张底色 */
     curtainColor: string
+    /** 幕布宣纸底色，默认跟随 xuanPaper 变体 */
+    curtainPaperColor: string
     /** 装饰透明度 (0-1) @default 0.12 */
     opacity: number
   }>

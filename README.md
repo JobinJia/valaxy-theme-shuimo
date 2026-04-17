@@ -106,6 +106,7 @@ export default defineConfig<ThemeConfig>({
 | `decorations.seasonAware` | `boolean` | `true` | 四季花卉自动切换 |
 | `decorations.heroLandscape` | `boolean` | `true` | 首页山水画 |
 | `decorations.curtainColor` | `string` | `''` | 首页幕布颜色，默认跟随纸张底色 |
+| `decorations.curtainPaperColor` | `string` | `''` | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant` |
 | `decorations.opacity` | `number` | `0.12` | 装饰透明度 |
 | `xuanPaper.enable` | `boolean` | `true` | 启用宣纸纹理 |
 | `xuanPaper.variant` | `'processed' \| 'aged' \| 'gold'` | `'processed'` | 纸张变体 |

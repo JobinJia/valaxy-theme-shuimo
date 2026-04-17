@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useThemeConfig } from '../composables/config'
-import { generateCached } from '../composables/useShuimoCache'
+import { generateXuanPaperTexture } from '../composables/useXuanPaperTexture'
 
 const props = withDefaults(defineProps<{
   variant?: 'processed' | 'aged' | 'gold'
@@ -19,43 +19,17 @@ const themeConfig = useThemeConfig()
 const paperUrl = ref<string | null>(null)
 const loaded = ref(false)
 
-const colorPresets: Record<string, [number, number, number]> = {
-  processed: [252, 248, 230],
-  aged: [235, 220, 190],
-  gold: [250, 245, 225],
-}
-
 onMounted(async () => {
   const cfg = themeConfig.value
   if (cfg?.xuanPaper?.enable === false)
     return
 
-  const variant = cfg?.xuanPaper?.variant || props.variant
-  const cacheKey = `xuan-paper-${variant}-${props.width}-${props.height}-${props.seed}`
-
   try {
-    const url = await generateCached(cacheKey, async () => {
-      const { XuanPaper } = await import('@jobinjia/shuimo-core/elements')
-
-      const options: Record<string, any> = {
-        width: props.width,
-        height: props.height,
-        baseColor: colorPresets[variant] || colorPresets.processed,
-        fiberDensity: 0.8,
-        textureIntensity: 0.3,
-        grainDensity: 0.4,
-        seed: props.seed,
-      }
-
-      if (variant === 'aged')
-        options.age = 0.4
-
-      if (variant === 'gold') {
-        options.goldFlecks = true
-        options.goldDensity = 0.3
-      }
-
-      return XuanPaper.generateDataURL(options)
+    const url = await generateXuanPaperTexture({
+      variant: cfg?.xuanPaper?.variant || props.variant,
+      width: props.width,
+      height: props.height,
+      seed: props.seed,
     })
 
     paperUrl.value = url

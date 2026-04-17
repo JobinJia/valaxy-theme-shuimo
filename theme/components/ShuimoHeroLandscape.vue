@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useBlankSide } from '../composables'
+import { generateXuanPaperTexture, useBlankSide, useThemeConfig } from '../composables'
 
 const svgContainer = ref<HTMLDivElement>()
 const { setBlankSide } = useBlankSide()
+const themeConfig = useThemeConfig()
+const paperUrl = ref<string | null>(null)
 
 const emit = defineEmits<{
   ready: []
@@ -278,6 +280,16 @@ onMounted(async () => {
     return
 
   try {
+    const xuanPaper = themeConfig.value?.xuanPaper
+    if (xuanPaper?.enable !== false) {
+      paperUrl.value = await generateXuanPaperTexture({
+        variant: xuanPaper?.variant || 'processed',
+        width: 512,
+        height: 512,
+        seed: 42,
+      })
+    }
+
     const W = Math.min(window.innerWidth, 1920)
     const H = Math.min(window.innerHeight, 1080)
     el.innerHTML = await generateScene(W, H)
@@ -294,7 +306,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="shuimo-hero-landscape">
+  <div
+    class="shuimo-hero-landscape"
+    :style="paperUrl ? { backgroundImage: `url(${paperUrl})`, backgroundRepeat: 'repeat', backgroundSize: '512px 512px' } : undefined"
+  >
     <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
     <!-- 暗色模式：月亮 + 月光 -->
     <div class="shuimo-moon">

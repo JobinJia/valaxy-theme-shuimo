@@ -48,3 +48,7 @@
 - 为了更直观看主题色，在 `demo/pages/about.md` 增加了主题色测试块
 - 首页幕布新增“中线印章裂开”动效，并调整为优先使用篆书字体
 - 已消除开场印章 fallback 方章闪现问题，并对幕布印章字体做预加载处理
+- 已推送当前分支到远端：`origin/feat/p0-config-audit`
+- 开始 `P0-2` 初步审查，当前确认：
+  - `theme/layouts/post.vue` 是实际文章页主入口
+  - `theme/components/ShuimoArticle.vue` 当前未被引用，更像历史遗留实现

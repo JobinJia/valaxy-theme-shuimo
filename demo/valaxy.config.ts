@@ -71,6 +71,7 @@ export default defineConfig<ThemeConfig>({
       seasonAware: false,
       heroLandscape: true,
       curtainColor: '#1F2937',
+      curtainPaperColor: '#E8D7A5',
       opacity: 0.22,
     },
 
