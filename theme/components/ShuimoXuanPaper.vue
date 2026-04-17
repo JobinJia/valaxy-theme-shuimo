@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { useValaxyDark } from 'valaxy'
+import { ref, watch } from 'vue'
 import { useThemeConfig } from '../composables/config'
 import { generateXuanPaperTexture } from '../composables/useXuanPaperTexture'
 
@@ -16,10 +17,11 @@ const props = withDefaults(defineProps<{
 })
 
 const themeConfig = useThemeConfig()
+const { isDark } = useValaxyDark()
 const paperUrl = ref<string | null>(null)
 const loaded = ref(false)
 
-onMounted(async () => {
+async function regenerate() {
   const cfg = themeConfig.value
   if (cfg?.xuanPaper?.enable === false)
     return
@@ -30,6 +32,7 @@ onMounted(async () => {
       width: props.width,
       height: props.height,
       seed: props.seed,
+      isDark: isDark.value,
     })
 
     paperUrl.value = url
@@ -38,7 +41,10 @@ onMounted(async () => {
   catch {
     loaded.value = false
   }
-})
+}
+
+// 初次挂载 + 暗色模式切换都重新生成纹理
+watch(isDark, regenerate, { immediate: true })
 </script>
 
 <template>

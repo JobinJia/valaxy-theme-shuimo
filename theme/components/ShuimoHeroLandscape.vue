@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { useValaxyDark } from 'valaxy'
+import { onMounted, ref, watch } from 'vue'
 import { generateXuanPaperTexture, useBlankSide, useThemeConfig } from '../composables'
-
-const svgContainer = ref<HTMLDivElement>()
-const { setBlankSide } = useBlankSide()
-const themeConfig = useThemeConfig()
-const paperUrl = ref<string | null>(null)
 
 const emit = defineEmits<{
   ready: []
 }>()
+
+const svgContainer = ref<HTMLDivElement>()
+const { setBlankSide } = useBlankSide()
+const themeConfig = useThemeConfig()
+const { isDark } = useValaxyDark()
+const paperUrl = ref<string | null>(null)
 
 interface PlanItem {
   tag: string
@@ -287,6 +289,7 @@ onMounted(async () => {
         width: 512,
         height: 512,
         seed: 42,
+        isDark: isDark.value,
       })
     }
 
@@ -302,6 +305,22 @@ onMounted(async () => {
 
   // shuimo-core 文字测量临时 SVG 清理
   document.querySelectorAll('body > svg').forEach(s => s.remove())
+})
+
+// 切换暗色时同步重生成纸纹（亮色米色、暗色乌金黑）
+watch(isDark, async (dark) => {
+  const xuanPaper = themeConfig.value?.xuanPaper
+  if (xuanPaper?.enable === false) {
+    paperUrl.value = null
+    return
+  }
+  paperUrl.value = await generateXuanPaperTexture({
+    variant: xuanPaper?.variant || 'processed',
+    width: 512,
+    height: 512,
+    seed: 42,
+    isDark: dark,
+  })
 })
 </script>
 

@@ -52,6 +52,10 @@ html.dark {
   --sm-content-bg: rgba(250, 247, 240, 0.6);
   --sm-card-bg: rgba(250, 247, 240, 0.5);
   --sm-sidebar-bg: rgba(250, 247, 240, 0.45);
+
+  // 开屏幕布底色：亮色下用更深的金褐色，与页面 --sm-paper 有明显区分，
+  // 幕布拉开时能清楚看到由金褐 → 米白的层次
+  --sm-curtain-bg: #E8D7A5;
 }
 
 // 暗色模式快捷变量 — 墨纸反转：暗底白墨
@@ -71,6 +75,9 @@ html.dark {
   // 边框在暗色下微亮
   --sm-c-border: rgba(200, 190, 170, 0.15);
   --sm-c-border-medium: rgba(200, 190, 170, 0.25);
+
+  // 开屏幕布：青黛夜幕色，与页面 --sm-paper 的纯黑形成冷暖对比
+  --sm-curtain-bg: #1D2230;
 
   // 主色衍生由 useThemeCssVars 根据 colors.primary 动态注入，
   // 不在此处硬编码覆盖，避免与用户配置冲突。

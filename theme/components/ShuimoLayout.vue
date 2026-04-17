@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import type { ThemeModeColor } from '../types'
 import { useHead } from '@unhead/vue'
+import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
@@ -9,8 +11,17 @@ defineProps<{
   verticalNav?: boolean
 }>()
 
+function resolveModeColor(value: ThemeModeColor | undefined, dark: boolean): string | undefined {
+  if (!value)
+    return undefined
+  if (typeof value === 'string')
+    return value
+  return dark ? value.dark : value.light
+}
+
 const themeConfig = useThemeConfig()
 const themeCssVars = useThemeCssVars()
+const { isDark } = useValaxyDark()
 const { blankSide } = provideBlankSide()
 const heroLandscapeEnabled = computed(() => themeConfig.value?.decorations?.heroLandscape !== false)
 const curtainStampText = computed(() => themeConfig.value?.stamp?.author || '墨')
@@ -27,9 +38,9 @@ const curtainStampSize = computed(() => {
 })
 const curtainPaperUrl = ref<string | null>(null)
 const curtainStyle = computed(() => {
-  const curtainColor = themeConfig.value?.decorations?.curtainColor
+  const userColor = resolveModeColor(themeConfig.value?.decorations?.curtainColor, isDark.value)
   return {
-    backgroundColor: curtainColor || 'var(--sm-paper)',
+    backgroundColor: userColor || 'var(--sm-curtain-bg)',
     backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
     backgroundRepeat: curtainPaperUrl.value ? 'repeat' : undefined,
     backgroundSize: curtainPaperUrl.value ? '512px 512px' : undefined,
@@ -70,13 +81,21 @@ async function ensureCurtainPaperReady() {
   if (xuanPaper?.enable === false)
     return
 
+  // 幕布纸色默认与首页宣纸不同，做出"拉开时有层次"的观感：
+  //   亮色：#E8D7A5 金褐陈年纸 vs 首页 #FCF8E6 米白宣纸
+  //   暗色：#1D2230 青黛夜幕 vs 首页纯黑宣纸（冷暖对比）
+  // 用户通过 decorations.curtainPaperColor 自定义时以用户配置为准
+  const userBase = resolveModeColor(themeConfig.value?.decorations?.curtainPaperColor, isDark.value)
+  const baseColor = userBase || (isDark.value ? '#1D2230' : '#E8D7A5')
+
   try {
     curtainPaperUrl.value = await generateXuanPaperTexture({
       variant: xuanPaper?.variant || 'processed',
       width: 512,
       height: 512,
       seed: 42,
-      baseColor: themeConfig.value?.decorations?.curtainPaperColor,
+      baseColor,
+      isDark: isDark.value,
     })
   }
   catch {
@@ -94,6 +113,9 @@ onMounted(() => {
   ensureCurtainStampFontReady()
   ensureCurtainPaperReady()
 })
+
+// 暗色模式切换时同步幕布纸纹：暗色清空，亮色重新生成
+watch(isDark, ensureCurtainPaperReady)
 
 watch(heroLandscapeEnabled, (enabled) => {
   if (!enabled)
@@ -241,8 +263,8 @@ watch(() => route.path, () => {
   }
 
   &.revealed {
-    // 展开用慢速优雅过渡
-    transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    // 展开用匀速线性过渡，避免尾部有明显"减速停顿"感
+    transition: transform 1.2s linear;
 
     &.shuimo-curtain--left {
       transform: translateX(-100%);

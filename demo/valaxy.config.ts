@@ -70,9 +70,11 @@ export default defineConfig<ThemeConfig>({
       enable: true,
       seasonAware: false,
       heroLandscape: true,
-      curtainColor: '#1F2937',
-      curtainPaperColor: '#E8D7A5',
       opacity: 0.22,
+      // 幕布底色 / 宣纸 baseColor 都支持 "{ light, dark }" 分别配置，
+      // 省略则走主题默认：亮色 #E8D7A5 金褐陈年纸、暗色 #1D2230 青黛夜幕
+      // curtainColor: { light: '#E8D7A5', dark: '#1D2230' },
+      // curtainPaperColor: { light: '#E8D7A5', dark: '#1D2230' },
     },
 
     xuanPaper: {
