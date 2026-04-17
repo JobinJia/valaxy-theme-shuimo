@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
 import { provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
 
 defineProps<{
@@ -12,20 +13,61 @@ const themeConfig = useThemeConfig()
 const themeCssVars = useThemeCssVars()
 const { blankSide } = provideBlankSide()
 const heroLandscapeEnabled = computed(() => themeConfig.value?.decorations?.heroLandscape !== false)
+const curtainStampText = computed(() => themeConfig.value?.stamp?.author || '墨')
+const curtainStampType = computed(() => themeConfig.value?.stamp?.type || 'yin')
+const curtainStampShape = computed(() => themeConfig.value?.stamp?.shape || 'auto')
+const curtainStampFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
+const curtainStampFontFamily = computed(() => {
+  const primaryFont = curtainStampFont.value.split(',')[0]?.trim()
+  return primaryFont?.replace(/^['"]|['"]$/g, '') || 'YiShanBeiZhuan'
+})
+const curtainStampSize = computed(() => {
+  const textLength = curtainStampText.value.replace(/[,，]/g, '').length
+  return textLength > 2 ? 116 : 104
+})
+const curtainStyle = computed(() => {
+  const curtainColor = themeConfig.value?.decorations?.curtainColor
+  return curtainColor ? { background: curtainColor } : undefined
+})
 const revealed = ref(!heroLandscapeEnabled.value)
+const curtainStampReady = ref(false)
 const route = useRoute()
 
 // 加载外部字体
 const fontUrl = computed(() => themeConfig.value?.fonts?.url)
 useHead({
-  link: computed(() => fontUrl.value ? [{ rel: 'stylesheet', href: fontUrl.value }] : []),
+  link: computed(() => [
+    { rel: 'preload', href: yishanFontUrl, as: 'font', type: 'font/ttf', crossorigin: 'anonymous' },
+    ...(fontUrl.value ? [{ rel: 'stylesheet', href: fontUrl.value }] : []),
+  ]),
 })
+
+async function ensureCurtainStampFontReady() {
+  if (typeof document === 'undefined' || !('fonts' in document)) {
+    curtainStampReady.value = true
+    return
+  }
+
+  const loadPromise = document.fonts.load(`16px "${curtainStampFontFamily.value}"`)
+  const timeoutPromise = new Promise<void>(resolve => setTimeout(resolve, 1200))
+
+  try {
+    await Promise.race([loadPromise, timeoutPromise])
+  }
+  finally {
+    curtainStampReady.value = true
+  }
+}
 
 function onLandscapeReady() {
   requestAnimationFrame(() => {
     revealed.value = true
   })
 }
+
+onMounted(() => {
+  ensureCurtainStampFontReady()
+})
 
 watch(heroLandscapeEnabled, (enabled) => {
   if (!enabled)
@@ -73,8 +115,28 @@ watch(() => route.path, () => {
     </footer>
 
     <!-- 开屏幕布 -->
-    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" />
-    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" />
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" :style="curtainStyle">
+      <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
+        <ShuimoStamp
+          :text="curtainStampText"
+          :type="curtainStampType"
+          :shape="curtainStampShape"
+          :font-family="curtainStampFont"
+          :size="curtainStampSize"
+        />
+      </div>
+    </div>
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" :style="curtainStyle">
+      <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
+        <ShuimoStamp
+          :text="curtainStampText"
+          :type="curtainStampType"
+          :shape="curtainStampShape"
+          :font-family="curtainStampFont"
+          :size="curtainStampSize"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -120,9 +182,29 @@ watch(() => route.path, () => {
   background: var(--sm-paper);
   z-index: 9999;
   pointer-events: none;
+  overflow: hidden;
   will-change: transform;
   // 关闭（合拢）快，打开（展开）慢
   transition: transform 0.5s ease-in;
+
+  &__stamp {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.96;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+
+    &--left {
+      right: calc(v-bind(curtainStampSize) * -0.5px);
+    }
+
+    &--right {
+      left: calc(v-bind(curtainStampSize) * -0.5px);
+    }
+  }
 
   &--left {
     left: 0;

@@ -55,6 +55,7 @@ export const defaultThemeConfig: ThemeConfig = {
     enable: true,
     seasonAware: true,
     heroLandscape: true,
+    curtainColor: '',
     opacity: 0.12,
   },
 

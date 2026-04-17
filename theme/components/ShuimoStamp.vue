@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
 
 const stampSvg = ref<string | null>(null)
 const hasShuimoCore = ref(false)
+const showFallback = ref(false)
 const themeConfig = useThemeConfig()
 
 onMounted(async () => {
@@ -54,6 +55,7 @@ onMounted(async () => {
   }
   catch (err) {
     hasShuimoCore.value = false
+    showFallback.value = true
     if (import.meta.env.DEV && !warnMissingShuimoCore.fired) {
       warnMissingShuimoCore.fired = true
       console.warn(
@@ -78,7 +80,7 @@ onMounted(async () => {
       v-html="stampSvg"
     />
     <div
-      v-else
+      v-else-if="showFallback"
       class="shuimo-stamp__fallback"
     >
       {{ text.slice(0, 2) }}

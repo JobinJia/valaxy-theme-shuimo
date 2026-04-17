@@ -30,6 +30,7 @@
 - `decorations.enable = true`
 - `decorations.seasonAware = false`
 - `decorations.heroLandscape = true`
+- `decorations.curtainColor = '#1F2937'`
 - `decorations.opacity = 0.22`
 - `xuanPaper.enable = true`
 - `xuanPaper.variant = 'gold'`
@@ -41,6 +42,7 @@
 
 - [ ] 首页能看到山水背景，说明 `decorations.heroLandscape = true` 生效
 - [ ] 首页进入时仍有幕布展开效果，说明山水开关已接入动画链路
+- [ ] 幕布颜色应为深灰蓝色 `#1F2937`，而不是默认纸色，说明 `decorations.curtainColor` 生效
 - [ ] 首页站名“落梅听雪阁”使用标题字体，视觉应比正文更有篆书感
 - [ ] 首页导航“栖墨斋 / 暗香阁”前面能看到图标
 - [ ] 首页导航文字与 hover 强调色偏洋红色 `#FF00AA`，而不是默认棕色，说明 `colors.primary` 生效

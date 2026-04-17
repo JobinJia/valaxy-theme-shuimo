@@ -38,3 +38,13 @@
   - 颜色、字体、导航图标、页脚备案、侧边栏印章
   - 装饰开关、宣纸变体、笔触开关
 - 新增 `planning/manual-checklist.md`，用于按 demo 基准配置逐项人工勾选验证
+- 新增 `decorations.curtainColor` 配置项，并在 demo 中设置为深灰蓝色以便人工验证
+- demo 人工验证已确认通过：
+  - `colors.primary`
+  - `colors.stamp`
+  - `footer.since`
+  - `decorations.heroLandscape`
+  - `decorations.curtainColor`
+- 为了更直观看主题色，在 `demo/pages/about.md` 增加了主题色测试块
+- 首页幕布新增“中线印章裂开”动效，并调整为优先使用篆书字体
+- 已消除开场印章 fallback 方章闪现问题，并对幕布印章字体做预加载处理

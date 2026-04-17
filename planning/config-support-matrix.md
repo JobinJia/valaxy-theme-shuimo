@@ -34,6 +34,7 @@
 | `decorations.enable` | `theme/node/index.ts` | 部分实现 | `theme/components/ShuimoDecoration.vue` | 组件支持，但需确认页面是否稳定挂载 |
 | `decorations.seasonAware` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoDecoration.vue` | 关闭后回退到固定 `plum` 装饰，不再自动切季 |
 | `decorations.heroLandscape` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页山水与幕布动画已受配置开关控制 |
+| `decorations.curtainColor` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoLayout.vue` | 首页幕布颜色可单独配置 |
 | `decorations.opacity` | `theme/node/index.ts` | 已实现 | `theme/components/ShuimoDecoration.vue` | 未显式传入 `opacity` 时回落到主题配置 |
 | `xuanPaper.enable` | `theme/node/index.ts` | 已实现 | `ShuimoLayout` / `default` 布局 + `ShuimoXuanPaper` | 可关闭主题宣纸纹理 |
 | `xuanPaper.variant` | `theme/node/index.ts` | 已实现 | `ShuimoLayout` / `default` 布局 + `ShuimoXuanPaper` | 可切换纸张变体 |
