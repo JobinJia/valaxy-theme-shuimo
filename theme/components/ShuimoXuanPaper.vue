@@ -33,6 +33,7 @@ async function regenerate() {
       height: props.height,
       seed: props.seed,
       isDark: isDark.value,
+      goldDensity: cfg?.xuanPaper?.goldDensity,
     })
 
     paperUrl.value = url

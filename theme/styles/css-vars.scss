@@ -79,6 +79,11 @@ html.dark {
   // 开屏幕布：青黛夜幕色，与页面 --sm-paper 的纯黑形成冷暖对比
   --sm-curtain-bg: #1D2230;
 
-  // 主色衍生由 useThemeCssVars 根据 colors.primary 动态注入，
-  // 不在此处硬编码覆盖，避免与用户配置冲突。
+  // 主色衍生：useThemeCssVars 会注入 --sm-c-brand-dark / --sm-primary-*-dark
+  // 这里把 --sm-accent 及半透明衍生切到暗色变体，并给出静态 fallback 以兜底 SSR 首帧
+  --sm-c-brand-dark: #B48666; // 默认棕色 #8B4513 向白靠 35%
+  --sm-accent: var(--sm-c-brand-dark, var(--sm-c-brand));
+  --sm-primary-faint: var(--sm-primary-faint-dark, rgba(180, 134, 102, 0.15));
+  --sm-primary-light: var(--sm-primary-light-dark, rgba(180, 134, 102, 0.22));
+  --sm-primary-medium: var(--sm-primary-medium-dark, rgba(180, 134, 102, 0.4));
 }

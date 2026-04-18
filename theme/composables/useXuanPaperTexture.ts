@@ -39,14 +39,17 @@ export async function generateXuanPaperTexture(options?: {
   seed?: number
   baseColor?: string
   isDark?: boolean
+  goldDensity?: number
 }) {
   const variant = options?.variant || 'processed'
   const width = options?.width || 256
   const height = options?.height || 256
   const seed = options?.seed || 42
   const isDark = options?.isDark === true
+  const goldDensity = clampGoldDensity(options?.goldDensity)
   const presets = isDark ? darkColorPresets : lightColorPresets
-  const cacheKey = `xuan-paper-${variant}-${width}-${height}-${seed}-${isDark ? 'dark' : 'light'}-${options?.baseColor || ''}`
+  const goldKey = variant === 'gold' ? goldDensity.toFixed(3) : ''
+  const cacheKey = `xuan-paper-${variant}-${width}-${height}-${seed}-${isDark ? 'dark' : 'light'}-${options?.baseColor || ''}-${goldKey}`
 
   return generateCached(cacheKey, async () => {
     const { XuanPaper } = await import('@jobinjia/shuimo-core/elements')
@@ -68,9 +71,19 @@ export async function generateXuanPaperTexture(options?: {
 
     if (variant === 'gold') {
       textureOptions.goldFlecks = true
-      textureOptions.goldDensity = 0.3
+      textureOptions.goldDensity = goldDensity
     }
 
     return XuanPaper.generateDataURL(textureOptions)
   })
+}
+
+function clampGoldDensity(value: number | undefined): number {
+  if (value === undefined || !Number.isFinite(value))
+    return 0.3
+  if (value < 0)
+    return 0
+  if (value > 1)
+    return 1
+  return value
 }

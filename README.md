@@ -106,6 +106,7 @@ export default defineConfig<ThemeConfig>({
 | `decorations.opacity` | `number` | `0.12` | 装饰透明度 |
 | `xuanPaper.enable` | `boolean` | `true` | 启用宣纸纹理 |
 | `xuanPaper.variant` | `'processed' \| 'aged' \| 'gold'` | `'processed'` | 纸张变体 |
+| `xuanPaper.goldDensity` | `number` | `0.3` | 洒金密度 (0–1)，仅 `variant: 'gold'` 生效 |
 | `brushStrokes.enable` | `boolean` | `true` | 启用毛笔线条 |
 
 ### `ThemeModeColor`

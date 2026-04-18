@@ -76,6 +76,7 @@ export default defineConfig<ThemeConfig>({
     xuanPaper: {
       enable: true,
       variant: 'gold',
+      goldDensity: 0.1,
     },
 
     brushStrokes: {

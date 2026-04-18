@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue'
 
 /**
- * 简单的字符串哈希函数
+ * 简单的字符串哈希函数（DJB2），导出用于单测种子确定性
  */
-function hashString(str: string): number {
+export function hashString(str: string): number {
   let hash = 5381
   for (let i = 0; i < str.length; i++)
     hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0

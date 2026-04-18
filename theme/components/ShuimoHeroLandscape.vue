@@ -310,6 +310,7 @@ onMounted(async () => {
         height: 512,
         seed: 42,
         isDark: isDark.value,
+        goldDensity: xuanPaper?.goldDensity,
       })
     }
 
@@ -342,6 +343,7 @@ watch(isDark, async (dark) => {
     height: 512,
     seed: 42,
     isDark: dark,
+    goldDensity: xuanPaper?.goldDensity,
   })
 })
 </script>
@@ -392,12 +394,7 @@ watch(isDark, async (dark) => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 40% 40%,
-    #F5F0E0 0%,
-    #E8E0C8 40%,
-    #D5C8A0 100%
-  );
+  background: radial-gradient(circle at 40% 40%, #f5f0e0 0%, #e8e0c8 40%, #d5c8a0 100%);
   box-shadow:
     0 0 20px 8px rgba(240, 230, 200, 0.3),
     0 0 60px 20px rgba(240, 230, 200, 0.15);
@@ -413,19 +410,21 @@ watch(isDark, async (dark) => {
   width: 400px;
   height: 400px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(220, 215, 180, 0.12) 0%,
-    rgba(220, 215, 180, 0.05) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(220, 215, 180, 0.12) 0%, rgba(220, 215, 180, 0.05) 30%, transparent 70%);
   pointer-events: none;
   animation: moon-pulse 6s ease-in-out infinite;
 }
 
 @keyframes moon-pulse {
-  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
 }
 </style>
 
