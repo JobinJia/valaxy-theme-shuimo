@@ -9,7 +9,7 @@
     "dev": "npm run demo",
     "demo": "npm -C demo run dev",
     "lint": "eslint .",
-    "release": "cd theme && git add -A && bumpp --all && pnpm -r publish --access public --no-git-checks",
+    "release": "pnpm build && cd theme && git add -A && bumpp --all && pnpm -r publish --access public --no-git-checks",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
