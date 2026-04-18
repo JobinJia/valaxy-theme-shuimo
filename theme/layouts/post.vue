@@ -94,7 +94,7 @@ function goBack() {
           :text="postStamp.text"
           :type="postStamp.type"
           :shape="postStamp.shape"
-          :size="postStamp.size || 64"
+          :size="postStamp.size || 48"
           :color="postStamp.color"
         />
       </div>
