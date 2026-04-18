@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useTags } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGoBack, useThemeConfig } from '../../composables'
+
+const { t } = useI18n()
 
 const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
-const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const tags = useTags()
 
 const tagList = computed(() => {
@@ -25,9 +27,7 @@ const tagList = computed(() => {
       <img :src="author.avatar" :alt="author?.name || ''" class="shuimo-tags-index__avatar">
     </router-link>
 
-    <h1 class="shuimo-tags-index__title" :style="titleFont ? { fontFamily: titleFont } : undefined">
-      标签
-    </h1>
+    <ShuimoTiqian :title="t('shuimo.tags_title')" class="shuimo-tags-index__tiqian" />
 
     <div class="shuimo-tags-index__cloud">
       <router-link
@@ -75,12 +75,8 @@ meta:
     border: 2px solid var(--sm-primary-light);
   }
 
-  &__title {
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--sm-ink-dark);
-    letter-spacing: 6px;
-    margin: 0 0 28px;
+  &__tiqian {
+    margin-bottom: 28px;
   }
 
   &__cloud {
@@ -121,7 +117,9 @@ meta:
     letter-spacing: 2px;
     font-family: var(--sm-font-kai);
     transition: color 0.2s;
-    &:hover { color: var(--sm-accent); }
+    &:hover {
+      color: var(--sm-accent);
+    }
   }
 }
 

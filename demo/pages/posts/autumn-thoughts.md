@@ -2,6 +2,8 @@
 title: 秋日偶得
 date: 2024-09-08
 categories: 技术
+series: 水墨技术笔记
+seriesOrder: 3
 tags:
   - Vue
   - 前端

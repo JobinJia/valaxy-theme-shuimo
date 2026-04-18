@@ -4,6 +4,8 @@ date: 2024-03-10
 updated: 2024-06-15
 categories: 技术
 original: true
+series: 水墨技术笔记
+seriesOrder: 1
 tags:
   - Canvas
   - Vue
@@ -30,8 +32,10 @@ stamp:
 
 ```typescript
 function pressure(t: number): number {
-  if (t < 0.2) return t / 0.2 // 起笔
-  if (t > 0.8) return (1 - t) / 0.2 * 0.4 // 收笔
+  if (t < 0.2)
+    return t / 0.2 // 起笔
+  if (t > 0.8)
+    return (1 - t) / 0.2 * 0.4 // 收笔
   return 1 // 行笔
 }
 ```
@@ -45,3 +49,40 @@ function pressure(t: number): number {
 水墨之美，在于不完美。
 
 ![飞白效果的数字模拟](https://picsum.photos/seed/feibai/600/300)
+
+## 古人论笔法
+
+> 笔墨之道，贵在气韵生动。用笔当如锥画沙，如折钗股，如屋漏痕。
+>
+> 凡作画，气韵为先，笔墨次之。
+>
+> —— 谢赫《古画品录》
+
+> 墨分五色：焦、浓、重、淡、清。
+>
+> > 五色之中，又有干湿之别，枯润之分。
+
+## 注意事项
+
+:::tip
+Canvas 的 `globalCompositeOperation` 设为 `multiply` 可以模拟墨色叠加效果，多次落笔处自然加深。
+:::
+
+:::warning
+飞白效果的随机间隙不宜过大，否则笔画会显得断裂而非自然的枯笔。建议间隙控制在笔宽的 10%–30% 之间。
+:::
+
+:::danger
+切勿在每一帧都重新绘制整个画布。水墨绘制是增量式的，应当使用离屏 Canvas 缓存已完成的笔画[^1]。
+:::
+
+:::info
+本系列文章基于 `@jobinjia/shuimo-core` 库的实现经验整理。该库使用 Perlin 噪声[^2]生成自然的笔触纹理。
+:::
+
+## 总结
+
+数字水墨不是对传统的替代，而是一种新的表达方式。代码与笔墨，终将殊途同归。
+
+[^1]: 离屏 Canvas 是一种常见的性能优化手段，将不变的内容缓存在独立的 Canvas 上，避免每帧重绘。
+[^2]: Perlin 噪声由 Ken Perlin 于 1983 年发明，广泛用于计算机图形学中生成自然纹理。

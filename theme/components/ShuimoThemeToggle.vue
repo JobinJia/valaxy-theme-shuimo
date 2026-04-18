@@ -90,7 +90,7 @@ const { isDark, toggleDark } = useValaxyDark()
     }
 
     .moon {
-      fill: #E8E0C8;
+      fill: #e8e0c8;
     }
 
     .moon-mask {
@@ -98,7 +98,7 @@ const { isDark, toggleDark } = useValaxyDark()
     }
 
     .star {
-      fill: #E8E0C8;
+      fill: #e8e0c8;
       opacity: 0.7;
     }
   }

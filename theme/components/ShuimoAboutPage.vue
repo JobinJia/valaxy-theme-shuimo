@@ -172,7 +172,9 @@ const tagCount = computed(() => tags.value?.size || 0)
     :deep(a) {
       color: var(--sm-accent);
       text-decoration: none;
-      &:hover { text-decoration: underline; }
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 

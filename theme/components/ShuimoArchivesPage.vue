@@ -14,14 +14,14 @@ const postList = usePostList()
 const postsByYear = computed(() => {
   const groups: Record<number, any[]> = {}
   for (const post of (postList.value || [])) {
-    const year = new Date(post.date).getFullYear()
+    const year = new Date(post.date ?? 0).getFullYear()
     ;(groups[year] ||= []).push(post)
   }
   return Object.entries(groups)
     .sort(([a], [b]) => +b - +a)
     .map(([year, posts]) => ({
       year: +year,
-      posts: posts.sort((a: any, b: any) => +new Date(b.date) - +new Date(a.date)),
+      posts: posts.sort((a: any, b: any) => +new Date(b.date ?? 0) - +new Date(a.date ?? 0)),
     }))
 })
 

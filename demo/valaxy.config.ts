@@ -82,5 +82,10 @@ export default defineConfig<ThemeConfig>({
     brushStrokes: {
       enable: true,
     },
+
+    preface: {
+      quote: '落梅听风雪，隔窗枕雨眠',
+      source: '—— 月牙',
+    },
   },
 })

@@ -49,7 +49,7 @@ function startStroke(x: number, y: number, pressure: number) {
 
 ```typescript
 function endStroke(t: number) {
-  const fadeOut = Math.pow(1 - t, 2)
+  const fadeOut = (1 - t) ** 2
   ctx.globalAlpha = fadeOut * 0.8
   ctx.lineWidth *= fadeOut
 }

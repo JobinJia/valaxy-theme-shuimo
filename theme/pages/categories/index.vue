@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useCategories } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGoBack, useThemeConfig } from '../../composables'
+
+const { t } = useI18n()
 
 const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
-const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const categories = useCategories()
 
 const categoryList = computed(() => {
@@ -25,9 +27,7 @@ const categoryList = computed(() => {
       <img :src="author.avatar" :alt="author?.name || ''" class="shuimo-categories-index__avatar">
     </router-link>
 
-    <h1 class="shuimo-categories-index__title" :style="titleFont ? { fontFamily: titleFont } : undefined">
-      分类
-    </h1>
+    <ShuimoTiqian :title="t('shuimo.categories_title')" class="shuimo-categories-index__tiqian" />
 
     <div class="shuimo-categories-index__list">
       <router-link
@@ -75,12 +75,8 @@ meta:
     border: 2px solid var(--sm-primary-light);
   }
 
-  &__title {
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--sm-ink-dark);
-    letter-spacing: 6px;
-    margin: 0 0 28px;
+  &__tiqian {
+    margin-bottom: 28px;
   }
 
   &__list {
@@ -103,7 +99,9 @@ meta:
 
     &:hover {
       border-color: var(--sm-accent);
-      .shuimo-categories-index__name { color: var(--sm-accent); }
+      .shuimo-categories-index__name {
+        color: var(--sm-accent);
+      }
     }
   }
 
@@ -128,7 +126,9 @@ meta:
     letter-spacing: 2px;
     font-family: var(--sm-font-kai);
     transition: color 0.2s;
-    &:hover { color: var(--sm-accent); }
+    &:hover {
+      color: var(--sm-accent);
+    }
   }
 }
 

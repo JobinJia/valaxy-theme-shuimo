@@ -14,23 +14,15 @@
     ),
     // 纵向纤维
     repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 5px,
-      rgba(170, 160, 140, 0.03) 5px,
-      rgba(170, 160, 140, 0.03) 6px
-    ),
+        90deg,
+        transparent,
+        transparent 5px,
+        rgba(170, 160, 140, 0.03) 5px,
+        rgba(170, 160, 140, 0.03) 6px
+      ),
     // 大面积色调变化
-    radial-gradient(
-      ellipse at 30% 20%,
-      rgba(200, 190, 170, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 80%,
-      rgba(190, 180, 160, 0.06) 0%,
-      transparent 40%
-    );
+    radial-gradient(ellipse at 30% 20%, rgba(200, 190, 170, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(190, 180, 160, 0.06) 0%, transparent 40%);
 }
 
 // 浅色宣纸变体（文章内容区）
@@ -71,23 +63,13 @@
 // 墨色渐变线（标题下方）
 .ink-line {
   height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--sm-ink-medium),
-    transparent
-  );
+  background: linear-gradient(90deg, var(--sm-ink-medium), transparent);
   border-radius: 1px;
 }
 
 // 竖向墨线（侧边栏分隔）
 .ink-line-vertical {
   width: 2px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    var(--sm-ink-medium) 15%,
-    var(--sm-ink-medium) 85%,
-    transparent
-  );
+  background: linear-gradient(180deg, transparent, var(--sm-ink-medium) 15%, var(--sm-ink-medium) 85%, transparent);
   opacity: 0.25;
 }

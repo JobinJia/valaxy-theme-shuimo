@@ -15,3 +15,6 @@ shuimo:
   updated_at: 'Updated {date}'
   original: Original
   figure_prefix: Fig.
+  archives: Archives
+  categories_title: Categories
+  tags_title: Tags

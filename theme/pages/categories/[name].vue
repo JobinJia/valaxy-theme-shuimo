@@ -13,7 +13,7 @@ const posts = computed(() => {
     if (Array.isArray(cats))
       return cats.includes(categoryName.value)
     return cats === categoryName.value
-  }).sort((a, b) => +new Date(b.date) - +new Date(a.date))
+  }).sort((a, b) => +new Date(b.date ?? 0) - +new Date(a.date ?? 0))
 })
 </script>
 

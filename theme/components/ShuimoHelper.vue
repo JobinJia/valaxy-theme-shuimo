@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { Ref } from 'vue'
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const visible = ref(false)
 const scrollContainer = inject<Ref<HTMLElement | null>>('scrollContainer', ref(null))

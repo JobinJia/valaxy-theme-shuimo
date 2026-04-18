@@ -20,16 +20,13 @@ html.dark {
 
 :root {
   // 衬线字体
-  --va-font-family-base:
-    'Noto Serif SC', 'Source Han Serif SC', 'SimSun',
-    Georgia, 'Times New Roman', serif;
+  --va-font-family-base: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', Georgia, 'Times New Roman', serif;
 
   // 等宽字体
-  --sm-font-mono:
-    'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --sm-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
   // 楷体
-  --sm-font-kai: "楷体", "KaiTi", "STKaiti", serif;
+  --sm-font-kai: '楷体', 'KaiTi', 'STKaiti', serif;
 
   // 主色 rgba 衍生（用于 border/dot/selection 等半透明场景）
   // 这里是 SSR/未配置时的默认值，运行时由 useThemeCssVars 根据 colors.primary 动态覆盖
@@ -43,9 +40,9 @@ html.dark {
   --sm-ink-light: #55493d;
   --sm-accent: var(--sm-c-brand);
   --sm-stamp: var(--sm-c-stamp);
-  --sm-paper: #F5F0E6;
-  --sm-paper-light: #FAF7F0;
-  --sm-paper-card: #ECE6D8;
+  --sm-paper: #f5f0e6;
+  --sm-paper-light: #faf7f0;
+  --sm-paper-card: #ece6d8;
 
   // 半透明层（内容区背景，让山水画透出来）
   --sm-paper-overlay: rgba(245, 240, 230, 0.82);
@@ -55,19 +52,19 @@ html.dark {
 
   // 开屏幕布底色：亮色下用更深的金褐色，与页面 --sm-paper 有明显区分，
   // 幕布拉开时能清楚看到由金褐 → 米白的层次
-  --sm-curtain-bg: #E8D7A5;
+  --sm-curtain-bg: #e8d7a5;
 }
 
 // 暗色模式快捷变量 — 墨纸反转：暗底白墨
 html.dark {
-  --sm-ink-dark: #E8E2D6;
-  --sm-ink-medium: #D5CFC0;
-  --sm-ink-light: #8A8070;
+  --sm-ink-dark: #e8e2d6;
+  --sm-ink-medium: #d5cfc0;
+  --sm-ink-light: #8a8070;
   --sm-paper: #151210;
-  --sm-paper-light: #1C1914;
+  --sm-paper-light: #1c1914;
   --sm-paper-card: #252118;
 
-  --sm-paper-overlay: rgba(21, 18, 16, 0.90);
+  --sm-paper-overlay: rgba(21, 18, 16, 0.9);
   --sm-content-bg: rgba(25, 22, 18, 0.75);
   --sm-card-bg: rgba(28, 25, 20, 0.65);
   --sm-sidebar-bg: rgba(28, 25, 20, 0.55);
@@ -77,11 +74,11 @@ html.dark {
   --sm-c-border-medium: rgba(200, 190, 170, 0.25);
 
   // 开屏幕布：青黛夜幕色，与页面 --sm-paper 的纯黑形成冷暖对比
-  --sm-curtain-bg: #1D2230;
+  --sm-curtain-bg: #1d2230;
 
   // 主色衍生：useThemeCssVars 会注入 --sm-c-brand-dark / --sm-primary-*-dark
   // 这里把 --sm-accent 及半透明衍生切到暗色变体，并给出静态 fallback 以兜底 SSR 首帧
-  --sm-c-brand-dark: #B48666; // 默认棕色 #8B4513 向白靠 35%
+  --sm-c-brand-dark: #b48666; // 默认棕色 #8B4513 向白靠 35%
   --sm-accent: var(--sm-c-brand-dark, var(--sm-c-brand));
   --sm-primary-faint: var(--sm-primary-faint-dark, rgba(180, 134, 102, 0.15));
   --sm-primary-light: var(--sm-primary-light-dark, rgba(180, 134, 102, 0.22));

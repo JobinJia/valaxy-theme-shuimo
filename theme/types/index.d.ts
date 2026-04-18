@@ -138,6 +138,14 @@ export interface ThemeConfig extends DefaultTheme.Config {
     wordsPerMinute: number
   }>
 
+  /** 卷首语/题词配置（首页） */
+  preface: Partial<{
+    /** 引言文字 */
+    quote: string
+    /** 出处 / 署名，如 "—— 李白《静夜思》" */
+    source: string
+  }>
+
   /** 图片题注配置 */
   imageCaption: Partial<{
     /** 总开关 @default true */

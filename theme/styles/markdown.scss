@@ -30,7 +30,7 @@
     margin: 1.5em 0 0.8em;
     padding-left: 10px;
     font-weight: 600;
-    border-left: 4px solid var(--sm-ink-medium, #6B5E50);
+    border-left: 4px solid var(--sm-ink-medium, #6b5e50);
   }
 
   // 代码块
@@ -55,14 +55,24 @@
     color: var(--sm-ink-dark);
   }
 
-  // 引用
+  // 引用 — 毛笔侧锋竖线
   blockquote {
-    border-left: 3px solid var(--sm-ink-light);
-    padding: 8px 16px;
-    margin: 1.2em 0;
+    border-left: 4px solid var(--sm-ink-light);
+    border-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--sm-ink-light) 8%,
+        var(--sm-ink-medium) 30%,
+        var(--sm-ink-light) 70%,
+        transparent 100%
+      )
+      1;
+    padding: 10px 20px 10px 24px;
+    margin: 1.4em 0;
     color: var(--sm-ink-light);
     background: var(--sm-card-bg);
     border-radius: 0 3px 3px 0;
+    position: relative;
 
     p {
       text-indent: 0;
@@ -71,6 +81,28 @@
       &:last-child {
         margin-bottom: 0;
       }
+    }
+
+    // 落款/出处行
+    footer,
+    cite,
+    p:last-child em:only-child {
+      display: block;
+      text-align: right;
+      font-size: 0.9em;
+      font-style: italic;
+      color: var(--sm-ink-light);
+      opacity: 0.85;
+      margin-top: 0.3em;
+    }
+
+    // 嵌套引用递减
+    blockquote {
+      border-left-width: 3px;
+      background: rgba(0, 0, 0, 0.02);
+      opacity: 0.88;
+      margin: 0.8em 0;
+      padding: 8px 16px;
     }
   }
 
@@ -87,7 +119,8 @@
   }
 
   // 列表
-  ul, ol {
+  ul,
+  ol {
     padding-left: 2em;
     margin: 0.8em 0;
 
@@ -128,13 +161,144 @@
     border: none;
     // 当 --sm-brush-hr 存在时使用笔触，否则 fallback 到渐变
     height: 16px;
-    background: var(--sm-brush-hr, linear-gradient(90deg, transparent 0%, var(--sm-ink-light) 20%, var(--sm-ink-light) 80%, transparent 100%));
+    background: var(
+      --sm-brush-hr,
+      linear-gradient(90deg, transparent 0%, var(--sm-ink-light) 20%, var(--sm-ink-light) 80%, transparent 100%)
+    );
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0.4;
     margin: 2em auto;
     max-width: 300px;
+  }
+
+  // 脚注
+  .footnotes,
+  section.footnotes {
+    margin-top: 3em;
+    padding-top: 1.5em;
+    font-size: 0.85em;
+    color: var(--sm-ink-light);
+    position: relative;
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--sm-ink-light) 15%,
+        var(--sm-ink-medium) 50%,
+        var(--sm-ink-light) 85%,
+        transparent 100%
+      );
+      opacity: 0.35;
+    }
+
+    ol {
+      padding-left: 1.5em;
+    }
+
+    li {
+      margin-bottom: 0.4em;
+      line-height: 1.8;
+
+      p {
+        text-indent: 0;
+        margin-bottom: 0.3em;
+      }
+    }
+
+    .footnote-backref {
+      color: var(--sm-accent);
+      text-decoration: none;
+      margin-left: 4px;
+
+      &:hover {
+        opacity: 0.75;
+      }
+    }
+  }
+
+  // 脚注锚跳转平滑滚动
+  sup a[href^='#fn'] {
+    color: var(--sm-accent);
+    text-decoration: none;
+    font-size: 0.8em;
+    scroll-behavior: smooth;
+  }
+
+  :target {
+    scroll-margin-top: 80px;
+  }
+
+  // 自定义容器 — 水墨批注风格
+  .custom-block {
+    margin: 1.4em 0;
+    padding: 14px 18px;
+    border-left: 4px solid var(--sm-ink-light);
+    border-radius: 0 3px 3px 0;
+    background: var(--sm-card-bg);
+
+    .custom-block-title {
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 0.5em;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      text-indent: 0;
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    &.tip {
+      border-left-color: var(--sm-accent);
+      background: var(--sm-primary-faint);
+
+      .custom-block-title {
+        color: var(--sm-accent);
+      }
+    }
+
+    &.warning {
+      --_warning: #b8860b;
+      border-left-color: var(--_warning);
+      background: rgba(184, 134, 11, 0.07);
+
+      .custom-block-title {
+        color: var(--_warning);
+      }
+    }
+
+    &.danger {
+      border-left-color: var(--sm-stamp);
+      background: rgba(200, 16, 46, 0.06);
+
+      .custom-block-title {
+        color: var(--sm-stamp);
+      }
+    }
+
+    &.info {
+      --_info: #5a7a8a;
+      border-left-color: var(--_info);
+      background: rgba(90, 122, 138, 0.07);
+
+      .custom-block-title {
+        color: var(--_info);
+      }
+    }
   }
 
   // 表格
@@ -144,7 +308,8 @@
     margin: 1.2em 0;
     font-size: 14px;
 
-    th, td {
+    th,
+    td {
       padding: 8px 12px;
       border-bottom: 1px solid var(--sm-c-border);
       text-align: left;
@@ -179,7 +344,7 @@
     }
 
     blockquote {
-      padding: 6px 12px;
+      padding: 8px 14px 8px 18px;
     }
 
     pre {
@@ -194,7 +359,8 @@
       -webkit-overflow-scrolling: touch;
       font-size: 13px;
 
-      th, td {
+      th,
+      td {
         padding: 6px 10px;
         white-space: nowrap;
       }
@@ -203,5 +369,37 @@
     hr {
       max-width: 200px;
     }
+
+    .custom-block {
+      padding: 12px 14px;
+    }
   }
+}
+
+// 暗色模式适配
+html.dark .shuimo-article-content {
+  blockquote blockquote {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .custom-block {
+    &.warning {
+      --_warning: #d4a843;
+      background: rgba(212, 168, 67, 0.08);
+    }
+
+    &.danger {
+      background: rgba(212, 48, 46, 0.08);
+    }
+
+    &.info {
+      --_info: #7ca0b0;
+      background: rgba(124, 160, 176, 0.08);
+    }
+  }
+}
+
+// 脚注平滑滚动
+html {
+  scroll-behavior: smooth;
 }

@@ -84,7 +84,7 @@ function goBack() {
       <ShuimoToc />
 
       <!-- 文章正文：页面作为子路由，必须用 RouterView 渲染 -->
-      <article ref="articleRef" class="shuimo-post-page__content markdown-body">
+      <article ref="articleRef" class="shuimo-post-page__content markdown-body shuimo-article-content">
         <RouterView />
       </article>
 
@@ -98,6 +98,9 @@ function goBack() {
           :color="postStamp.color"
         />
       </div>
+
+      <!-- 系列文章导航 -->
+      <ShuimoSeriesNav />
 
       <!-- 上一篇 / 下一篇 -->
       <nav v-if="prev || next" class="shuimo-post-page__nav">

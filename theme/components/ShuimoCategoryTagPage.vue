@@ -3,20 +3,20 @@ import type { Post } from 'valaxy'
 import { computed } from 'vue'
 import { useGoBack, useThemeConfig } from '../composables'
 
-const { goBack } = useGoBack()
-
 const props = defineProps<{
   title: string
   posts: Post[]
   type: 'category' | 'tag'
 }>()
 
+const { goBack } = useGoBack()
+
 const themeConfig = useThemeConfig()
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const author = computed(() => themeConfig.value?.sidebar?.author)
 
-function formatDate(date: string | Date) {
-  const d = new Date(date)
+function formatDate(date: string | number | Date | undefined) {
+  const d = new Date(date ?? 0)
   return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 </script>

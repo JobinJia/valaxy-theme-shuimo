@@ -5,7 +5,7 @@
 
 type Task<T = any> = () => Promise<T>
 
-let queue: Array<{ task: Task, resolve: (v: any) => void, reject: (e: any) => void }> = []
+const queue: Array<{ task: Task, resolve: (v: any) => void, reject: (e: any) => void }> = []
 let running = false
 
 async function processQueue() {

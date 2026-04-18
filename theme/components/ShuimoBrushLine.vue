@@ -133,11 +133,7 @@ onMounted(async () => {
 
   // ink 变体 fallback
   &--ink &__fallback {
-    background: linear-gradient(
-      90deg,
-      var(--sm-ink-medium),
-      transparent
-    );
+    background: linear-gradient(90deg, var(--sm-ink-medium), transparent);
     border-radius: 1px;
   }
 
@@ -147,23 +143,11 @@ onMounted(async () => {
   }
 
   &--light#{&}--horizontal &__fallback {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--sm-ink-medium) 15%,
-      var(--sm-ink-medium) 85%,
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, var(--sm-ink-medium) 15%, var(--sm-ink-medium) 85%, transparent);
   }
 
   &--light#{&}--vertical &__fallback {
-    background: linear-gradient(
-      180deg,
-      transparent,
-      var(--sm-ink-medium) 15%,
-      var(--sm-ink-medium) 85%,
-      transparent
-    );
+    background: linear-gradient(180deg, transparent, var(--sm-ink-medium) 15%, var(--sm-ink-medium) 85%, transparent);
   }
 }
 </style>

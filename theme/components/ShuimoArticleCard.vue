@@ -22,7 +22,7 @@ defineProps<{
     />
 
     <div class="shuimo-card__meta">
-      <ShuimoDate :date="post.date" />
+      <ShuimoDate :date="post.date ? String(post.date) : undefined" />
       <span v-if="post.categories" class="shuimo-card__cat">
         · {{ Array.isArray(post.categories) ? post.categories.join(' / ') : post.categories }}
       </span>

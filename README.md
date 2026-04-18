@@ -8,8 +8,8 @@ An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/
 
 ## 预览 / Preview
 
-| Light | Dark |
-|-------|------|
+| Light                                          | Dark                                         |
+| ---------------------------------------------- | -------------------------------------------- |
 | ![Light Mode](./screenshots/preview-light.png) | ![Dark Mode](./screenshots/preview-dark.png) |
 
 ## 特性 / Features
@@ -76,38 +76,38 @@ export default defineConfig<ThemeConfig>({
 
 ## 主题配置 / Theme Config
 
-| 配置项 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `colors.primary` | `string` | `'#8B4513'` | 主色（古铜） |
-| `colors.stamp` | `string` | `'#C8102E'` | 印章色（朱红） |
-| `fonts.serif` | `string` | `'Noto Serif SC', ...` | 衬线字体 |
-| `fonts.title` | `string` | - | 标题字体（如篆书） |
-| `fonts.body` | `string` | - | 正文字体 |
-| `fonts.url` | `string` | - | 外部字体 URL |
-| `header.title` | `string` | `'墨韵书斋'` | 站名 |
-| `header.subtitle` | `string` | `'以墨会友 · 以文载道'` | 副标题 |
-| `footer.since` | `number` | `2024` | 建站年份 |
-| `footer.powered` | `boolean` | `true` | 显示 Valaxy 驱动标识 |
-| `footer.beian.enable` | `boolean` | `false` | 启用备案号 |
-| `footer.beian.icp` | `string` | `''` | ICP 备案号 |
-| `sidebar.author.name` | `string` | `'墨客'` | 作者名（About / 归档 / 分类 / 首页竖排导航 / 文章页均会读取） |
-| `sidebar.author.motto` | `string` | `'以码为墨，以屏为纸'` | 座右铭 |
-| `sidebar.author.avatar` | `string` | - | 头像路径（首页竖排导航、文章页左上角使用） |
-| `nav` | `NavItem[]` | `[]` | 导航项 `{ text, link, icon? }` |
-| `stamp.enable` | `boolean` | `true` | 启用印章 |
-| `stamp.author` | `string` | `'墨'` | 印章文字 |
-| `stamp.type` | `'yin' \| 'yang'` | `'yin'` | 阴章/阳章 |
-| `stamp.shape` | `'auto' \| 'circle' \| 'ellipse'` | `'auto'` | 印章形状 |
-| `decorations.enable` | `boolean` | `true` | 启用装饰 |
-| `decorations.seasonAware` | `boolean` | `true` | 四季花卉自动切换 |
-| `decorations.heroLandscape` | `boolean` | `true` | 首页山水画 |
-| `decorations.curtainColor` | `ThemeModeColor` | `''` | 首页幕布颜色，默认跟随纸张底色；支持 `string` 或 `{ light, dark }` |
-| `decorations.curtainPaperColor` | `ThemeModeColor` | `''` | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant`；支持 `string` 或 `{ light, dark }` |
-| `decorations.opacity` | `number` | `0.12` | 装饰透明度 |
-| `xuanPaper.enable` | `boolean` | `true` | 启用宣纸纹理 |
-| `xuanPaper.variant` | `'processed' \| 'aged' \| 'gold'` | `'processed'` | 纸张变体 |
-| `xuanPaper.goldDensity` | `number` | `0.3` | 洒金密度 (0–1)，仅 `variant: 'gold'` 生效 |
-| `brushStrokes.enable` | `boolean` | `true` | 启用毛笔线条 |
+| 配置项                          | 类型                              | 默认值                  | 说明                                                                               |
+| ------------------------------- | --------------------------------- | ----------------------- | ---------------------------------------------------------------------------------- |
+| `colors.primary`                | `string`                          | `'#8B4513'`             | 主色（古铜）                                                                       |
+| `colors.stamp`                  | `string`                          | `'#C8102E'`             | 印章色（朱红）                                                                     |
+| `fonts.serif`                   | `string`                          | `'Noto Serif SC', ...`  | 衬线字体                                                                           |
+| `fonts.title`                   | `string`                          | -                       | 标题字体（如篆书）                                                                 |
+| `fonts.body`                    | `string`                          | -                       | 正文字体                                                                           |
+| `fonts.url`                     | `string`                          | -                       | 外部字体 URL                                                                       |
+| `header.title`                  | `string`                          | `'墨韵书斋'`            | 站名                                                                               |
+| `header.subtitle`               | `string`                          | `'以墨会友 · 以文载道'` | 副标题                                                                             |
+| `footer.since`                  | `number`                          | `2024`                  | 建站年份                                                                           |
+| `footer.powered`                | `boolean`                         | `true`                  | 显示 Valaxy 驱动标识                                                               |
+| `footer.beian.enable`           | `boolean`                         | `false`                 | 启用备案号                                                                         |
+| `footer.beian.icp`              | `string`                          | `''`                    | ICP 备案号                                                                         |
+| `sidebar.author.name`           | `string`                          | `'墨客'`                | 作者名（About / 归档 / 分类 / 首页竖排导航 / 文章页均会读取）                      |
+| `sidebar.author.motto`          | `string`                          | `'以码为墨，以屏为纸'`  | 座右铭                                                                             |
+| `sidebar.author.avatar`         | `string`                          | -                       | 头像路径（首页竖排导航、文章页左上角使用）                                         |
+| `nav`                           | `NavItem[]`                       | `[]`                    | 导航项 `{ text, link, icon? }`                                                     |
+| `stamp.enable`                  | `boolean`                         | `true`                  | 启用印章                                                                           |
+| `stamp.author`                  | `string`                          | `'墨'`                  | 印章文字                                                                           |
+| `stamp.type`                    | `'yin' \| 'yang'`                 | `'yin'`                 | 阴章/阳章                                                                          |
+| `stamp.shape`                   | `'auto' \| 'circle' \| 'ellipse'` | `'auto'`                | 印章形状                                                                           |
+| `decorations.enable`            | `boolean`                         | `true`                  | 启用装饰                                                                           |
+| `decorations.seasonAware`       | `boolean`                         | `true`                  | 四季花卉自动切换                                                                   |
+| `decorations.heroLandscape`     | `boolean`                         | `true`                  | 首页山水画                                                                         |
+| `decorations.curtainColor`      | `ThemeModeColor`                  | `''`                    | 首页幕布颜色，默认跟随纸张底色；支持 `string` 或 `{ light, dark }`                 |
+| `decorations.curtainPaperColor` | `ThemeModeColor`                  | `''`                    | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant`；支持 `string` 或 `{ light, dark }` |
+| `decorations.opacity`           | `number`                          | `0.12`                  | 装饰透明度                                                                         |
+| `xuanPaper.enable`              | `boolean`                         | `true`                  | 启用宣纸纹理                                                                       |
+| `xuanPaper.variant`             | `'processed' \| 'aged' \| 'gold'` | `'processed'`           | 纸张变体                                                                           |
+| `xuanPaper.goldDensity`         | `number`                          | `0.3`                   | 洒金密度 (0–1)，仅 `variant: 'gold'` 生效                                          |
+| `brushStrokes.enable`           | `boolean`                         | `true`                  | 启用毛笔线条                                                                       |
 
 ### `ThemeModeColor`
 

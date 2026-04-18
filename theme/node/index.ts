@@ -85,6 +85,8 @@ export const defaultThemeConfig: ThemeConfig = {
     autoNumbering: true,
     prefix: '图',
   },
+
+  preface: {},
 }
 
 export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {

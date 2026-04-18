@@ -15,3 +15,6 @@ shuimo:
   updated_at: '更新于 {date}'
   original: 原创
   figure_prefix: 图
+  archives: 归档
+  categories_title: 分类
+  tags_title: 标签

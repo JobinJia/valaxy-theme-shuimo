@@ -242,12 +242,14 @@ async function buildScene(W: number, H: number): Promise<{ svg: string, blankSid
     const s = Math.random() * 100
 
     if (item.tag === 'mount') {
-      svgParts.push(Mount.mountain(item.x, item.y, s, {
+      const result = Mount.mountain(item.x, item.y, s, {
         hei: 80 + Math.random() * 250,
         wid: 350 + Math.random() * 200,
         tex: 180,
         veg: true,
-      }))
+      })
+      if (typeof result === 'string')
+        svgParts.push(result)
     }
     else if (item.tag === 'flatmount') {
       svgParts.push(Mount.flatMount(item.x, item.y, s, {
@@ -271,7 +273,6 @@ async function buildScene(W: number, H: number): Promise<{ svg: string, blankSid
     }
     else if (item.tag === 'arch03') {
       svgParts.push(Arch.arch03(item.x, item.y, s, {
-        hei: 8 + Math.random() * 4,
         wid: 35 + Math.random() * 20,
         sto: 4 + Math.floor(Math.random() * 4),
       }))

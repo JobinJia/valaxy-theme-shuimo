@@ -2,6 +2,8 @@
 title: 春雨润笔端
 date: 2025-03-22
 categories: 技术
+series: 水墨技术笔记
+seriesOrder: 2
 tags:
   - Canvas
   - 水墨

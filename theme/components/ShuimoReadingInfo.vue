@@ -15,14 +15,14 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useThemeConfig } from '../composables'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const themeConfig = useThemeConfig()
 const route = useRoute()
 const config = computed(() => themeConfig.value?.readingInfo)
 const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
 
 const wordCount = ref(0)
-const readingTime = ref(0)
+const readingTime = ref(frontmatter.value.readingTime ?? 0)
 const wpm = computed(() => config.value?.wordsPerMinute ?? 300)
 
 /**
@@ -37,7 +37,8 @@ function countWords() {
   const cjk = text.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g)
   const latin = text.match(/[a-z0-9]+/gi)
   wordCount.value = (cjk?.length || 0) + (latin?.length || 0)
-  readingTime.value = Math.max(1, Math.ceil(wordCount.value / wpm.value))
+  if (frontmatter.value.readingTime == null)
+    readingTime.value = Math.max(1, Math.ceil(wordCount.value / wpm.value))
 }
 
 /** Format the updated date from frontmatter (supports `updated` or `lastUpdated`). */
@@ -45,7 +46,7 @@ const updatedDate = computed(() => {
   const d = frontmatter.value.updated || frontmatter.value.lastUpdated
   if (!d)
     return ''
-  return new Date(d).toLocaleDateString('zh-CN')
+  return new Intl.DateTimeFormat(locale.value, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(d))
 })
 
 const isOriginal = computed(() => frontmatter.value.original === true)

@@ -14,7 +14,7 @@ describe('hashString', () => {
   })
 
   it('always returns a non-negative integer', () => {
-    const values = ['', 'a', 'shuimo', '\u4e2d\u6587\u79cd\u5b50', 'x'.repeat(256)]
+    const values = ['', 'a', 'shuimo', '\u4E2D\u6587\u79CD\u5B50', 'x'.repeat(256)]
       .map(hashString)
     for (const v of values) {
       expect(Number.isInteger(v)).toBe(true)

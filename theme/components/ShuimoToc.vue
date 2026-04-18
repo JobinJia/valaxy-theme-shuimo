@@ -11,9 +11,11 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { useThemeConfig } from '../composables'
 
 const { t } = useI18n()
+const route = useRoute()
 const themeConfig = useThemeConfig()
 const tocConfig = computed(() => themeConfig.value?.toc)
 const maxDepth = computed(() => tocConfig.value?.maxDepth ?? 3)
@@ -54,25 +56,31 @@ function extractHeadings() {
 }
 
 let observer: IntersectionObserver | null = null
+let activeDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 /**
  * Set up an IntersectionObserver to track which heading is currently
  * visible in the viewport. Updates `activeId` to highlight the
- * corresponding TOC item.
+ * corresponding TOC item. Uses debounce to prevent flicker on short sections.
  */
 function setupObserver() {
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          activeId.value = entry.target.id
+          const id = entry.target.id
+          if (activeDebounceTimer)
+            clearTimeout(activeDebounceTimer)
+          activeDebounceTimer = setTimeout(() => {
+            activeId.value = id
+          }, 30)
           break
         }
       }
     },
-    // Top margin accounts for fixed header; bottom 80% ensures
-    // a heading is considered "active" when it enters the top 20%
-    { rootMargin: '-60px 0px -80% 0px' },
+    // Bias toward top of viewport: heading is "active" when in top 30%.
+    // Using -70% instead of -80% improves stability for short sections.
+    { rootMargin: '-60px 0px -70% 0px' },
   )
 
   headings.value.forEach((h) => {
@@ -80,6 +88,20 @@ function setupObserver() {
     if (el)
       observer!.observe(el)
   })
+}
+
+/**
+ * Initialize activeId from URL hash. If the hash matches a known heading,
+ * set it as active immediately so the TOC highlights correctly on load.
+ */
+function initFromHash() {
+  const hash = route.hash || window.location.hash
+  if (!hash)
+    return
+  const id = decodeURIComponent(hash.slice(1))
+  if (id && headings.value.some(h => h.id === id)) {
+    activeId.value = id
+  }
 }
 
 /** Smooth-scroll to a heading and close the mobile panel. */
@@ -98,14 +120,18 @@ let timerId: ReturnType<typeof setTimeout> | null = null
 onMounted(() => {
   timerId = setTimeout(() => {
     extractHeadings()
-    if (headings.value.length)
+    if (headings.value.length) {
+      initFromHash()
       setupObserver()
+    }
   }, 300)
 })
 
 onBeforeUnmount(() => {
   if (timerId)
     clearTimeout(timerId)
+  if (activeDebounceTimer)
+    clearTimeout(activeDebounceTimer)
   observer?.disconnect()
 })
 </script>
