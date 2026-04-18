@@ -17,7 +17,7 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
     <ShuimoStamp
       :text="isDark ? '月映' : '日照'"
       :type="isDark ? 'yin' : 'yang'"
-      shape="ellipse"
+      shape="rectangle"
       color="#8B2500"
       :font-family="titleFont"
       :size="80"

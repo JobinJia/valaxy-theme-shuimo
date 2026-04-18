@@ -20,7 +20,7 @@ import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 const props = withDefaults(defineProps<{
   text?: string
   type?: 'yin' | 'yang'
-  shape?: 'auto' | 'circle' | 'ellipse'
+  shape?: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
   fontFamily?: string
   size?: number
   /** 文字水平偏移，范围 -1~1；负值左移（右侧留白变大），正值右移 */

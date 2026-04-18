@@ -72,7 +72,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 阴章/阳章 @default 'yin' */
     type: 'yin' | 'yang'
     /** 印章形状 @default 'auto' */
-    shape: 'auto' | 'circle' | 'ellipse'
+    shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
   }>
 
   /** 画面装饰配置 */
