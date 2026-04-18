@@ -1,21 +1,9 @@
-/**
- * useImageCaption — Composable that enhances article images with figure captions.
- *
- * Scans a container element for `<img>` tags with `alt` text, wraps each in a
- * `<figure>` element, and appends a `<figcaption>` with optional auto-numbering.
- *
- * The DOM changes are reverted automatically on component unmount or when
- * options change (the composable re-runs the enhancement).
- *
- * Images without alt text are left untouched.
- */
 import type { Ref } from 'vue'
 import { onMounted, onUnmounted, watch } from 'vue'
 
 export interface ImageCaptionOptions {
   enable?: boolean
   autoNumbering?: boolean
-  /** Numbering prefix, e.g. "图" or "Fig." */
   prefix?: string
 }
 
@@ -25,14 +13,12 @@ export function useImageCaption(
 ) {
   let cleanup: (() => void) | null = null
 
-  /** Wrap qualifying images in <figure>/<figcaption> elements. */
   function enhance() {
     revert()
     const container = containerRef.value
     if (!container || options.value.enable === false)
       return
 
-    // Select images with alt text that haven't already been wrapped
     const imgs = container.querySelectorAll('img[alt]:not(.shuimo-figure img)')
     let index = 0
 
@@ -48,12 +34,15 @@ export function useImageCaption(
       const caption = document.createElement('figcaption')
       caption.className = 'shuimo-figure__caption'
 
-      if (options.value.autoNumbering !== false) {
-        const prefix = options.value.prefix || '图'
-        caption.textContent = `${prefix} ${index}. ${alt}`
+      const title = img.getAttribute('title')?.trim()
+      const prefix = options.value.prefix || '图'
+      const numberStr = options.value.autoNumbering !== false ? `${prefix} ${index}. ` : ''
+
+      if (title && title !== alt) {
+        caption.innerHTML = `<span class="shuimo-figure__caption-main">${numberStr}${alt}</span><span class="shuimo-figure__caption-sub">${title}</span>`
       }
       else {
-        caption.textContent = alt
+        caption.textContent = `${numberStr}${alt}`
       }
 
       if (!img.parentNode)
@@ -63,7 +52,6 @@ export function useImageCaption(
       figure.appendChild(caption)
     })
 
-    // Store a cleanup function that reverses the DOM changes
     cleanup = () => {
       const figures = container.querySelectorAll('.shuimo-figure')
       figures.forEach((figure) => {
@@ -76,7 +64,6 @@ export function useImageCaption(
     }
   }
 
-  /** Revert any previous DOM changes. */
   function revert() {
     if (cleanup) {
       cleanup()
@@ -84,13 +71,11 @@ export function useImageCaption(
     }
   }
 
-  // Delay enhancement to ensure images are rendered
   onMounted(() => {
     setTimeout(enhance, 400)
   })
 
   onUnmounted(revert)
 
-  // Re-enhance when options change (e.g. toggling numbering)
   watch(options, enhance, { deep: true })
 }

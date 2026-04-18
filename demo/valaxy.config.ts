@@ -83,6 +83,10 @@ export default defineConfig<ThemeConfig>({
       enable: true,
     },
 
+    hero: {
+      showSeedControl: true,
+    },
+
     preface: {
       quote: '落梅听风雪，隔窗枕雨眠',
       source: '—— 月牙',

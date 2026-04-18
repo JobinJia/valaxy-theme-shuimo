@@ -1,43 +1,39 @@
 <script setup lang="ts">
-import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
 import { useThemeConfig } from '../composables'
+import { getSolarTerm, getTimeOfDay } from '../composables/useSolarTerm'
 
-const { isDark, toggleDark } = useValaxyDark()
 const themeConfig = useThemeConfig()
 const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
+const term = getSolarTerm()
+const time = getTimeOfDay()
 </script>
 
 <template>
-  <button
-    class="shuimo-theme-toggle"
-    :title="isDark ? '切换亮色' : '切换暗色'"
-    @click="toggleDark()"
-  >
+  <div class="shuimo-solar-seal" :title="`${term.name} · ${time.shichen}时`">
     <ShuimoStamp
-      :text="isDark ? '月映' : '日照'"
-      :type="isDark ? 'yin' : 'yang'"
+      :text="term.name"
+      type="yang"
       shape="ellipse"
       color="#8B2500"
       :font-family="titleFont"
       :size="80"
     />
-  </button>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.shuimo-theme-toggle {
+.shuimo-solar-seal {
   position: fixed;
   top: 10px;
-  right: 8px;
-  z-index: 100;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
+  right: 56px;
+  z-index: 3;
+  opacity: 0.65;
+  transition: opacity 0.3s;
+  cursor: default;
+  pointer-events: auto;
   transform: scale(0.5);
   transform-origin: top right;
-  opacity: 0.65;
 
   &:hover {
     opacity: 0.9;
@@ -45,10 +41,14 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
 }
 
 @media (max-width: 767px) {
-  .shuimo-theme-toggle {
+  .shuimo-solar-seal {
     top: 6px;
-    right: 6px;
-    transform: scale(0.38);
+    right: 46px;
+
+    :deep(.shuimo-stamp) {
+      transform: scale(0.4);
+      transform-origin: top right;
+    }
   }
 }
 </style>

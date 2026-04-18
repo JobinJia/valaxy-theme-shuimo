@@ -80,6 +80,10 @@ export const defaultThemeConfig: ThemeConfig = {
     wordsPerMinute: 300,
   },
 
+  hero: {
+    showSeedControl: false,
+  },
+
   imageCaption: {
     enable: true,
     autoNumbering: true,

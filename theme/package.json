@@ -18,7 +18,8 @@
   "types": "types/index.ts",
   "dependencies": {
     "@iconify-json/ant-design": "catalog:",
-    "@iconify-json/simple-icons": "catalog:"
+    "@iconify-json/simple-icons": "catalog:",
+    "@shuimo-design/lunar": "catalog:"
   },
   "devDependencies": {
     "valaxy": "catalog:"

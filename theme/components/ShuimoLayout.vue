@@ -5,7 +5,7 @@ import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
-import { generateXuanPaperTexture, provideBlankSide, useThemeConfig, useThemeCssVars } from '../composables'
+import { generateXuanPaperTexture, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
 
 const props = withDefaults(defineProps<{
   verticalNav?: boolean
@@ -52,6 +52,10 @@ const curtainStampSize = computed(() => {
   const textLength = curtainStampText.value.replace(/[,，]/g, '').length
   return textLength > 2 ? 116 : 104
 })
+const currentSeed = ref(0)
+const showSeedControl = computed(() =>
+  heroLandscapeEnabled.value && themeConfig.value?.hero?.showSeedControl === true,
+)
 const curtainPaperUrl = ref<string | null>(null)
 const curtainStyle = computed(() => {
   const userColor = resolveModeColor(themeConfig.value?.decorations?.curtainColor, isDark.value)
@@ -124,6 +128,10 @@ async function ensureCurtainPaperReady() {
   }
 }
 
+function onSeedGenerated(seed: number) {
+  currentSeed.value = seed
+}
+
 function onLandscapeReady() {
   curtainPlayedInSession = true
   requestAnimationFrame(() => {
@@ -132,6 +140,10 @@ function onLandscapeReady() {
 }
 
 onMounted(() => {
+  const heroSeed = themeConfig.value?.hero?.seed
+  if (typeof heroSeed === 'number')
+    setFixedSeed(heroSeed)
+
   if (!heroLandscapeEnabled.value)
     return
   ensureCurtainStampFontReady()
@@ -167,8 +179,10 @@ watch(() => route.path, () => {
 
 <template>
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]" :style="themeCssVars">
+    <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     <ShuimoThemeToggle />
-    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" />
+    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" @seed-generated="onSeedGenerated" />
+    <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="revealed" />

@@ -46,6 +46,23 @@
     line-height: 1.6;
   }
 
+  // 代码块语言标签（Shiki / Valaxy 生成）
+  div[class*='language-'] {
+    position: relative;
+
+    &::before {
+      color: var(--sm-accent, var(--sm-c-brand)) !important;
+      font-size: 11px !important;
+      opacity: 0.85;
+    }
+  }
+
+  .lang {
+    color: var(--sm-accent, var(--sm-c-brand)) !important;
+    font-size: 11px !important;
+    opacity: 0.85;
+  }
+
   code:not(pre code) {
     background: var(--sm-paper-card);
     padding: 2px 6px;
@@ -154,6 +171,36 @@
     font-family: var(--sm-font-kai);
     letter-spacing: 1px;
     text-indent: 0;
+    line-height: 1.6;
+  }
+
+  .shuimo-figure__caption-main {
+    display: block;
+  }
+
+  .shuimo-figure__caption-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--sm-ink-light);
+    opacity: 0.75;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  @media (max-width: 767px) {
+    .shuimo-figure {
+      margin: 1em 0;
+    }
+
+    .shuimo-figure__caption {
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 0 8px;
+    }
+
+    .shuimo-figure__caption-sub {
+      font-size: 10px;
+    }
   }
 
   // 分隔线

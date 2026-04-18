@@ -18,6 +18,9 @@ catalogs:
     '@jobinjia/shuimo-core':
       specifier: ^0.0.3
       version: 0.0.3
+    '@shuimo-design/lunar':
+      specifier: ^0.0.8
+      version: 0.0.8
     '@unocss/eslint-plugin':
       specifier: ^66.5.10
       version: 66.6.8
@@ -98,6 +101,9 @@ importers:
       '@jobinjia/shuimo-core':
         specifier: '>=0.0.3'
         version: 0.0.3
+      '@shuimo-design/lunar':
+        specifier: 'catalog:'
+        version: 0.0.8
     devDependencies:
       valaxy:
         specifier: 'catalog:'
@@ -1342,6 +1348,9 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+
+  '@shuimo-design/lunar@0.0.8':
+    resolution: {integrity: sha512-vClxjhwBld4GurQeBGWSOKmp7d4DL2CoV9F5tjshhDn6IHi1ZqJv2UUZiaj6v2Anpx9zyUCGGaCC4iv4ODuoAA==}
 
   '@sindresorhus/base62@1.0.0':
     resolution: {integrity: sha512-TeheYy0ILzBEI/CO55CP6zJCSdSWeRtGnHy8U8dWSUH4I68iqTsy7HkMktR4xakThc9jotkPQUXT4ITdbV7cHA==}
@@ -5922,6 +5931,8 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
+
+  '@shuimo-design/lunar@0.0.8': {}
 
   '@sindresorhus/base62@1.0.0': {}
 

@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
 import { onMounted, ref, watch } from 'vue'
-import { generateXuanPaperTexture, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
+import { generateXuanPaperTexture, getSessionSeed, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
 
 const emit = defineEmits<{
   ready: []
+  seedGenerated: [seed: number]
 }>()
 
 interface HeroSceneCache {
   svg: string
   blankSide: 'left' | 'right'
+  seed: number
   W: number
   H: number
 }
@@ -225,13 +227,14 @@ function planScene(
  * 生成山水画 SVG 字符串与本次留白方向
  * 直接注入 DOM，不经过 Canvas 转换（与 shan-shui-inf 同样做法）
  */
-async function buildScene(W: number, H: number): Promise<{ svg: string, blankSide: 'left' | 'right' }> {
+async function buildScene(W: number, H: number): Promise<{ svg: string, blankSide: 'left' | 'right', seed: number }> {
   const { noise } = await import('@jobinjia/shuimo-core/foundation')
   const { Mount, Arch } = await import('@jobinjia/shuimo-core/elements')
-  const seed = Math.floor(Math.random() * 99999)
+  const heroConfig = themeConfig.value?.hero
+  const seed = heroConfig?.seed ?? getSessionSeed()
 
-  // 随机选择留白方向：左上或右上
-  const blankSide: 'left' | 'right' = Math.random() > 0.5 ? 'left' : 'right'
+  // 留白方向由 seed 决定，保证同一 seed 画面一致
+  const blankSide: 'left' | 'right' = seed % 2 === 0 ? 'left' : 'right'
 
   const noiseFn = (x: number, y: number, z?: number) => noise.noise(x, y, z ?? 0)
   const plan = planScene(W, H, seed, noiseFn, blankSide)
@@ -285,7 +288,7 @@ async function buildScene(W: number, H: number): Promise<{ svg: string, blankSid
     ${svgParts.join('\n')}
   </svg>`
 
-  return { svg, blankSide }
+  return { svg, blankSide, seed }
 }
 
 async function getHeroScene(W: number, H: number): Promise<HeroSceneCache> {
@@ -320,7 +323,7 @@ onMounted(async () => {
     const scene = await getHeroScene(W, H)
     setBlankSide(scene.blankSide)
     el.innerHTML = scene.svg
-    // 通知父组件画面已就绪，可以开幕
+    emit('seedGenerated', scene.seed)
     emit('ready')
   }
   catch (e) {

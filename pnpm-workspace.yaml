@@ -7,6 +7,7 @@ catalog:
   '@iconify-json/ant-design': ^1.2.5
   '@iconify-json/simple-icons': ^1.2.61
   '@jobinjia/shuimo-core': ^0.0.3
+  '@shuimo-design/lunar': ^0.0.8
   '@unocss/eslint-plugin': ^66.5.10
   bumpp: ^10.3.2
   eslint: ^9.39.1

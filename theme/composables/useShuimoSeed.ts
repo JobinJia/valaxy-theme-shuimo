@@ -1,8 +1,5 @@
 import { computed, ref } from 'vue'
 
-/**
- * 简单的字符串哈希函数（DJB2），导出用于单测种子确定性
- */
 export function hashString(str: string): number {
   let hash = 5381
   for (let i = 0; i < str.length; i++)
@@ -10,34 +7,28 @@ export function hashString(str: string): number {
   return Math.abs(hash)
 }
 
-// 每次页面加载生成一个随机种子，整个会话内保持一致
-// 刷新页面 → 新种子 → 新画面
 const sessionSeed = ref(Math.floor(Math.random() * 100000))
 
-/**
- * 页面级种子：每次刷新不同
- */
 export function usePageSeed() {
   return computed(() => sessionSeed.value)
 }
 
-/**
- * 组件级种子：同一页面上不同组件使用不同种子
- */
 export function useComponentSeed(name: string) {
   return computed(() => sessionSeed.value ^ hashString(name))
 }
 
-/**
- * 强制刷新种子（生成全新的画面）
- */
 export function refreshSeed() {
   sessionSeed.value = Math.floor(Math.random() * 100000)
 }
 
-/**
- * 获取当前季节（用于四君子装饰选择）
- */
+export function setFixedSeed(seed: number) {
+  sessionSeed.value = seed
+}
+
+export function getSessionSeed(): number {
+  return sessionSeed.value
+}
+
 export function getCurrentSeason(): 'spring' | 'summer' | 'autumn' | 'winter' {
   const month = new Date().getMonth() + 1
   if (month >= 3 && month <= 5)
@@ -49,9 +40,6 @@ export function getCurrentSeason(): 'spring' | 'summer' | 'autumn' | 'winter' {
   return 'winter'
 }
 
-/**
- * 根据季节返回对应的花卉类型
- */
 export function getSeasonFlora(): 'orchid' | 'bamboo' | 'chrysanthemum' | 'plum' {
   const season = getCurrentSeason()
   const floraMap = {

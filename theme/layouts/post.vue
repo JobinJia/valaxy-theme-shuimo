@@ -33,7 +33,7 @@ const postStamp = computed(() => {
     enable: fm.enable ?? global.enable ?? true,
     text: fm.text ?? fm.author ?? global.author ?? '墨',
     type: fm.type ?? global.type ?? 'yin',
-    shape: fm.shape ?? global.shape ?? 'auto',
+    shape: fm.shape ?? 'auto',
     color: fm.color,
     size: fm.size,
   }
@@ -94,7 +94,7 @@ function goBack() {
           :text="postStamp.text"
           :type="postStamp.type"
           :shape="postStamp.shape"
-          :size="postStamp.size || 40"
+          :size="postStamp.size || 64"
           :color="postStamp.color"
         />
       </div>

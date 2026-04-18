@@ -15,7 +15,11 @@ export type ThemeModeColor = string | {
   dark?: string
 }
 
+export type ThemePreset = 'classic' | 'night' | 'gold' | 'minimal' | 'album'
+
 export interface ThemeConfig extends DefaultTheme.Config {
+  /** 主题预设，一键套用风格 */
+  preset?: ThemePreset
   colors: {
     /** 主色（古铜） @default '#8B4513' */
     primary: string
@@ -144,6 +148,14 @@ export interface ThemeConfig extends DefaultTheme.Config {
     quote: string
     /** 出处 / 署名，如 "—— 李白《静夜思》" */
     source: string
+  }>
+
+  /** 首页山水 seed 配置 */
+  hero: Partial<{
+    /** 固定 seed（设置后每次加载画面相同） */
+    seed: number
+    /** 显示 seed 控制面板（复制 / 随机） @default false */
+    showSeedControl: boolean
   }>
 
   /** 图片题注配置 */
