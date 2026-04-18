@@ -43,6 +43,11 @@ function goBack() {
   <ShuimoClickPetals />
   <ShuimoLayout>
     <div :key="route.path" class="shuimo-post-page">
+      <!-- 顶部返回 -->
+      <a href="#" class="shuimo-post-page__back shuimo-post-page__back--top" @click.prevent="goBack">
+        ← {{ t('shuimo.back') }}
+      </a>
+
       <!-- 头像回首页 -->
       <router-link v-if="author?.avatar" to="/" class="shuimo-post-page__avatar-link">
         <img :src="author.avatar" :alt="author?.name || ''" class="shuimo-post-page__avatar">
@@ -284,16 +289,22 @@ function goBack() {
   }
 
   &__back {
-    margin-top: 40px;
     font-size: 13px;
     color: var(--sm-ink-light);
     text-decoration: none;
     letter-spacing: 2px;
     font-family: var(--sm-font-kai);
     transition: color 0.2s;
+    margin-top: 40px;
 
     &:hover {
       color: var(--sm-accent);
+    }
+
+    &--top {
+      align-self: flex-start;
+      margin-top: 0;
+      margin-bottom: 16px;
     }
   }
 }
