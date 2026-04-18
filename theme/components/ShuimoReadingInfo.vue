@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * ShuimoReadingInfo — Displays article reading metadata.
+ *
+ * Shows word count, estimated reading time, optional update date,
+ * and optional "original" badge. Placed below the article title.
+ *
+ * Word counting is CJK-aware: Chinese characters are counted individually,
+ * while Latin words are counted by whitespace boundaries.
+ *
+ * Configurable via `themeConfig.readingInfo.*` options.
+ */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -14,6 +25,10 @@ const wordCount = ref(0)
 const readingTime = ref(0)
 const wpm = computed(() => config.value?.wordsPerMinute ?? 300)
 
+/**
+ * Count words in the article content element.
+ * CJK characters are counted individually; Latin words by regex match.
+ */
 function countWords() {
   const article = document.querySelector('.shuimo-post-page__content')
   if (!article)
@@ -25,6 +40,7 @@ function countWords() {
   readingTime.value = Math.max(1, Math.ceil(wordCount.value / wpm.value))
 }
 
+/** Format the updated date from frontmatter (supports `updated` or `lastUpdated`). */
 const updatedDate = computed(() => {
   const d = frontmatter.value.updated || frontmatter.value.lastUpdated
   if (!d)
@@ -36,6 +52,7 @@ const isOriginal = computed(() => frontmatter.value.original === true)
 
 let timerId: ReturnType<typeof setTimeout> | null = null
 
+// Delay counting to ensure article content is rendered
 onMounted(() => {
   timerId = setTimeout(countWords, 300)
 })
@@ -48,15 +65,19 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="config?.enable !== false" class="shuimo-reading-info">
+    <!-- Original content badge -->
     <span v-if="isOriginal && config?.originalMark" class="shuimo-reading-info__original">
       {{ t('shuimo.original') }}
     </span>
+    <!-- Word count -->
     <span v-if="config?.wordCount !== false && wordCount > 0" class="shuimo-reading-info__item">
       {{ t('shuimo.word_count', { count: wordCount }) }}
     </span>
+    <!-- Reading time estimate -->
     <span v-if="config?.readingTime !== false && readingTime > 0" class="shuimo-reading-info__item">
       {{ t('shuimo.reading_time', { min: readingTime }) }}
     </span>
+    <!-- Last updated date -->
     <span v-if="config?.updatedTime && updatedDate" class="shuimo-reading-info__item">
       {{ t('shuimo.updated_at', { date: updatedDate }) }}
     </span>
@@ -75,6 +96,7 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
+// Bordered badge for original content
 .shuimo-reading-info__original {
   padding: 1px 6px;
   border: 1px solid var(--sm-accent);
@@ -84,6 +106,7 @@ onBeforeUnmount(() => {
   letter-spacing: 1px;
 }
 
+// Dot separator between items
 .shuimo-reading-info__item {
   &::before {
     content: '·';

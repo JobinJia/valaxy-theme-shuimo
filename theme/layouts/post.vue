@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/**
+ * Post layout — Article page with TOC, reading info, image captions, and stamp.
+ *
+ * Uses `:key="route.path"` on the container to force full remount on SPA
+ * navigation, ensuring all client-side features (TOC, word count, stamp)
+ * reinitialize correctly for each post.
+ */
 import { usePrevNext } from 'valaxy'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -17,6 +24,8 @@ const [prev, next] = usePrevNext()
 const articleRef = ref<HTMLElement>()
 const imageCaptionConfig = computed(() => themeConfig.value?.imageCaption || {})
 
+// Merge per-post frontmatter stamp config with global theme stamp config.
+// Frontmatter values take priority over global defaults.
 const postStamp = computed(() => {
   const fm = frontmatter.value.stamp || {}
   const global = stampConfig.value || {}
@@ -29,6 +38,8 @@ const postStamp = computed(() => {
     size: fm.size,
   }
 })
+
+// Enhance images with figure captions
 useImageCaption(articleRef, imageCaptionConfig)
 
 function goBack() {

@@ -1,9 +1,21 @@
+/**
+ * useImageCaption — Composable that enhances article images with figure captions.
+ *
+ * Scans a container element for `<img>` tags with `alt` text, wraps each in a
+ * `<figure>` element, and appends a `<figcaption>` with optional auto-numbering.
+ *
+ * The DOM changes are reverted automatically on component unmount or when
+ * options change (the composable re-runs the enhancement).
+ *
+ * Images without alt text are left untouched.
+ */
 import type { Ref } from 'vue'
 import { onMounted, onUnmounted, watch } from 'vue'
 
 export interface ImageCaptionOptions {
   enable?: boolean
   autoNumbering?: boolean
+  /** Numbering prefix, e.g. "图" or "Fig." */
   prefix?: string
 }
 
@@ -13,12 +25,14 @@ export function useImageCaption(
 ) {
   let cleanup: (() => void) | null = null
 
+  /** Wrap qualifying images in <figure>/<figcaption> elements. */
   function enhance() {
     revert()
     const container = containerRef.value
     if (!container || options.value.enable === false)
       return
 
+    // Select images with alt text that haven't already been wrapped
     const imgs = container.querySelectorAll('img[alt]:not(.shuimo-figure img)')
     let index = 0
 
@@ -49,6 +63,7 @@ export function useImageCaption(
       figure.appendChild(caption)
     })
 
+    // Store a cleanup function that reverses the DOM changes
     cleanup = () => {
       const figures = container.querySelectorAll('.shuimo-figure')
       figures.forEach((figure) => {
@@ -61,6 +76,7 @@ export function useImageCaption(
     }
   }
 
+  /** Revert any previous DOM changes. */
   function revert() {
     if (cleanup) {
       cleanup()
@@ -68,11 +84,13 @@ export function useImageCaption(
     }
   }
 
+  // Delay enhancement to ensure images are rendered
   onMounted(() => {
     setTimeout(enhance, 400)
   })
 
   onUnmounted(revert)
 
+  // Re-enhance when options change (e.g. toggling numbering)
   watch(options, enhance, { deep: true })
 }

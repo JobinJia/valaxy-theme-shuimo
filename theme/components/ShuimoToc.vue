@@ -1,4 +1,14 @@
 <script setup lang="ts">
+/**
+ * ShuimoToc — Article table of contents component.
+ *
+ * Extracts h2/h3 headings from the article content area and renders:
+ * - Desktop (≥1200px): a fixed floating sidebar on the right side
+ * - Mobile (<1200px): a collapsible panel with slide animation
+ *
+ * Uses IntersectionObserver to highlight the currently visible section.
+ * Configurable via `themeConfig.toc.enable` and `themeConfig.toc.maxDepth`.
+ */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useThemeConfig } from '../composables'
@@ -18,6 +28,10 @@ const headings = ref<TocItem[]>([])
 const activeId = ref('')
 const mobileOpen = ref(false)
 
+/**
+ * Scan the article DOM for heading elements and build the TOC list.
+ * Automatically generates an id for headings that don't have one.
+ */
 function extractHeadings() {
   const selector = maxDepth.value >= 3 ? 'h2, h3' : 'h2'
   const article = document.querySelector('.shuimo-post-page__content')
@@ -41,6 +55,11 @@ function extractHeadings() {
 
 let observer: IntersectionObserver | null = null
 
+/**
+ * Set up an IntersectionObserver to track which heading is currently
+ * visible in the viewport. Updates `activeId` to highlight the
+ * corresponding TOC item.
+ */
 function setupObserver() {
   observer = new IntersectionObserver(
     (entries) => {
@@ -51,6 +70,8 @@ function setupObserver() {
         }
       }
     },
+    // Top margin accounts for fixed header; bottom 80% ensures
+    // a heading is considered "active" when it enters the top 20%
     { rootMargin: '-60px 0px -80% 0px' },
   )
 
@@ -61,6 +82,7 @@ function setupObserver() {
   })
 }
 
+/** Smooth-scroll to a heading and close the mobile panel. */
 function scrollTo(id: string) {
   const el = document.getElementById(id)
   if (el) {
@@ -72,6 +94,7 @@ function scrollTo(id: string) {
 
 let timerId: ReturnType<typeof setTimeout> | null = null
 
+// Delay extraction slightly to ensure the article content is rendered
 onMounted(() => {
   timerId = setTimeout(() => {
     extractHeadings()
@@ -89,7 +112,7 @@ onBeforeUnmount(() => {
 
 <template>
   <template v-if="tocConfig?.enable !== false && headings.length > 0">
-    <!-- Desktop: floating sidebar -->
+    <!-- Desktop: fixed floating sidebar on the right -->
     <nav class="shuimo-toc shuimo-toc--desktop">
       <div class="shuimo-toc__title">
         {{ t('shuimo.toc_title') }}
@@ -109,7 +132,7 @@ onBeforeUnmount(() => {
       </ul>
     </nav>
 
-    <!-- Mobile: collapsible button + panel -->
+    <!-- Mobile: collapsible toggle button + sliding panel -->
     <div class="shuimo-toc shuimo-toc--mobile">
       <button class="shuimo-toc__toggle" @click="mobileOpen = !mobileOpen">
         {{ t('shuimo.toc_title') }}
@@ -135,6 +158,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss" scoped>
+// Desktop TOC: hidden by default, shown as fixed sidebar on wide screens
 .shuimo-toc--desktop {
   display: none;
 }
@@ -160,6 +184,7 @@ onBeforeUnmount(() => {
   }
 }
 
+// Narrower screens: push TOC closer to the edge
 @media (min-width: 1200px) and (max-width: 1400px) {
   .shuimo-toc--desktop {
     right: 20px;
@@ -203,18 +228,20 @@ onBeforeUnmount(() => {
     }
   }
 
+  // h3 items indented deeper
   &--h3 a {
     padding-left: 24px;
     font-size: 12px;
   }
 
+  // Active section highlight
   &--active a {
     color: var(--sm-accent);
     border-left-color: var(--sm-accent);
   }
 }
 
-// Mobile
+// Mobile TOC: full-width collapsible panel
 .shuimo-toc--mobile {
   margin-bottom: 20px;
   width: 100%;
@@ -250,6 +277,7 @@ onBeforeUnmount(() => {
   }
 }
 
+// Slide transition for mobile panel
 .shuimo-toc-slide-enter-active,
 .shuimo-toc-slide-leave-active {
   transition:

@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * ShuimoStamp — Chinese seal stamp component.
+ *
+ * Renders an SVG seal stamp via @jobinjia/shuimo-core, with a CSS fallback
+ * when the optional peer dependency is not installed.
+ *
+ * Supports per-post customization: text, color, type (yin/yang), shape,
+ * and size can all be overridden via props (driven by frontmatter).
+ *
+ * Text layout: use commas to split text into columns, e.g. "月下,独酌"
+ * renders as a 2×2 grid (right column "月下", left column "独酌").
+ *
+ * Default font: YiShanBeiZhuan (seal script / 篆书).
+ */
 import { onMounted, ref, watch } from 'vue'
 import { useThemeConfig } from '../composables'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
@@ -27,8 +41,10 @@ const hasShuimoCore = ref(false)
 const showFallback = ref(false)
 const themeConfig = useThemeConfig()
 
+// Cache the dynamic import so we only load shuimo-core once
 let generateStampAsync: any = null
 
+/** Split stamp text into columns by comma delimiter for multi-column layout. */
 function parseStampText(text: string | string[]): string[] {
   if (Array.isArray(text))
     return text
@@ -37,6 +53,7 @@ function parseStampText(text: string | string[]): string[] {
   return [text]
 }
 
+/** Generate the stamp SVG via shuimo-core. Called on mount and when props change. */
 async function renderStamp() {
   try {
     if (!generateStampAsync) {
@@ -49,6 +66,7 @@ async function renderStamp() {
 
     const textArray = parseStampText(props.text)
     const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
+    // Single short text (1-2 chars) defaults to circle; otherwise use configured shape
     const resolvedShape = props.shape === 'auto' && textArray.length === 1 && textArray[0].length <= 2
       ? 'circle'
       : props.shape
@@ -87,6 +105,7 @@ async function renderStamp() {
 
 onMounted(renderStamp)
 
+// Re-render when stamp props change (e.g. SPA route navigation updates frontmatter)
 watch(
   () => [props.text, props.type, props.shape, props.color, props.size],
   renderStamp,
