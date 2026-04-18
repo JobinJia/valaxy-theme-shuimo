@@ -15,6 +15,16 @@ const props = withDefaults(defineProps<{
   heroLandscape: false,
 })
 
+// 会话级开关：幕布只在会话内首次进入 hero 页面时播一次
+// 同一次浏览里后续路由切换保持展开，不再重播，避免打断阅读节奏
+let curtainPlayedInSession = false
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined')
+    return false
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+}
+
 function resolveModeColor(value: ThemeModeColor | undefined, dark: boolean): string | undefined {
   if (!value)
     return undefined
@@ -52,7 +62,11 @@ const curtainStyle = computed(() => {
     backgroundSize: curtainPaperUrl.value ? '512px 512px' : undefined,
   }
 })
-const revealed = ref(!heroLandscapeEnabled.value)
+const revealed = ref(
+  !heroLandscapeEnabled.value
+  || curtainPlayedInSession
+  || prefersReducedMotion(),
+)
 const curtainStampReady = ref(false)
 const route = useRoute()
 
@@ -102,6 +116,7 @@ async function ensureCurtainPaperReady() {
       seed: 42,
       baseColor,
       isDark: isDark.value,
+      goldDensity: xuanPaper?.goldDensity,
     })
   }
   catch {
@@ -110,6 +125,7 @@ async function ensureCurtainPaperReady() {
 }
 
 function onLandscapeReady() {
+  curtainPlayedInSession = true
   requestAnimationFrame(() => {
     revealed.value = true
   })
@@ -133,14 +149,16 @@ watch(heroLandscapeEnabled, (enabled) => {
     revealed.value = true
 })
 
-// 路由切换时重新播放幕布动画：仅在本页启用了幕布时生效
+// 路由切换策略：
+// - 当前路由无 hero / 本会话已播过一次 / 用户偏好 reduced-motion → 保持展开，不重播
+// - 其他情况（会话内首次进入 hero 页面）→ 合拢 0.5s 再展开
 watch(() => route.path, () => {
-  if (!heroLandscapeEnabled.value) {
+  if (!heroLandscapeEnabled.value || curtainPlayedInSession || prefersReducedMotion()) {
     revealed.value = true
     return
   }
+  curtainPlayedInSession = true
   revealed.value = false
-  // 等幕布合拢完成（0.5s）后再展开
   setTimeout(() => {
     revealed.value = true
   }, 550)
@@ -165,13 +183,13 @@ watch(() => route.path, () => {
         </slot>
 
         <ShuimoHelper />
+
+        <!-- Footer 在宣纸区域内，保持统一背景 -->
+        <footer class="shuimo-app__footer">
+          <ShuimoFooter />
+        </footer>
       </ShuimoXuanPaper>
     </div>
-
-    <!-- Footer 独立于 paper，始终全宽居中贴底 -->
-    <footer class="shuimo-app__footer">
-      <ShuimoFooter />
-    </footer>
 
     <!-- 开屏幕布 -->
     <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" :style="curtainStyle">
