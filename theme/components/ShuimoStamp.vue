@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useThemeConfig } from '../composables'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 
@@ -11,11 +11,13 @@ const props = withDefaults(defineProps<{
   size?: number
   /** 文字水平偏移，范围 -1~1；负值左移（右侧留白变大），正值右移 */
   offsetX?: number
+  /** 覆盖全局印章颜色 */
+  color?: string
 }>(), {
   text: '墨',
   type: 'yin',
   shape: 'auto',
-  fontFamily: 'serif',
+  fontFamily: '\'YiShanBeiZhuan\', serif',
   size: 56,
   offsetX: 0,
 })
@@ -25,23 +27,35 @@ const hasShuimoCore = ref(false)
 const showFallback = ref(false)
 const themeConfig = useThemeConfig()
 
-onMounted(async () => {
+let generateStampAsync: any = null
+
+function parseStampText(text: string | string[]): string[] {
+  if (Array.isArray(text))
+    return text
+  if (text.includes(',') || text.includes('，'))
+    return text.split(/[,，]/).map(s => s.trim())
+  return [text]
+}
+
+async function renderStamp() {
   try {
-    const { generateStampAsync } = await import('@jobinjia/shuimo-core/drawing')
-    hasShuimoCore.value = true
+    if (!generateStampAsync) {
+      const mod = await import('@jobinjia/shuimo-core/drawing')
+      generateStampAsync = mod.generateStampAsync
+      hasShuimoCore.value = true
+    }
 
     await document.fonts.ready
 
-    const textArray = Array.isArray(props.text)
-      ? props.text
-      : props.text.includes(',') || props.text.includes('，')
-        ? props.text.split(/[,，]/).map(s => s.trim())
-        : [props.text]
-    const stampColor = themeConfig.value?.colors?.stamp || '#C8102E'
+    const textArray = parseStampText(props.text)
+    const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
+    const resolvedShape = props.shape === 'auto' && textArray.length === 1 && textArray[0].length <= 2
+      ? 'circle'
+      : props.shape
     const result = await generateStampAsync({
       text: textArray,
       type: props.type,
-      shape: props.shape,
+      shape: resolvedShape,
       color: stampColor,
       textColor: props.type === 'yin' ? '#FFFFFF' : stampColor,
       fontFamily: props.fontFamily,
@@ -69,7 +83,14 @@ onMounted(async () => {
       )
     }
   }
-})
+}
+
+onMounted(renderStamp)
+
+watch(
+  () => [props.text, props.type, props.shape, props.color, props.size],
+  renderStamp,
+)
 </script>
 
 <template>

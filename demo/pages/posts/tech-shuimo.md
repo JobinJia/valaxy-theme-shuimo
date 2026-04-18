@@ -1,11 +1,15 @@
 ---
 title: 使用 Canvas 绘制水墨笔触
 date: 2024-03-10
+updated: 2024-06-15
 categories: 技术
+original: true
 tags:
   - Canvas
   - Vue
   - 水墨
+stamp:
+  text: 水墨
 ---
 
 如何用 HTML Canvas 模拟传统毛笔的压力变化与飞白效果？
@@ -36,4 +40,8 @@ function pressure(t: number): number {
 
 飞白是中国书法中特有的效果，笔画中出现的枯笔留白。通过在笔触末端降低墨色浓度和增加随机间隙来模拟。
 
+![毛笔笔触的三个阶段示意](https://picsum.photos/seed/brush/600/300)
+
 水墨之美，在于不完美。
+
+![飞白效果的数字模拟](https://picsum.photos/seed/feibai/600/300)

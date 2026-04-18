@@ -105,6 +105,24 @@
     display: block;
   }
 
+  // 图片题注
+  .shuimo-figure {
+    margin: 1.5em 0;
+    text-align: center;
+
+    img {
+      margin: 0 auto 8px;
+    }
+  }
+
+  .shuimo-figure__caption {
+    font-size: 12px;
+    color: var(--sm-ink-light);
+    font-family: var(--sm-font-kai);
+    letter-spacing: 1px;
+    text-indent: 0;
+  }
+
   // 分隔线
   hr {
     border: none;

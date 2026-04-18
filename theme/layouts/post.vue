@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { usePrevNext } from 'valaxy'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useImageCaption, useThemeConfig } from '../composables'
 
 const { t } = useI18n()
 const themeConfig = useThemeConfig()
@@ -13,6 +13,23 @@ const route = useRoute()
 const router = useRouter()
 const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
 const [prev, next] = usePrevNext()
+
+const articleRef = ref<HTMLElement>()
+const imageCaptionConfig = computed(() => themeConfig.value?.imageCaption || {})
+
+const postStamp = computed(() => {
+  const fm = frontmatter.value.stamp || {}
+  const global = stampConfig.value || {}
+  return {
+    enable: fm.enable ?? global.enable ?? true,
+    text: fm.text ?? fm.author ?? global.author ?? '墨',
+    type: fm.type ?? global.type ?? 'yin',
+    shape: fm.shape ?? global.shape ?? 'auto',
+    color: fm.color,
+    size: fm.size,
+  }
+})
+useImageCaption(articleRef, imageCaptionConfig)
 
 function goBack() {
   if (window.history.length > 1)
@@ -25,7 +42,7 @@ function goBack() {
 <template>
   <ShuimoClickPetals />
   <ShuimoLayout>
-    <div class="shuimo-post-page">
+    <div :key="route.path" class="shuimo-post-page">
       <!-- 头像回首页 -->
       <router-link v-if="author?.avatar" to="/" class="shuimo-post-page__avatar-link">
         <img :src="author.avatar" :alt="author?.name || ''" class="shuimo-post-page__avatar">
@@ -42,20 +59,27 @@ function goBack() {
         <span v-if="frontmatter.categories"> · {{ Array.isArray(frontmatter.categories) ? frontmatter.categories.join(' / ') : frontmatter.categories }}</span>
       </div>
 
+      <!-- 阅读信息 -->
+      <ShuimoReadingInfo />
+
       <ShuimoBrushLine variant="light" :length="200" :width="1" class="shuimo-post-page__line" />
 
+      <!-- 移动端目录 -->
+      <ShuimoToc />
+
       <!-- 文章正文：页面作为子路由，必须用 RouterView 渲染 -->
-      <article class="shuimo-post-page__content markdown-body">
+      <article ref="articleRef" class="shuimo-post-page__content markdown-body">
         <RouterView />
       </article>
 
       <!-- 落款印章 -->
-      <div v-if="stampConfig?.enable !== false" class="shuimo-post-page__stamp">
+      <div v-if="postStamp.enable" class="shuimo-post-page__stamp">
         <ShuimoStamp
-          :text="stampConfig?.author || '墨'"
-          :type="stampConfig?.type || 'yin'"
-          :shape="stampConfig?.shape || 'auto'"
-          :size="40"
+          :text="postStamp.text"
+          :type="postStamp.type"
+          :shape="postStamp.shape"
+          :size="postStamp.size || 40"
+          :color="postStamp.color"
         />
       </div>
 

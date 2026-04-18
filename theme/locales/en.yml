@@ -9,3 +9,9 @@ shuimo:
   tags: Tags
   recent: Recent
   powered_by: Powered by Valaxy
+  toc_title: Contents
+  word_count: '{count} words'
+  reading_time: '{min} min read'
+  updated_at: 'Updated {date}'
+  original: Original
+  figure_prefix: Fig.

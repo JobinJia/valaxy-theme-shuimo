@@ -65,6 +65,26 @@ export const defaultThemeConfig: ThemeConfig = {
   brushStrokes: {
     enable: true,
   },
+
+  toc: {
+    enable: true,
+    maxDepth: 3,
+  },
+
+  readingInfo: {
+    enable: true,
+    wordCount: true,
+    readingTime: true,
+    updatedTime: false,
+    originalMark: false,
+    wordsPerMinute: 300,
+  },
+
+  imageCaption: {
+    enable: true,
+    autoNumbering: true,
+    prefix: '图',
+  },
 }
 
 export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {

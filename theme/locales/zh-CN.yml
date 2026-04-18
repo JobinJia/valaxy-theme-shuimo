@@ -9,3 +9,9 @@ shuimo:
   tags: 标签
   recent: 近作
   powered_by: 由 Valaxy 驱动
+  toc_title: 目录
+  word_count: '{count} 字'
+  reading_time: '约 {min} 分钟'
+  updated_at: '更新于 {date}'
+  original: 原创
+  figure_prefix: 图

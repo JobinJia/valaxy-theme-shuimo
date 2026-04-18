@@ -5,6 +5,9 @@ categories: 技术
 tags:
   - Vue
   - 前端
+stamp:
+  text: 秋
+  color: '#B8860B'
 ---
 
 空山新雨后，天气晚来秋。明月松间照，清泉石上流。

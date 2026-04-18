@@ -104,12 +104,48 @@ export interface ThemeConfig extends DefaultTheme.Config {
     enable: boolean
     /** 纸张变体 @default 'processed' */
     variant: 'processed' | 'aged' | 'gold'
+    /** 洒金密度 (0-1)，仅 `variant: 'gold'` 生效 @default 0.3 */
+    goldDensity: number
   }>
 
   /** 毛笔线条配置 */
   brushStrokes: Partial<{
     /** 用毛笔笔触替换 CSS 线条 @default true */
     enable: boolean
+  }>
+
+  /** 文章目录配置 */
+  toc: Partial<{
+    /** 总开关 @default true */
+    enable: boolean
+    /** 最大提取层级 (2=h2, 3=h2+h3) @default 3 */
+    maxDepth: 2 | 3
+  }>
+
+  /** 阅读信息配置 */
+  readingInfo: Partial<{
+    /** 总开关 @default true */
+    enable: boolean
+    /** 显示字数 @default true */
+    wordCount: boolean
+    /** 显示阅读时长 @default true */
+    readingTime: boolean
+    /** 显示更新时间 @default false */
+    updatedTime: boolean
+    /** 显示原创标记 @default false */
+    originalMark: boolean
+    /** 中文阅读速度（字/分） @default 300 */
+    wordsPerMinute: number
+  }>
+
+  /** 图片题注配置 */
+  imageCaption: Partial<{
+    /** 总开关 @default true */
+    enable: boolean
+    /** 自动编号 @default true */
+    autoNumbering: boolean
+    /** 编号前缀 @default '图' */
+    prefix: string
   }>
 }
 

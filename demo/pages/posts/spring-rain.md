@@ -5,6 +5,8 @@ categories: 技术
 tags:
   - Canvas
   - 水墨
+stamp:
+  text: 润,无声
 ---
 
 好雨知时节，当春乃发生。随风潜入夜，润物细无声。
