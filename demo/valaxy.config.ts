@@ -59,7 +59,7 @@ export default defineConfig<ThemeConfig>({
       enable: true,
       author: '隔窗,听雨',
       type: 'yin',
-      shape: 'ellipse',
+      shape: 'rectangle',
     },
 
     decorations: {
