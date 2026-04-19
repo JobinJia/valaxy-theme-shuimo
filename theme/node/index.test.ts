@@ -1,6 +1,7 @@
 import type { ThemeConfig } from '../types'
 import { describe, expect, it } from 'vitest'
 import { defaultThemeConfig, generateSafelist } from './index'
+import { applyPreset } from './presets'
 
 describe('defaultThemeConfig', () => {
   it('exposes brand colors', () => {
@@ -70,5 +71,32 @@ describe('generateSafelist', () => {
       ],
     } as unknown as ThemeConfig)
     expect(safelist).toEqual([])
+  })
+})
+
+describe('applyPreset', () => {
+  it('applies preset values as defaults', () => {
+    const merged = applyPreset(defaultThemeConfig, { preset: 'gold' })
+    expect(merged.colors.primary).toBe('#B8860B')
+    expect(merged.xuanPaper?.variant).toBe('gold')
+    expect(merged.xuanPaper?.goldDensity).toBe(0.4)
+  })
+
+  it('lets user config override preset values', () => {
+    const merged = applyPreset(defaultThemeConfig, {
+      preset: 'gold',
+      colors: {
+        primary: '#123456',
+        stamp: '#654321',
+      },
+      xuanPaper: {
+        goldDensity: 0.1,
+      },
+    })
+
+    expect(merged.colors.primary).toBe('#123456')
+    expect(merged.colors.stamp).toBe('#654321')
+    expect(merged.xuanPaper?.variant).toBe('gold')
+    expect(merged.xuanPaper?.goldDensity).toBe(0.1)
   })
 })
