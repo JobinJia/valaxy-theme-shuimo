@@ -13,7 +13,7 @@ catalog:
   '@antfu/eslint-config': ^6.4.2
   '@iconify-json/ant-design': ^1.2.5
   '@iconify-json/simple-icons': ^1.2.61
-  '@jobinjia/shuimo-core': ^1.0.1
+  '@jobinjia/shuimo-core': ^1.0.2
   '@shuimo-design/lunar': ^0.0.8
   '@unocss/eslint-plugin': ^66.5.10
   bumpp: ^10.3.2
