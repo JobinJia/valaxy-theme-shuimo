@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
+import { useArticleContentObserver } from './useArticleContentObserver'
 
 export interface ImageCaptionOptions {
   enable?: boolean
@@ -39,7 +40,15 @@ export function useImageCaption(
       const numberStr = options.value.autoNumbering !== false ? `${prefix} ${index}. ` : ''
 
       if (title && title !== alt) {
-        caption.innerHTML = `<span class="shuimo-figure__caption-main">${numberStr}${alt}</span><span class="shuimo-figure__caption-sub">${title}</span>`
+        const main = document.createElement('span')
+        main.className = 'shuimo-figure__caption-main'
+        main.textContent = `${numberStr}${alt}`
+
+        const sub = document.createElement('span')
+        sub.className = 'shuimo-figure__caption-sub'
+        sub.textContent = title
+
+        caption.append(main, sub)
       }
       else {
         caption.textContent = `${numberStr}${alt}`
@@ -71,9 +80,7 @@ export function useImageCaption(
     }
   }
 
-  onMounted(() => {
-    setTimeout(enhance, 400)
-  })
+  useArticleContentObserver(containerRef, enhance)
 
   onUnmounted(revert)
 

@@ -10,10 +10,10 @@
  *
  * Configurable via `themeConfig.readingInfo.*` options.
  */
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useArticleContentObserver, useThemeConfig } from '../composables'
 
 const { t, locale } = useI18n()
 const themeConfig = useThemeConfig()
@@ -24,13 +24,14 @@ const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
 const wordCount = ref(0)
 const readingTime = ref(frontmatter.value.readingTime ?? 0)
 const wpm = computed(() => config.value?.wordsPerMinute ?? 300)
+const articleRef = ref<HTMLElement | null>(null)
 
 /**
  * Count words in the article content element.
  * CJK characters are counted individually; Latin words by regex match.
  */
 function countWords() {
-  const article = document.querySelector('.shuimo-post-page__content')
+  const article = articleRef.value
   if (!article)
     return
   const text = article.textContent || ''
@@ -51,17 +52,18 @@ const updatedDate = computed(() => {
 
 const isOriginal = computed(() => frontmatter.value.original === true)
 
-let timerId: ReturnType<typeof setTimeout> | null = null
-
-// Delay counting to ensure article content is rendered
-onMounted(() => {
-  timerId = setTimeout(countWords, 300)
+watch(frontmatter, () => {
+  readingTime.value = frontmatter.value.readingTime ?? 0
+  countWords()
 })
 
-onBeforeUnmount(() => {
-  if (timerId)
-    clearTimeout(timerId)
+watch(() => route.path, () => {
+  articleRef.value = null
+  readingTime.value = frontmatter.value.readingTime ?? 0
+  wordCount.value = 0
 })
+
+useArticleContentObserver(articleRef, countWords)
 </script>
 
 <template>

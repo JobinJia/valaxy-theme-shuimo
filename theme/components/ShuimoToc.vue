@@ -9,10 +9,10 @@
  * Uses IntersectionObserver to highlight the currently visible section.
  * Configurable via `themeConfig.toc.enable` and `themeConfig.toc.maxDepth`.
  */
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useArticleContentObserver, useThemeConfig } from '../composables'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -29,6 +29,16 @@ interface TocItem {
 const headings = ref<TocItem[]>([])
 const activeId = ref('')
 const mobileOpen = ref(false)
+const articleRef = ref<HTMLElement | null>(null)
+
+function slugifyHeading(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{Letter}\p{Number}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
 
 /**
  * Scan the article DOM for heading elements and build the TOC list.
@@ -36,16 +46,24 @@ const mobileOpen = ref(false)
  */
 function extractHeadings() {
   const selector = maxDepth.value >= 3 ? 'h2, h3' : 'h2'
-  const article = document.querySelector('.shuimo-post-page__content')
+  const article = articleRef.value
   if (!article)
     return
 
   const els = article.querySelectorAll(selector)
   const items: TocItem[] = []
+  const usedIds = new Set<string>()
   els.forEach((el) => {
-    if (!el.id) {
-      el.id = el.textContent?.trim().replace(/\s+/g, '-').toLowerCase() || ''
+    const baseId = el.id || slugifyHeading(el.textContent || '') || 'section'
+    let nextId = baseId
+    let suffix = 1
+    while (usedIds.has(nextId)) {
+      nextId = `${baseId}-${suffix}`
+      suffix++
     }
+    el.id = nextId
+
+    usedIds.add(el.id)
     items.push({
       id: el.id,
       text: el.textContent?.trim() || '',
@@ -64,6 +82,7 @@ let activeDebounceTimer: ReturnType<typeof setTimeout> | null = null
  * corresponding TOC item. Uses debounce to prevent flicker on short sections.
  */
 function setupObserver() {
+  observer?.disconnect()
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -114,26 +133,35 @@ function scrollTo(id: string) {
   }
 }
 
-let timerId: ReturnType<typeof setTimeout> | null = null
+function refreshToc() {
+  extractHeadings()
+  observer?.disconnect()
+  activeId.value = ''
+  if (headings.value.length) {
+    initFromHash()
+    setupObserver()
+  }
+}
 
-// Delay extraction slightly to ensure the article content is rendered
-onMounted(() => {
-  timerId = setTimeout(() => {
-    extractHeadings()
-    if (headings.value.length) {
-      initFromHash()
-      setupObserver()
-    }
-  }, 300)
+watch(() => route.hash, () => {
+  initFromHash()
+})
+
+watch(() => route.path, () => {
+  articleRef.value = null
+  headings.value = []
+  activeId.value = ''
+  mobileOpen.value = false
+  observer?.disconnect()
 })
 
 onBeforeUnmount(() => {
-  if (timerId)
-    clearTimeout(timerId)
   if (activeDebounceTimer)
     clearTimeout(activeDebounceTimer)
   observer?.disconnect()
 })
+
+useArticleContentObserver(articleRef, refreshToc)
 </script>
 
 <template>

@@ -1,4 +1,5 @@
 export * from './config'
+export * from './useArticleContentObserver'
 export * from './useBlankSide'
 export * from './useBrushStyles'
 export * from './useGoBack'
