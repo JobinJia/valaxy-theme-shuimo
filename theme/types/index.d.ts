@@ -136,6 +136,65 @@ export interface ThemeConfig extends DefaultTheme.Config {
       /** 桌面端菜单印章尺寸（px） @default 48 */
       desktopSize: number
     }>
+    /** 开屏幕布印章配置（独立于主印章，不会继承 `stamp.*`） */
+    curtain: Partial<{
+      /** 印章文字 @default '受命,于天,既寿,永昌' */
+      author: string
+      /** 印章颜色 */
+      color: string
+      /** 阴章/阳章 @default 'yang' */
+      type: 'yin' | 'yang'
+      /** 印章形状 @default 'rectangle' */
+      shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
+      /** 字体族，缺省时走 `fonts.title` */
+      fontFamily: string
+      /** 字体大小（px） @default 70 */
+      fontSize: number
+      /** 字体粗细 @default 'normal' */
+      fontWeight: string
+      /** 文字刻法 @default 'normal' */
+      textCarving: 'normal' | 'strong' | 'stone-cut'
+      /** 文字水平偏移 -1~1 @default 0 */
+      offsetX: number
+      /** 文字垂直偏移 -1~1 @default 0 */
+      offsetY: number
+      /** 总体边框缩放 @default 1 */
+      borderScale: number
+      /** 列间距比例 */
+      columnSpacing: number
+      /** 字间距比例 */
+      characterSpacing: number
+      /** 水平内边距比例 */
+      paddingX: number
+      /** 垂直内边距比例 */
+      paddingY: number
+      /** 绝对列间距（px） @default 0.35 */
+      columnSpacingPx: number
+      /** 绝对字间距（px） @default 3.2 */
+      characterSpacingPx: number
+      /** 绝对水平内边距（px） @default 1.5 */
+      paddingXPx: number
+      /** 绝对垂直内边距（px） @default 1.5 */
+      paddingYPx: number
+      /** 水平边框缩放 @default 1 */
+      borderScaleX: number
+      /** 垂直边框缩放 @default 1 */
+      borderScaleY: number
+      /** 噪点量（px） @default 10 */
+      noiseAmountPx: number
+      /** 边框采样点数 @default 24 */
+      borderPointsPx: number
+      /** 圆角半径（px） @default 10 */
+      cornerRadiusPx: number
+      /** 边框宽度（px） @default 4 */
+      borderWidthPx: number
+      /** 是否规则形状 @default true */
+      regularShape: boolean
+      /** 随机种子 @default 69706 */
+      seed: number
+      /** 幕布印章容器尺寸（px）。未设置时根据文字长度自适应 */
+      size: number
+    }>
   }>
 
   /** 画面装饰配置 */

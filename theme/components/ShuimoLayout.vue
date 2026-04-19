@@ -40,26 +40,39 @@ const { blankSide } = provideBlankSide()
 const heroLandscapeEnabled = computed(() =>
   props.heroLandscape && themeConfig.value?.decorations?.heroLandscape !== false,
 )
-const curtainStampText = computed(() => themeConfig.value?.stamp?.author || '墨')
-const curtainStampType = computed(() => themeConfig.value?.stamp?.type || 'yin')
-const curtainStampShape = computed(() => themeConfig.value?.stamp?.shape || 'auto')
-const curtainStampFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
+const curtainStampConfig = computed(() => themeConfig.value?.stamp?.curtain || {})
+const curtainStampText = computed(() => curtainStampConfig.value.author || '墨')
+const curtainStampType = computed(() => curtainStampConfig.value.type || 'yin')
+const curtainStampShape = computed(() => curtainStampConfig.value.shape || 'auto')
+const curtainStampFont = computed(() =>
+  curtainStampConfig.value.fontFamily
+  || themeConfig.value?.fonts?.title
+  || 'YiShanBeiZhuan, serif',
+)
 const curtainStampFontFamily = computed(() => {
   const primaryFont = curtainStampFont.value.split(',')[0]?.trim()
   return primaryFont?.replace(/^['"]|['"]$/g, '') || 'YiShanBeiZhuan'
 })
+const curtainStampSize = computed(() => {
+  const userSize = curtainStampConfig.value.size
+  if (typeof userSize === 'number' && userSize > 0)
+    return userSize
+  // 容器只显示一半印章，需足够大让多列文字也能看全
+  const columns = curtainStampText.value.split(/[,，]/).filter(Boolean).length || 1
+  if (columns >= 3)
+    return 240
+  if (columns === 2)
+    return 180
+  return 140
+})
 const curtainStampProps = computed(() => ({
-  ...(themeConfig.value?.stamp || {}),
+  ...curtainStampConfig.value,
   text: curtainStampText.value,
   type: curtainStampType.value,
   shape: curtainStampShape.value,
   fontFamily: curtainStampFont.value,
   size: curtainStampSize.value,
 }))
-const curtainStampSize = computed(() => {
-  const textLength = curtainStampText.value.replace(/[,，]/g, '').length
-  return textLength > 2 ? 116 : 104
-})
 const currentSeed = ref(0)
 const showSeedControl = computed(() =>
   heroLandscapeEnabled.value && themeConfig.value?.hero?.showSeedControl === true,
@@ -154,6 +167,7 @@ onMounted(() => {
 
   if (!heroLandscapeEnabled.value)
     return
+
   ensureCurtainStampFontReady()
   ensureCurtainPaperReady()
 })
@@ -281,19 +295,22 @@ watch(() => route.path, () => {
   &__stamp {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0.96;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
 
+    // 印章居中对齐在幕布靠中间的边缘，由两片幕布各显示一半拼成完整印章；
+    // 使用 translate 百分比让位移自动跟随元素实际尺寸，避免 size 与 SVG 实际宽高不一致时错位
     &--left {
-      right: calc(v-bind(curtainStampSize) * -0.5px);
+      right: 0;
+      transform: translate(50%, -50%);
     }
 
     &--right {
-      left: calc(v-bind(curtainStampSize) * -0.5px);
+      left: 0;
+      transform: translate(-50%, -50%);
     }
   }
 

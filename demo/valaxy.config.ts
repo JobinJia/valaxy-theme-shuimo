@@ -67,6 +67,11 @@ export default defineConfig<ThemeConfig>({
         mobileSize: 40,
         desktopSize: 48,
       },
+      curtain: {
+        author: '落梅,听雪',
+        type: 'yin',
+        shape: 'rectangle',
+      },
     },
 
     decorations: {
