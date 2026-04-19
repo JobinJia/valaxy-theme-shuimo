@@ -195,13 +195,14 @@ watch(
 
 <style lang="scss" scoped>
 .shuimo-stamp {
+  --shuimo-stamp-size: v-bind(`${size}px`);
   display: flex;
   align-items: center;
   justify-content: center;
 
   :deep(svg) {
-    max-width: v-bind("size + 'px'");
-    max-height: v-bind("size + 'px'");
+    max-width: var(--shuimo-stamp-size);
+    max-height: var(--shuimo-stamp-size);
     width: auto;
     height: auto;
   }
