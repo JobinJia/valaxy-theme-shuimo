@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { useGoBack, useThemeCssVars } from '../composables'
+import { useGoBack, useThemeConfig, useThemeCssVars } from '../composables'
 
 const { t } = useI18n()
 const { goBack } = useGoBack()
 const themeCssVars = useThemeCssVars()
+const themeConfig = useThemeConfig()
 
 const route = useRoute()
 
@@ -37,6 +38,7 @@ const pageType = computed(() => {
   <!-- 关于页：不带标题/副标题 -->
   <div v-else-if="pageType === 'about'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
+    <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     <ShuimoXuanPaper class="shuimo-page__paper">
       <ShuimoAboutPage>
         <RouterView />
@@ -48,6 +50,7 @@ const pageType = computed(() => {
   <!-- 归档页：不带标题/副标题 -->
   <div v-else-if="pageType === 'archives'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
+    <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     <ShuimoXuanPaper class="shuimo-page__paper">
       <ShuimoArchivesPage />
     </ShuimoXuanPaper>
@@ -57,6 +60,7 @@ const pageType = computed(() => {
   <!-- 分类/标签页：不带标题/副标题 -->
   <div v-else-if="pageType === 'cat-tag'" class="shuimo-page" :style="themeCssVars">
     <ShuimoThemeToggle />
+    <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     <ShuimoXuanPaper class="shuimo-page__paper">
       <RouterView />
     </ShuimoXuanPaper>
