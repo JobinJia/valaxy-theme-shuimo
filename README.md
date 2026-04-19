@@ -134,6 +134,11 @@ export default defineConfig<ThemeConfig>({
 | `stamp.borderWidthPx`           | `number`                          | `4`                     | 边框宽度（px）                                                                     |
 | `stamp.regularShape`            | `boolean`                         | `true`                  | 是否使用规整外轮廓                                                                 |
 | `stamp.seed`                    | `number`                          | `69706`                 | 随机种子，用于稳定复现                                                             |
+| `stamp.nav.type`                | `'yin' \| 'yang'`                 | `'yang'`                | 导航菜单印章类型                                                                   |
+| `stamp.nav.shape`               | `'auto' \| 'circle' \| 'ellipse' \| 'rectangle' \| 'square'` | `'rectangle'` | 导航菜单印章形状                                                                   |
+| `stamp.nav.showIcon`            | `boolean`                         | `false`                 | 是否显示菜单 icon                                                                  |
+| `stamp.nav.mobileSize`          | `number`                          | `40`                    | 移动端菜单印章尺寸（px）                                                           |
+| `stamp.nav.desktopSize`         | `number`                          | `48`                    | 桌面端菜单印章尺寸（px）                                                           |
 | `decorations.enable`            | `boolean`                         | `true`                  | 启用装饰                                                                           |
 | `decorations.seasonAware`       | `boolean`                         | `true`                  | 四季花卉自动切换                                                                   |
 | `decorations.heroLandscape`     | `boolean`                         | `true`                  | 首页山水画                                                                         |
@@ -189,6 +194,13 @@ themeConfig: {
     noiseAmountPx: 10,
     regularShape: true,
     seed: 69706,
+    nav: {
+      type: 'yang',
+      shape: 'rectangle',
+      showIcon: false,
+      mobileSize: 40,
+      desktopSize: 48,
+    },
   },
 }
 ```
@@ -198,6 +210,7 @@ themeConfig: {
 - 想让字更松或更紧：调 `columnSpacingPx`、`characterSpacingPx`
 - 想控制印面留白：调 `paddingXPx`、`paddingYPx`
 - 想稳定复现同一枚印章：固定 `seed`
+- 想单独控制菜单印章：调 `stamp.nav.shape`、`stamp.nav.showIcon`、`stamp.nav.mobileSize`、`stamp.nav.desktopSize`
 
 ## 开发 / Development
 

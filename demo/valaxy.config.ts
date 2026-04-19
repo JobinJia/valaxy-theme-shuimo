@@ -60,6 +60,13 @@ export default defineConfig<ThemeConfig>({
       author: '隔窗,听雨',
       type: 'yin',
       shape: 'rectangle',
+      nav: {
+        type: 'yang',
+        shape: 'rectangle',
+        showIcon: false,
+        mobileSize: 40,
+        desktopSize: 48,
+      },
     },
 
     decorations: {

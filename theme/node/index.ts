@@ -66,6 +66,13 @@ export const defaultThemeConfig: ThemeConfig = {
     borderWidthPx: 4,
     regularShape: true,
     seed: 69706,
+    nav: {
+      type: 'yang',
+      shape: 'rectangle',
+      showIcon: false,
+      mobileSize: 40,
+      desktopSize: 48,
+    },
   },
 
   decorations: {

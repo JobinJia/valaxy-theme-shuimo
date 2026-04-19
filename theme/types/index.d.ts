@@ -123,6 +123,19 @@ export interface ThemeConfig extends DefaultTheme.Config {
     seed: number
     /** 容器显示尺寸（px） */
     size: number
+    /** 导航菜单印章配置 */
+    nav: Partial<{
+      /** 阴章/阳章 @default 'yang' */
+      type: 'yin' | 'yang'
+      /** 印章形状 @default 'rectangle' */
+      shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
+      /** 是否显示菜单 icon @default false */
+      showIcon: boolean
+      /** 移动端菜单印章尺寸（px） @default 40 */
+      mobileSize: number
+      /** 桌面端菜单印章尺寸（px） @default 48 */
+      desktopSize: number
+    }>
   }>
 
   /** 画面装饰配置 */

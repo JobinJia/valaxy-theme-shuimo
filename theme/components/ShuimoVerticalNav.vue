@@ -12,6 +12,7 @@ const siteConfig = useSiteConfig()
 const { blankSide } = useBlankSide()
 
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
+const navStampConfig = computed(() => themeConfig.value?.stamp?.nav)
 const mainStampProps = computed(() => ({
   ...(themeConfig.value?.stamp || {}),
   text: themeConfig.value?.stamp?.author || '墨',
@@ -21,6 +22,19 @@ const mainStampProps = computed(() => ({
   size: 56,
   offsetX: -4 / 56,
 }))
+const mobileMenuStampProps = computed(() => ({
+  type: navStampConfig.value?.type || 'yang',
+  shape: navStampConfig.value?.shape || 'rectangle',
+  fontFamily: titleFont.value || 'YiShanBeiZhuan, serif',
+  size: navStampConfig.value?.mobileSize || 40,
+}))
+const desktopMenuStampProps = computed(() => ({
+  type: navStampConfig.value?.type || 'yang',
+  shape: navStampConfig.value?.shape || 'rectangle',
+  fontFamily: titleFont.value || 'YiShanBeiZhuan, serif',
+  size: navStampConfig.value?.desktopSize || 48,
+}))
+const showMenuIcon = computed(() => navStampConfig.value?.showIcon === true)
 
 // 菜单在标题的对面
 const menuSide = computed(() => blankSide.value === 'right' ? 'left' : 'right')
@@ -70,13 +84,10 @@ const subtitleParts = computed(() => {
           :to="item.link"
           class="shuimo-vnav__link-stamp shuimo-vnav__link-stamp--mobile"
         >
-          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
+          <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
-            type="yang"
-            shape="ellipse"
-            :font-family="titleFont || 'YiShanBeiZhuan, serif'"
-            :size="40"
+            v-bind="mobileMenuStampProps"
           />
         </router-link>
         <a
@@ -86,13 +97,10 @@ const subtitleParts = computed(() => {
           rel="noopener noreferrer"
           class="shuimo-vnav__link-stamp shuimo-vnav__link-stamp--mobile"
         >
-          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
+          <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
-            type="yang"
-            shape="ellipse"
-            :font-family="titleFont || 'YiShanBeiZhuan, serif'"
-            :size="40"
+            v-bind="mobileMenuStampProps"
           />
         </a>
       </template>
@@ -115,13 +123,10 @@ const subtitleParts = computed(() => {
           :to="item.link"
           class="shuimo-vnav__link-stamp"
         >
-          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
+          <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
-            type="yang"
-            shape="ellipse"
-            :font-family="titleFont || 'YiShanBeiZhuan, serif'"
-            :size="48"
+            v-bind="desktopMenuStampProps"
           />
         </router-link>
         <a
@@ -131,13 +136,10 @@ const subtitleParts = computed(() => {
           rel="noopener noreferrer"
           class="shuimo-vnav__link-stamp"
         >
-          <span v-if="item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
+          <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
             :text="item.text"
-            type="yang"
-            shape="ellipse"
-            :font-family="titleFont || 'YiShanBeiZhuan, serif'"
-            :size="48"
+            v-bind="desktopMenuStampProps"
           />
         </a>
       </template>
