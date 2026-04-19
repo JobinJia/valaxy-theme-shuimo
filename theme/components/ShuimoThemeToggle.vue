@@ -14,14 +14,16 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
     :title="isDark ? '切换亮色' : '切换暗色'"
     @click="toggleDark()"
   >
-    <ShuimoStamp
-      :text="isDark ? '月映' : '日照'"
-      :type="isDark ? 'yin' : 'yang'"
-      shape="rectangle"
-      color="#8B2500"
-      :font-family="titleFont"
-      :size="80"
-    />
+    <span class="shuimo-theme-toggle__stamp">
+      <ShuimoStamp
+        :text="isDark ? '月映' : '日照'"
+        :type="isDark ? 'yin' : 'yang'"
+        shape="rectangle"
+        color="#8B2500"
+        :font-family="titleFont"
+        :size="80"
+      />
+    </span>
   </button>
 </template>
 
@@ -38,9 +40,24 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
   transform: scale(0.5);
   transform-origin: top right;
   opacity: 0.65;
+  width: 80px;
+  height: 80px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     opacity: 0.9;
+  }
+
+  &__stamp {
+    width: 80px;
+    height: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
   }
 }
 

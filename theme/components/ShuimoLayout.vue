@@ -48,6 +48,14 @@ const curtainStampFontFamily = computed(() => {
   const primaryFont = curtainStampFont.value.split(',')[0]?.trim()
   return primaryFont?.replace(/^['"]|['"]$/g, '') || 'YiShanBeiZhuan'
 })
+const curtainStampProps = computed(() => ({
+  ...(themeConfig.value?.stamp || {}),
+  text: curtainStampText.value,
+  type: curtainStampType.value,
+  shape: curtainStampShape.value,
+  fontFamily: curtainStampFont.value,
+  size: curtainStampSize.value,
+}))
 const curtainStampSize = computed(() => {
   const textLength = curtainStampText.value.replace(/[,，]/g, '').length
   return textLength > 2 ? 116 : 104
@@ -209,22 +217,14 @@ watch(() => route.path, () => {
     <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" :style="curtainStyle">
       <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
         <ShuimoStamp
-          :text="curtainStampText"
-          :type="curtainStampType"
-          :shape="curtainStampShape"
-          :font-family="curtainStampFont"
-          :size="curtainStampSize"
+          v-bind="curtainStampProps"
         />
       </div>
     </div>
     <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" :style="curtainStyle">
       <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
         <ShuimoStamp
-          :text="curtainStampText"
-          :type="curtainStampType"
-          :shape="curtainStampShape"
-          :font-family="curtainStampFont"
-          :size="curtainStampSize"
+          v-bind="curtainStampProps"
         />
       </div>
     </div>

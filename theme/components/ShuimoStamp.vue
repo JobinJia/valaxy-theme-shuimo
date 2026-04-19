@@ -14,6 +14,7 @@
  * Default font: YiShanBeiZhuan (seal script / 篆书).
  */
 import { onMounted, ref, watch } from 'vue'
+import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
 import { useThemeConfig } from '../composables'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 
@@ -23,23 +24,67 @@ const props = withDefaults(defineProps<{
   shape?: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
   fontFamily?: string
   size?: number
-  /** 文字水平偏移，范围 -1~1；负值左移（右侧留白变大），正值右移 */
+  fontSize?: number
+  fontWeight?: string
   offsetX?: number
-  /** 覆盖全局印章颜色 */
+  offsetY?: number
   color?: string
+  textCarving?: 'normal' | 'strong' | 'stone-cut'
+  seed?: number
+  borderScale?: number
+  columnSpacing?: number
+  characterSpacing?: number
+  paddingX?: number
+  paddingY?: number
+  columnSpacingPx?: number
+  characterSpacingPx?: number
+  paddingXPx?: number
+  paddingYPx?: number
+  borderScaleX?: number
+  borderScaleY?: number
+  noiseAmountPx?: number
+  borderPointsPx?: number
+  cornerRadiusPx?: number
+  borderWidthPx?: number
+  regularShape?: boolean
 }>(), {
-  text: '墨',
-  type: 'yin',
-  shape: 'auto',
-  fontFamily: '\'YiShanBeiZhuan\', serif',
-  size: 56,
+  text: '受命,于天,既寿,永昌',
+  type: 'yang',
+  shape: 'rectangle',
+  fontFamily: '峄山碑篆体',
+  size: 200,
+  fontSize: 70,
+  fontWeight: 'normal',
   offsetX: 0,
+  offsetY: 0,
+  borderScale: 1,
+  columnSpacing: undefined,
+  characterSpacing: undefined,
+  paddingX: undefined,
+  paddingY: undefined,
+  columnSpacingPx: 0.35,
+  characterSpacingPx: 3.2,
+  paddingXPx: 1.5,
+  paddingYPx: 1.5,
+  borderScaleX: undefined,
+  borderScaleY: undefined,
+  noiseAmountPx: 10,
+  borderPointsPx: 24,
+  cornerRadiusPx: 10,
+  borderWidthPx: 4,
+  regularShape: true,
 })
 
 const stampSvg = ref<string | null>(null)
 const hasShuimoCore = ref(false)
 const showFallback = ref(false)
 const themeConfig = useThemeConfig()
+
+let stampUid = ''
+if (typeof crypto !== 'undefined' && crypto.randomUUID)
+  stampUid = crypto.randomUUID().slice(0, 8)
+else
+  stampUid = Math.random().toString(36).slice(2, 10)
 
 // Cache the dynamic import so we only load shuimo-core once
 let generateStampAsync: any = null
@@ -66,24 +111,44 @@ async function renderStamp() {
 
     const textArray = parseStampText(props.text)
     const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
-    // Single short text (1-2 chars) defaults to circle; otherwise use configured shape
-    const resolvedShape = props.shape === 'auto' && textArray.length === 1 && textArray[0].length <= 2
-      ? 'circle'
-      : props.shape
-    const result = await generateStampAsync({
+    const stampOptions: Record<string, any> = {
       text: textArray,
       type: props.type,
-      shape: resolvedShape,
+      shape: props.shape,
       color: stampColor,
       textColor: props.type === 'yin' ? '#FFFFFF' : stampColor,
       fontFamily: props.fontFamily,
-      width: props.size * 2,
-      height: props.size * 2,
+      fontSize: props.fontSize,
+      fontWeight: props.fontWeight,
+      textCarving: props.textCarving ?? 'normal',
       offsetX: props.offsetX,
-    })
+      offsetY: props.offsetY,
+      borderScale: props.borderScale,
+      columnSpacing: props.columnSpacing,
+      characterSpacing: props.characterSpacing,
+      paddingX: props.paddingX,
+      paddingY: props.paddingY,
+      columnSpacingPx: props.columnSpacingPx,
+      characterSpacingPx: props.characterSpacingPx,
+      paddingXPx: props.paddingXPx,
+      paddingYPx: props.paddingYPx,
+      borderScaleX: props.borderScaleX,
+      borderScaleY: props.borderScaleY,
+      noiseAmountPx: props.noiseAmountPx,
+      borderPointsPx: props.borderPointsPx,
+      cornerRadiusPx: props.cornerRadiusPx,
+      borderWidthPx: props.borderWidthPx,
+      regularShape: props.regularShape,
+      seed: props.seed ?? 69706,
+      fontUrl: yishanFontUrl,
+    }
+    const result = await generateStampAsync(stampOptions)
 
     if (typeof result === 'string') {
       stampSvg.value = result
+        .replace(/stamp-ink-texture/g, `stamp-ink-texture-${stampUid}`)
+        .replace(/stamp-border-texture/g, `stamp-border-texture-${stampUid}`)
+        .replace(/stamp-text-texture/g, `stamp-text-texture-${stampUid}`)
     }
     else if (result?.toDataURL) {
       stampSvg.value = `<img src="${result.toDataURL()}" width="100%" height="100%" />`
@@ -107,69 +172,57 @@ onMounted(renderStamp)
 
 // Re-render when stamp props change (e.g. SPA route navigation updates frontmatter)
 watch(
-  () => [props.text, props.type, props.shape, props.color, props.size],
+  () => [props.text, props.type, props.shape, props.color, props.size, props.fontSize, props.fontWeight, props.offsetX, props.offsetY, props.textCarving, props.seed, props.borderScale, props.columnSpacing, props.characterSpacing, props.paddingX, props.paddingY, props.columnSpacingPx, props.characterSpacingPx, props.paddingXPx, props.paddingYPx, props.borderScaleX, props.borderScaleY, props.noiseAmountPx, props.borderPointsPx, props.cornerRadiusPx, props.borderWidthPx, props.regularShape],
   renderStamp,
 )
 </script>
 
 <template>
   <div
+    v-if="stampSvg"
     class="shuimo-stamp"
-    :class="[`shuimo-stamp--${type}`]"
-    :style="{ width: `${size}px`, height: `${size}px` }"
+    v-html="stampSvg"
+  />
+  <div
+    v-else-if="showFallback"
+    class="shuimo-stamp-fallback"
+    :class="[`shuimo-stamp-fallback--${type}`]"
+    :style="{ width: `${size}px`, height: `${size}px`, fontSize: `${size * 0.4}px` }"
   >
-    <div
-      v-if="stampSvg"
-      class="shuimo-stamp__svg"
-      v-html="stampSvg"
-    />
-    <div
-      v-else-if="showFallback"
-      class="shuimo-stamp__fallback"
-    >
-      {{ text.slice(0, 2) }}
-    </div>
+    {{ text.slice(0, 2) }}
   </div>
 </template>
 
 <style lang="scss" scoped>
 .shuimo-stamp {
-  display: inline-block;
-  // 暗色模式切换时平滑过渡
-  transition: filter 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &__svg {
-    width: 100%;
-    height: 100%;
-
-    :deep(svg) {
-      width: 100%;
-      height: 100%;
-    }
+  :deep(svg) {
+    max-width: v-bind("size + 'px'");
+    max-height: v-bind("size + 'px'");
+    width: auto;
+    height: auto;
   }
+}
 
-  &__fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--va-font-family-base);
-    font-weight: bold;
-    border-radius: 3px;
-    transform: rotate(-3deg);
-    line-height: 1.2;
-    font-size: calc(v-bind(size) * 0.4px);
-  }
+.shuimo-stamp-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--va-font-family-base);
+  font-weight: bold;
+  border-radius: 3px;
+  transform: rotate(-3deg);
+  line-height: 1.2;
 
-  // 阴章 fallback：红底白字
-  &--yin .shuimo-stamp__fallback {
+  &--yin {
     background: var(--sm-stamp);
     color: var(--sm-paper);
   }
 
-  // 阳章 fallback：白底红字+红边框
-  &--yang .shuimo-stamp__fallback {
+  &--yang {
     background: transparent;
     color: var(--sm-stamp);
     border: 2px solid var(--sm-stamp);

@@ -6,7 +6,25 @@ tags:
   - 水墨
   - 生活
 stamp:
-  text: 山水有,清音也
+  text: 受命,于天,既寿,永昌
+  type: yang
+  shape: rectangle
+  size: 200
+  fontSize: 70
+  textCarving: normal
+  borderScale: 1
+  borderScaleY: 1.04
+  columnSpacingPx: 0.35
+  characterSpacingPx: 3.2
+  paddingXPx: 1.5
+  paddingYPx: 2.5
+  offsetY: -0.03
+  noiseAmountPx: 10
+  borderPointsPx: 24
+  cornerRadiusPx: 0
+  borderWidthPx: 4
+  regularShape: true
+  seed: 69706
 ---
 
 山不在高，有仙则名。水不在深，有龙则灵。斯是陋室，惟吾德馨。

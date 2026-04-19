@@ -12,6 +12,15 @@ const siteConfig = useSiteConfig()
 const { blankSide } = useBlankSide()
 
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
+const mainStampProps = computed(() => ({
+  ...(themeConfig.value?.stamp || {}),
+  text: themeConfig.value?.stamp?.author || '墨',
+  type: themeConfig.value?.stamp?.type || 'yin',
+  shape: themeConfig.value?.stamp?.shape || 'auto',
+  fontFamily: titleFont.value || themeConfig.value?.stamp?.fontFamily || 'YiShanBeiZhuan, serif',
+  size: 56,
+  offsetX: -4 / 56,
+}))
 
 // 菜单在标题的对面
 const menuSide = computed(() => blankSide.value === 'right' ? 'left' : 'right')
@@ -91,12 +100,7 @@ const subtitleParts = computed(() => {
       <!-- 大印章（移动端在最左，桌面端在最下） -->
       <ShuimoStamp
         v-if="themeConfig?.stamp?.enable !== false"
-        :text="themeConfig?.stamp?.author || '墨'"
-        :type="themeConfig?.stamp?.type || 'yin'"
-        :shape="themeConfig?.stamp?.shape || 'auto'"
-        :font-family="titleFont || 'YiShanBeiZhuan, serif'"
-        :size="56"
-        :offset-x="-4 / 56"
+        v-bind="mainStampProps"
         class="shuimo-vnav__stamp"
       />
     </div>

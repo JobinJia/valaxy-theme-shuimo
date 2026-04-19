@@ -69,10 +69,60 @@ export interface ThemeConfig extends DefaultTheme.Config {
     enable: boolean
     /** 印章文字 */
     author: string
-    /** 阴章/阳章 @default 'yin' */
+    /** 印章颜色 @default '#C8102E' */
+    color: string
+    /** 阴章/阳章 @default 'yang' */
     type: 'yin' | 'yang'
-    /** 印章形状 @default 'auto' */
+    /** 印章形状 @default 'rectangle' */
     shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
+    /** 字体族 */
+    fontFamily: string
+    /** 字体大小（px） @default 70 */
+    fontSize: number
+    /** 字体粗细 @default 'normal' */
+    fontWeight: string
+    /** 文字刻法 @default 'normal' */
+    textCarving: 'normal' | 'strong' | 'stone-cut'
+    /** 文字水平偏移 -1~1 @default 0 */
+    offsetX: number
+    /** 文字垂直偏移 -1~1 @default 0 */
+    offsetY: number
+    /** 总体边框缩放 @default 1 */
+    borderScale: number
+    /** 列间距比例 @default 0.01 */
+    columnSpacing: number
+    /** 字间距比例 @default 0.045 */
+    characterSpacing: number
+    /** 水平内边距比例 @default 0.015 */
+    paddingX: number
+    /** 垂直内边距比例 @default 0.02 */
+    paddingY: number
+    /** 绝对列间距（px），优先级高于 columnSpacing */
+    columnSpacingPx: number
+    /** 绝对字间距（px），优先级高于 characterSpacing */
+    characterSpacingPx: number
+    /** 绝对水平内边距（px），优先级高于 paddingX */
+    paddingXPx: number
+    /** 绝对垂直内边距（px），优先级高于 paddingY */
+    paddingYPx: number
+    /** 水平边框缩放 @default 1 */
+    borderScaleX: number
+    /** 垂直边框缩放 @default 1 */
+    borderScaleY: number
+    /** 噪点量（px） @default 10 */
+    noiseAmountPx: number
+    /** 边框采样点数 @default 24 */
+    borderPointsPx: number
+    /** 圆角半径（px） @default 10 */
+    cornerRadiusPx: number
+    /** 边框宽度（px） @default 4 */
+    borderWidthPx: number
+    /** 是否规则形状 @default true */
+    regularShape: boolean
+    /** 随机种子，用于可复现的生成 @default 69706 */
+    seed: number
+    /** 容器显示尺寸（px） */
+    size: number
   }>
 
   /** 画面装饰配置 */

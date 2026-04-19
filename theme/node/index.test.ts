@@ -11,7 +11,16 @@ describe('defaultThemeConfig', () => {
   it('enables the default stamp with author text', () => {
     expect(defaultThemeConfig.stamp?.enable).toBe(true)
     expect(defaultThemeConfig.stamp?.author).toBeTruthy()
-    expect(defaultThemeConfig.stamp?.type).toBe('yin')
+    expect(defaultThemeConfig.stamp?.type).toBe('yang')
+    expect(defaultThemeConfig.stamp?.shape).toBe('rectangle')
+    expect(defaultThemeConfig.stamp?.fontSize).toBe(70)
+    expect(defaultThemeConfig.stamp?.borderScale).toBe(1)
+    expect(defaultThemeConfig.stamp?.columnSpacingPx).toBe(0.35)
+    expect(defaultThemeConfig.stamp?.characterSpacingPx).toBe(3.2)
+    expect(defaultThemeConfig.stamp?.paddingXPx).toBe(1.5)
+    expect(defaultThemeConfig.stamp?.paddingYPx).toBe(1.5)
+    expect(defaultThemeConfig.stamp?.borderWidthPx).toBe(4)
+    expect(defaultThemeConfig.stamp?.regularShape).toBe(true)
   })
 
   it('enables core visual subsystems by default', () => {

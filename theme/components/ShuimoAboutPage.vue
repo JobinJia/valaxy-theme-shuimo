@@ -8,6 +8,14 @@ const { goBack } = useGoBack()
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
+const stampProps = computed(() => ({
+  ...(themeConfig.value?.stamp || {}),
+  text: themeConfig.value?.stamp?.author || '墨',
+  type: themeConfig.value?.stamp?.type || 'yin',
+  shape: themeConfig.value?.stamp?.shape || 'auto',
+  fontFamily: titleFont.value || themeConfig.value?.stamp?.fontFamily || 'serif',
+  size: 64,
+}))
 
 const postList = usePostList()
 const categories = useCategories()
@@ -59,11 +67,7 @@ const tagCount = computed(() => tags.value?.size || 0)
     <!-- 印章 -->
     <ShuimoStamp
       v-if="themeConfig?.stamp?.enable !== false"
-      :text="themeConfig?.stamp?.author || '墨'"
-      :type="themeConfig?.stamp?.type || 'yin'"
-      :shape="themeConfig?.stamp?.shape || 'auto'"
-      :font-family="titleFont || 'serif'"
-      :size="64"
+      v-bind="stampProps"
       class="shuimo-about-page__stamp"
     />
 

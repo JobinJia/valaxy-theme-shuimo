@@ -67,8 +67,20 @@ export default defineConfig<ThemeConfig>({
 
     stamp: {
       enable: true,
-      author: '墨',
-      type: 'yin',
+      author: '受命,于天,既寿,永昌',
+      type: 'yang',
+      shape: 'rectangle',
+      fontSize: 70,
+      borderScale: 1,
+      columnSpacingPx: 0.35,
+      characterSpacingPx: 3.2,
+      paddingXPx: 1.5,
+      paddingYPx: 1.5,
+      borderWidthPx: 4,
+      borderPointsPx: 24,
+      cornerRadiusPx: 10,
+      noiseAmountPx: 10,
+      regularShape: true,
     },
   },
 })
@@ -95,9 +107,33 @@ export default defineConfig<ThemeConfig>({
 | `sidebar.author.avatar`         | `string`                          | -                       | 头像路径（首页竖排导航、文章页左上角使用）                                         |
 | `nav`                           | `NavItem[]`                       | `[]`                    | 导航项 `{ text, link, icon? }`                                                     |
 | `stamp.enable`                  | `boolean`                         | `true`                  | 启用印章                                                                           |
-| `stamp.author`                  | `string`                          | `'墨'`                  | 印章文字                                                                           |
-| `stamp.type`                    | `'yin' \| 'yang'`                 | `'yin'`                 | 阴章/阳章                                                                          |
-| `stamp.shape`                   | `'auto' \| 'circle' \| 'ellipse'` | `'auto'`                | 印章形状                                                                           |
+| `stamp.author`                  | `string`                          | `'受命,于天,既寿,永昌'` | 印章文字，支持用逗号分列                                                           |
+| `stamp.color`                   | `string`                          | `'#C8102E'`             | 印章颜色                                                                           |
+| `stamp.type`                    | `'yin' \| 'yang'`                 | `'yang'`                | 阴章/阳章                                                                          |
+| `stamp.shape`                   | `'auto' \| 'circle' \| 'ellipse' \| 'rectangle' \| 'square'` | `'rectangle'` | 印章形状                                                                           |
+| `stamp.fontFamily`              | `string`                          | `'峄山碑篆体'`          | 印章字体                                                                           |
+| `stamp.fontSize`                | `number`                          | `70`                    | 字体大小（px）                                                                     |
+| `stamp.fontWeight`              | `string`                          | `'normal'`              | 字重                                                                               |
+| `stamp.textCarving`             | `'normal' \| 'strong' \| 'stone-cut'` | `'normal'`          | 文字刀刻质感                                                                       |
+| `stamp.offsetX`                 | `number`                          | `0`                     | 水平偏移                                                                           |
+| `stamp.offsetY`                 | `number`                          | `0`                     | 垂直偏移                                                                           |
+| `stamp.borderScale`             | `number`                          | `1`                     | 整体边框缩放                                                                       |
+| `stamp.columnSpacing`           | `number`                          | -                       | 相对列间距，未设置时优先走 `columnSpacingPx`                                       |
+| `stamp.characterSpacing`        | `number`                          | -                       | 相对字间距，未设置时优先走 `characterSpacingPx`                                    |
+| `stamp.paddingX`                | `number`                          | -                       | 相对水平内边距，未设置时优先走 `paddingXPx`                                        |
+| `stamp.paddingY`                | `number`                          | -                       | 相对垂直内边距，未设置时优先走 `paddingYPx`                                        |
+| `stamp.columnSpacingPx`         | `number`                          | `0.35`                  | 绝对列间距（px）                                                                   |
+| `stamp.characterSpacingPx`      | `number`                          | `3.2`                   | 绝对字间距（px）                                                                   |
+| `stamp.paddingXPx`              | `number`                          | `1.5`                   | 绝对水平内边距（px）                                                               |
+| `stamp.paddingYPx`              | `number`                          | `1.5`                   | 绝对垂直内边距（px）                                                               |
+| `stamp.borderScaleX`            | `number`                          | `1`                     | 水平方向边框缩放                                                                   |
+| `stamp.borderScaleY`            | `number`                          | `1`                     | 垂直方向边框缩放                                                                   |
+| `stamp.noiseAmountPx`           | `number`                          | `10`                    | 噪声强度（px）                                                                     |
+| `stamp.borderPointsPx`          | `number`                          | `24`                    | 边框采样点数                                                                       |
+| `stamp.cornerRadiusPx`          | `number`                          | `10`                    | 圆角半径（px）                                                                     |
+| `stamp.borderWidthPx`           | `number`                          | `4`                     | 边框宽度（px）                                                                     |
+| `stamp.regularShape`            | `boolean`                         | `true`                  | 是否使用规整外轮廓                                                                 |
+| `stamp.seed`                    | `number`                          | `69706`                 | 随机种子，用于稳定复现                                                             |
 | `decorations.enable`            | `boolean`                         | `true`                  | 启用装饰                                                                           |
 | `decorations.seasonAware`       | `boolean`                         | `true`                  | 四季花卉自动切换                                                                   |
 | `decorations.heroLandscape`     | `boolean`                         | `true`                  | 首页山水画                                                                         |
@@ -130,6 +166,38 @@ themeConfig: {
   },
 }
 ```
+
+## 印章调参 / Stamp Tuning
+
+主题层现在不再二次修改 `shuimo-core` 生成结果，而是把参数直接透传给底层 API。也就是说，用户可以只通过 `themeConfig.stamp` 来实时调整印章效果。
+
+```ts
+themeConfig: {
+  stamp: {
+    author: '隔窗,听雨',
+    type: 'yang',
+    shape: 'rectangle',
+    fontSize: 70,
+    borderScale: 1,
+    columnSpacingPx: 0.35,
+    characterSpacingPx: 3.2,
+    paddingXPx: 1.5,
+    paddingYPx: 1.5,
+    borderWidthPx: 4,
+    borderPointsPx: 24,
+    cornerRadiusPx: 10,
+    noiseAmountPx: 10,
+    regularShape: true,
+    seed: 69706,
+  },
+}
+```
+
+- 想让外框更规整：优先调 `regularShape`、`cornerRadiusPx`
+- 想让边缘更自然：调 `noiseAmountPx`、`borderPointsPx`
+- 想让字更松或更紧：调 `columnSpacingPx`、`characterSpacingPx`
+- 想控制印面留白：调 `paddingXPx`、`paddingYPx`
+- 想稳定复现同一枚印章：固定 `seed`
 
 ## 开发 / Development
 

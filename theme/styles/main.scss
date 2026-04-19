@@ -2,13 +2,21 @@
 @use './layout';
 @use './markdown';
 
-// 义山碑篆体
+// 峄山碑篆体（同时注册两个名字，兼容旧引用和 SVG 内 font-family）
 @font-face {
   font-family: 'YiShanBeiZhuan';
   src: url('../assets/fonts/yishanbeizhuanti.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+@font-face {
+  font-family: '峄山碑篆体';
+  src: url('../assets/fonts/yishanbeizhuanti.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
 }
 
 // 全局基础样式
