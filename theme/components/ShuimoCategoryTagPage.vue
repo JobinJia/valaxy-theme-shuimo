@@ -3,7 +3,7 @@ import type { Post } from 'valaxy'
 import { computed } from 'vue'
 import { useGoBack, useThemeConfig } from '../composables'
 
-const props = defineProps<{
+defineProps<{
   title: string
   posts: Post[]
   type: 'category' | 'tag'

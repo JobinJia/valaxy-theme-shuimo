@@ -35,7 +35,7 @@ function pressure(t: number): number {
   if (t < 0.2)
     return t / 0.2 // 起笔
   if (t > 0.8)
-    return (1 - t) / 0.2 * 0.4 // 收笔
+    return ((1 - t) / 0.2) * 0.4 // 收笔
   return 1 // 行笔
 }
 ```
@@ -85,4 +85,5 @@ Canvas 的 `globalCompositeOperation` 设为 `multiply` 可以模拟墨色叠加
 数字水墨不是对传统的替代，而是一种新的表达方式。代码与笔墨，终将殊途同归。
 
 [^1]: 离屏 Canvas 是一种常见的性能优化手段，将不变的内容缓存在独立的 Canvas 上，避免每帧重绘。
+
 [^2]: Perlin 噪声由 Ken Perlin 于 1983 年发明，广泛用于计算机图形学中生成自然纹理。

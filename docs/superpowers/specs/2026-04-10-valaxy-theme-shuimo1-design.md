@@ -74,16 +74,16 @@ valaxy-theme-shuimo1/
 
 ```scss
 // 主色调
-$ink-dark: #2A2520;       // 焦墨 — 标题、强调
-$ink-medium: #6B5E50;     // 赭石 — 正文
-$ink-light: #8A7E70;      // 淡墨 — 辅助文字、日期
-$accent: #8B4513;         // 古铜 — 链接、强调色
-$stamp-red: #C8102E;      // 朱红 — 仅印章使用
+$ink-dark: #2a2520; // 焦墨 — 标题、强调
+$ink-medium: #6b5e50; // 赭石 — 正文
+$ink-light: #8a7e70; // 淡墨 — 辅助文字、日期
+$accent: #8b4513; // 古铜 — 链接、强调色
+$stamp-red: #c8102e; // 朱红 — 仅印章使用
 
 // 背景
-$paper-bg: #F5F0E6;       // 古宣纸底
-$paper-light: #FAF7F0;    // 浅宣纸（文章内容区）
-$paper-card: #ECE6D8;     // 卡片/标签背景
+$paper-bg: #f5f0e6; // 古宣纸底
+$paper-light: #faf7f0; // 浅宣纸（文章内容区）
+$paper-card: #ece6d8; // 卡片/标签背景
 
 // 边框/分隔
 $border-subtle: rgba(107, 94, 80, 0.15);
@@ -111,6 +111,7 @@ $font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 ### 4. 卷轴展开入场动画
 
 页面加载时，显示一个卷轴从屏幕中间向两边展开的 CSS 动画：
+
 - 初始状态：两个卷轴轴心并拢在屏幕中央，中间露出一条缝
 - 动画过程：两个卷轴向左右分离，中间的"纸面"逐渐展开露出
 - 完成后：卷轴淡出，页面内容完全显示
@@ -131,12 +132,14 @@ $font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 ### 6. shuimo-core 集成（混合方案）
 
 **CSS 实现（不依赖 shuimo-core）：**
+
 - 宣纸纹理背景（CSS gradient + filter 模拟）
 - 笔触装饰线（CSS gradient）
 - 墨色渐变效果
 - 所有排版和布局
 
 **按需引入 shuimo-core：**
+
 - `ShuimoStamp.vue`：使用 `generateStampAsync()` 生成印章图片
   - 作者落款印章（文章末尾）
   - 侧边栏头像印章
@@ -146,39 +149,39 @@ $font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
 ### 7. ThemeConfig 类型
 
-```typescript
+```ts
 interface ThemeConfig {
   colors: {
-    primary: string     // 默认 #8B4513（古铜）
-    stamp: string       // 默认 #C8102E（朱红）
+    primary: string // 默认 #8B4513（古铜）
+    stamp: string // 默认 #C8102E（朱红）
   }
   fonts: {
-    serif: string       // 自定义衬线字体
+    serif: string // 自定义衬线字体
   }
   header: {
-    title: string       // 站名
-    subtitle: string    // 副标题
+    title: string // 站名
+    subtitle: string // 副标题
   }
   footer: {
     since: number
     powered: boolean
-    beian: { enable: boolean; icp: string }
+    beian: { enable: boolean, icp: string }
   }
   sidebar: {
-    author: { name: string; motto: string; stamp?: string }
+    author: { name: string, motto: string, stamp?: string }
     showCategories: boolean
     showTags: boolean
     showRecent: boolean
   }
   nav: NavItem[]
   scrollReveal: {
-    enable: boolean     // 默认 true
-    duration: number    // 默认 1800（ms）
+    enable: boolean // 默认 true
+    duration: number // 默认 1800（ms）
   }
   stamp: {
-    enable: boolean     // 默认 true
-    author: string      // 印章文字
-    type: 'yin' | 'yang'  // 阴章/阳章
+    enable: boolean // 默认 true
+    author: string // 印章文字
+    type: 'yin' | 'yang' // 阴章/阳章
   }
 }
 ```

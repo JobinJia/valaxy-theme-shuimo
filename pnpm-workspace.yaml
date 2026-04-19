@@ -1,7 +1,14 @@
+catalogMode: prefer
+
+cleanupUnusedCatalogs: true
+
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 packages:
   - theme
   - demo
-
 catalog:
   '@antfu/eslint-config': ^6.4.2
   '@iconify-json/ant-design': ^1.2.5
@@ -16,15 +23,6 @@ catalog:
   valaxy: ^0.26.10
   vitest: ^4.0.15
   vue-tsc: ^3.1.6
-
-catalogMode: prefer
-
-cleanupUnusedCatalogs: true
-
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
-
-shellEmulator: true
-
-trustPolicy: permissive

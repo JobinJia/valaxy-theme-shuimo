@@ -29,18 +29,18 @@ pnpm workspace with two packages:
 
 Valaxy themes follow a convention-based structure. Key directories in `theme/`:
 
-| Directory | Purpose |
-|-----------|---------|
-| `node/` | Server-side: default theme config, Vite plugin, UnoCSS safelist generation |
-| `client/` | Client entry — re-exports composables |
-| `setup/` | App setup hook — initializes brush stroke CSS variables on client |
-| `layouts/` | Valaxy layouts: `default`, `home`, `post`, `404` |
-| `components/` | Vue SFCs prefixed with `Shuimo*` (header, footer, sidebar, article cards, decorations, etc.) |
-| `composables/` | Vue composables for brush styles, seed-based RNG, caching, scheduling |
-| `styles/` | SCSS — CSS variables (`css-vars.scss`), layout, markdown, xuan paper styles |
-| `pages/` | File-based routes: index, archives, categories, tags |
-| `types/` | `ThemeConfig` interface extending Valaxy's `DefaultTheme.Config` |
-| `locales/` | i18n (zh-CN, en) |
+| Directory      | Purpose                                                                                      |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| `node/`        | Server-side: default theme config, Vite plugin, UnoCSS safelist generation                   |
+| `client/`      | Client entry — re-exports composables                                                        |
+| `setup/`       | App setup hook — initializes brush stroke CSS variables on client                            |
+| `layouts/`     | Valaxy layouts: `default`, `home`, `post`, `404`                                             |
+| `components/`  | Vue SFCs prefixed with `Shuimo*` (header, footer, sidebar, article cards, decorations, etc.) |
+| `composables/` | Vue composables for brush styles, seed-based RNG, caching, scheduling                        |
+| `styles/`      | SCSS — CSS variables (`css-vars.scss`), layout, markdown, xuan paper styles                  |
+| `pages/`       | File-based routes: index, archives, categories, tags                                         |
+| `types/`       | `ThemeConfig` interface extending Valaxy's `DefaultTheme.Config`                             |
+| `locales/`     | i18n (zh-CN, en)                                                                             |
 
 ### Config Flow
 
