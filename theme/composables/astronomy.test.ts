@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   FALLBACK_LOCATION,
   moonScreenPos,
+  moonShadowPath,
   parseLocationFromUrl,
   readLocationOverride,
   resolveLocation,
@@ -147,5 +148,33 @@ describe('resolveLocation priority', () => {
       search: '?loc=50,60',
     })
     expect(out).toEqual({ lat: 30, lng: 40 })
+  })
+})
+
+describe('moonShadowPath', () => {
+  it('returns a non-empty SVG path string', () => {
+    const path = moonShadowPath(0.3, 50, 50, 30)
+    expect(path).toMatch(/^M /)
+    expect(path).toContain('Z')
+  })
+
+  it('shadow is a full disc at new moon (phase=0)', () => {
+    // At phase=0 the terminator ellipse rx == R, so the shadow path
+    // describes the entire moon disc.
+    const path = moonShadowPath(0, 50, 50, 30)
+    expect(path).toMatch(/A 30,30 /)
+  })
+
+  it('terminator becomes a vertical line at first quarter (phase=0.25)', () => {
+    // At phase=0.25, cos(2π·0.25) = 0 → rx ≈ 0 → terminator is
+    // the diameter (vertical line).
+    const path = moonShadowPath(0.25, 50, 50, 30)
+    expect(path).toMatch(/A 0,30 /)
+  })
+
+  it('different phases produce different paths', () => {
+    const a = moonShadowPath(0.1, 50, 50, 30)
+    const b = moonShadowPath(0.4, 50, 50, 30)
+    expect(a).not.toEqual(b)
   })
 })

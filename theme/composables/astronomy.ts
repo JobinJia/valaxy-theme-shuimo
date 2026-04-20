@@ -117,3 +117,45 @@ export function resolveLocation(opts: {
   }
   return opts.configLocation ?? FALLBACK_LOCATION
 }
+
+/**
+ * Build the SVG path describing the unlit (shadow) portion of the moon disc
+ * at a given lunar phase.
+ *
+ *   phase ∈ [0, 1):
+ *     0      → new moon (full shadow)
+ *     0.25   → first quarter, lit on right
+ *     0.5    → full moon (no shadow)
+ *     0.75   → last quarter, lit on left
+ *
+ * Standard 2-arc construction: half-circle of the dark side + half-ellipse
+ * of width R·|cos(2π·phase)| acting as the terminator.
+ */
+export function moonShadowPath(phase: number, cx: number, cy: number, R: number): string {
+  const cos = Math.cos(2 * Math.PI * phase)
+  let rx = Math.abs(cos) * R
+  // Round to avoid floating-point artifacts (e.g., 1.8e-15 → 0)
+  rx = Math.round(rx * 1e10) / 1e10
+
+  // shadowOnLeft when phase ∈ [0, 0.5) (waxing → light grows from right)
+  const shadowOnLeft = phase < 0.5
+
+  // SVG arc sweep flag: 0 = ccw, 1 = cw.  Going from top (cx, cy-R) to
+  // bottom (cx, cy+R) at center (cx, cy):
+  //   sweep=1 traces the right side, sweep=0 traces the left.
+  let outerSweep: 0 | 1
+  let innerSweep: 0 | 1
+
+  if (shadowOnLeft) {
+    outerSweep = 0 // half-circle on the left
+    innerSweep = cos >= 0 ? 0 : 1 // terminator extends right (more shadow) vs carves left (crescent)
+  }
+  else {
+    outerSweep = 1 // half-circle on the right
+    innerSweep = cos >= 0 ? 1 : 0
+  }
+
+  const top = `${cx},${cy - R}`
+  const bot = `${cx},${cy + R}`
+  return `M ${top} A ${R},${R} 0 0,${outerSweep} ${bot} A ${rx},${R} 0 0,${innerSweep} ${top} Z`
+}
