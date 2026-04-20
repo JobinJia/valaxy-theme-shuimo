@@ -18,3 +18,18 @@ shuimo:
   archives: 归档
   categories_title: 分类
   tags_title: 标签
+  astronomy:
+    phase:
+      new: 朔
+      waxing_crescent: 蛾眉
+      first_quarter: 上弦
+      waxing_gibbous: 渐盈凸
+      full: 望
+      waning_gibbous: 渐亏凸
+      last_quarter: 下弦
+      waning_crescent: 残月
+    label_phase: '月相：{name}'
+    switch_to_my_location: 切换到我所在地
+    restore_blogger_view: 还原博主视角
+    location_failed: 无法获取位置，已保留博主视角
+    locating: 正在获取位置…

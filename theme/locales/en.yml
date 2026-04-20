@@ -18,3 +18,18 @@ shuimo:
   archives: Archives
   categories_title: Categories
   tags_title: Tags
+  astronomy:
+    phase:
+      new: New Moon
+      waxing_crescent: Waxing Crescent
+      first_quarter: First Quarter
+      waxing_gibbous: Waxing Gibbous
+      full: Full Moon
+      waning_gibbous: Waning Gibbous
+      last_quarter: Last Quarter
+      waning_crescent: Waning Crescent
+    label_phase: 'Phase: {name}'
+    switch_to_my_location: Use my location
+    restore_blogger_view: Restore default
+    location_failed: Could not get location; staying on default view.
+    locating: Locating…
