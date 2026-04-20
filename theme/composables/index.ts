@@ -1,7 +1,7 @@
 export * from './astronomy'
 export * from './config'
 export * from './useArticleContentObserver'
-export { type AstronomyOptions, type AstronomyState, useAstronomy } from './useAstronomy'
+export { type AstronomyOptions, type AstronomyState, type MoonState, type SunState, useAstronomy } from './useAstronomy'
 export * from './useBlankSide'
 export * from './useBrushStyles'
 export * from './useGoBack'

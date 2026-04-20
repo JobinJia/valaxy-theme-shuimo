@@ -42,29 +42,33 @@ describe('useAstronomy', () => {
     expect(state.value.moon.phaseKey).toBe('first_quarter')
     expect(state.value.location.lat).toBe(29.56)
     expect(state.value.sun.hidden).toBe(false)
-    expect(typeof state.value.solarTermName).toBe('string')
+    expect(state.value.solarTermName).toBe('谷雨')
   })
 
   it('refreshes once per 60 s tick', async () => {
     useAstronomy({ allowVisitorOverride: true })
     const initialCalls = (suncalc.getMoonPosition as any).mock.calls.length
+    const initialSunCalls = (suncalc.getPosition as any).mock.calls.length
 
     vi.advanceTimersByTime(60_000)
     await nextTick()
 
     expect((suncalc.getMoonPosition as any).mock.calls.length).toBe(initialCalls + 1)
+    expect((suncalc.getPosition as any).mock.calls.length).toBe(initialSunCalls + 1)
   })
 
   it('shares one interval across multiple subscribers', async () => {
     useAstronomy({ allowVisitorOverride: true })
     useAstronomy({ allowVisitorOverride: true })
     const before = (suncalc.getMoonPosition as any).mock.calls.length
+    const beforeSun = (suncalc.getPosition as any).mock.calls.length
 
     vi.advanceTimersByTime(60_000)
     await nextTick()
 
     // Only one extra call across both subscribers
     expect((suncalc.getMoonPosition as any).mock.calls.length).toBe(before + 1)
+    expect((suncalc.getPosition as any).mock.calls.length).toBe(beforeSun + 1)
   })
 
   it('setVisitorLocation updates location and persists to localStorage', async () => {
