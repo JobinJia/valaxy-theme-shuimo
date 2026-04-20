@@ -145,8 +145,12 @@ export const defaultThemeConfig: ThemeConfig = {
     enable: true,
     location: { lat: 29.56, lng: 106.55, name: '重庆' },
     allowVisitorOverride: true,
-    layers: { moon: true, stars: true, mist: true, vignette: true },
+    layers: {
+      moon: true, stars: true, mist: true, vignette: true,
+      sun: true, glowMorning: true, glowDusk: true, bird: true, skyTint: true,
+    },
     moon: { size: 70, tiltByLatitude: true },
+    sun: { size: 60, color: '#D9362E' },
     stars: { count: 16, moonLinked: true },
     mist: { opacity: 0.12, driftDuration: 120 },
   },
