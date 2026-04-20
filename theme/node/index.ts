@@ -141,6 +141,16 @@ export const defaultThemeConfig: ThemeConfig = {
     prefix: '图',
   },
 
+  astronomy: {
+    enable: true,
+    location: { lat: 29.56, lng: 106.55, name: '重庆' },
+    allowVisitorOverride: true,
+    layers: { moon: true, stars: true, mist: true, vignette: true },
+    moon: { size: 70, tiltByLatitude: true },
+    stars: { count: 16, moonLinked: true },
+    mist: { opacity: 0.12, driftDuration: 120 },
+  },
+
   preface: {},
 }
 
