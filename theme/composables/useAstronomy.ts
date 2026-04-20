@@ -1,15 +1,17 @@
+import type { ComputedRef } from 'vue'
+import type { Location } from './astronomy'
+import type { MoonPhaseKey } from './useMoonPhase'
 import suncalc from 'suncalc'
 import { computed, onUnmounted, ref } from 'vue'
-import type { ComputedRef } from 'vue'
 import {
   FALLBACK_LOCATION,
-  type Location,
+
   moonScreenPos,
   resolveLocation,
   writeLocationOverride,
 } from './astronomy'
+import { moonPhaseI18nKey } from './useMoonPhase'
 import { getTimeOfDay } from './useSolarTerm'
-import { type MoonPhaseKey, moonPhaseI18nKey } from './useMoonPhase'
 
 const REFRESH_MS = 60_000
 
@@ -91,7 +93,12 @@ export function useAstronomy(opts: AstronomyOptions = {}): {
   setVisitorLocation: (loc: Location) => void
   clearVisitorOverride: () => void
 } {
-  // Most-recent caller wins for option merging — intentional & simple.
+  // Module-level options state — most-recent caller wins. In practice
+  // ShuimoMoon and ShuimoNightSky both pass the same astronomyConfig from
+  // the shared themeConfig, so this can't diverge. If a future caller passes
+  // different options (especially `allowVisitorOverride`), the new value will
+  // affect setVisitorLocation/clearVisitorOverride behavior for ALL active
+  // subscribers — not just the new one.
   currentOptions = {
     configLocation: opts.configLocation ?? currentOptions.configLocation ?? FALLBACK_LOCATION,
     allowVisitorOverride: opts.allowVisitorOverride ?? currentOptions.allowVisitorOverride ?? true,

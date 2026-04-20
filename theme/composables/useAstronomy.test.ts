@@ -5,7 +5,10 @@ import { nextTick } from 'vue'
 vi.mock('suncalc', () => ({
   default: {
     getMoonPosition: vi.fn(() => ({
-      altitude: 0.5, azimuth: 0, distance: 384000, parallacticAngle: 0,
+      altitude: 0.5,
+      azimuth: 0,
+      distance: 384000,
+      parallacticAngle: 0,
     })),
     getMoonIllumination: vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 })),
   },
