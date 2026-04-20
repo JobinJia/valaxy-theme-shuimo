@@ -153,7 +153,6 @@ export const defaultThemeConfig: ThemeConfig = {
       sun: true,
       glowMorning: true,
       glowDusk: true,
-      bird: true,
       skyTint: true,
     },
     moon: { size: 70, tiltByLatitude: true },

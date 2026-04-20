@@ -17,7 +17,6 @@ const sunSize = computed(() => astronomy.value.sun?.size ?? 60)
 const showSun = computed(() => layers.value.sun !== false)
 const showGlowMorning = computed(() => layers.value.glowMorning !== false)
 const showGlowDusk = computed(() => layers.value.glowDusk !== false)
-const showBird = computed(() => layers.value.bird !== false)
 const showSkyTint = computed(() => layers.value.skyTint !== false)
 const showVignette = computed(() => layers.value.vignette !== false)
 
@@ -89,9 +88,6 @@ const sunX = computed(() => state.value.sun.x)
 
     <!-- 4. sun -->
     <ShuimoSun v-if="showSun" :size="sunSize" />
-
-    <!-- 5. bird -->
-    <ShuimoFlyingBird v-if="showBird" />
   </div>
 </template>
 
