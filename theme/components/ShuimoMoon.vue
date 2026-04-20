@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { moonShadowPath } from '../composables/astronomy'
+import { FALLBACK_LOCATION, moonShadowPath } from '../composables/astronomy'
 import { useThemeConfig } from '../composables/config'
 import { useAstronomy } from '../composables/useAstronomy'
 
@@ -25,7 +25,7 @@ const R = computed(() => props.size / 2 - 2)
 const shadowPath = computed(() => moonShadowPath(state.value.phase, props.size / 2, props.size / 2, R.value))
 const tiltDeg = computed(() => tiltByLatitude.value ? state.value.parallacticAngleDeg : 0)
 
-const phaseLabel = computed(() => t(`shuimo.astronomy.label_phase`, { name: t(`shuimo.astronomy.phase.${state.value.phaseKey}`) }))
+const phaseLabel = computed(() => t('shuimo.astronomy.label_phase', { name: t(`shuimo.astronomy.phase.${state.value.phaseKey}`) }))
 const locationLabel = computed(() => {
   const { location } = state.value
   if (location.name)
@@ -43,7 +43,7 @@ const moonStyle = computed(() => ({
 }))
 
 const isVisitorOverride = computed(() => {
-  const cfg = astronomyConfig.value.location ?? { lat: 29.56, lng: 106.55 }
+  const cfg = astronomyConfig.value.location ?? FALLBACK_LOCATION
   return state.value.location.lat !== cfg.lat || state.value.location.lng !== cfg.lng
 })
 
@@ -57,6 +57,13 @@ function flashMessage(text: string, ms = 3000) {
     message.value = null
   }, ms)
 }
+
+onUnmounted(() => {
+  if (messageTimer) {
+    clearTimeout(messageTimer)
+    messageTimer = null
+  }
+})
 
 function requestVisitorLocation() {
   if (!allowVisitorOverride.value)
@@ -157,7 +164,8 @@ function requestVisitorLocation() {
     pointer-events: none;
   }
 
-  &:hover &__pill {
+  &:hover &__pill,
+  &:focus-within &__pill {
     opacity: 1;
     pointer-events: auto;
   }
