@@ -114,22 +114,15 @@ function requestVisitorLocation() {
       </g>
     </svg>
 
-    <div class="shuimo-moon-astro__pill">
-      <span class="shuimo-moon-astro__loc">{{ locationLabel }}</span>
-      <span class="shuimo-moon-astro__sep">·</span>
-      <span class="shuimo-moon-astro__phase">{{ phaseLabel }}</span>
-      <span class="shuimo-moon-astro__sep">·</span>
-      <span class="shuimo-moon-astro__shichen">{{ state.shichen }}时</span>
-      <button
-        v-if="allowVisitorOverride"
-        class="shuimo-moon-astro__btn"
-        type="button"
-        @click="isVisitorOverride ? clearVisitorOverride() : requestVisitorLocation()"
-      >
-        {{ isVisitorOverride ? t('shuimo.astronomy.restore_blogger_view') : t('shuimo.astronomy.switch_to_my_location') }}
-      </button>
-      <span v-if="message" class="shuimo-moon-astro__msg">{{ message }}</span>
-    </div>
+    <ShuimoCelestialPill
+      :location-label="locationLabel"
+      :dynamic-label="phaseLabel"
+      :shichen="state.shichen"
+      :show-toggle="allowVisitorOverride"
+      :is-visitor-override="isVisitorOverride"
+      :message="message"
+      @toggle="isVisitorOverride ? clearVisitorOverride() : requestVisitorLocation()"
+    />
   </div>
 </template>
 
@@ -157,45 +150,10 @@ function requestVisitorLocation() {
     filter: drop-shadow(0 0 18px rgba(240, 230, 200, 0.18));
   }
 
-  &__pill {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, 8px);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    font-family: var(--sm-font-kai);
-    font-size: 11px;
-    color: var(--sm-ink-light);
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 999px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease 0.15s;
-    pointer-events: none;
-  }
-
-  &:hover &__pill,
-  &:focus-within &__pill {
+  &:hover :deep(.shuimo-celestial-pill),
+  &:focus-within :deep(.shuimo-celestial-pill) {
     opacity: 1;
     pointer-events: auto;
-  }
-
-  &__btn {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: inherit;
-    border-radius: 999px;
-    padding: 1px 6px;
-    cursor: pointer;
-    font-size: inherit;
-    font-family: inherit;
-  }
-
-  &__msg {
-    color: var(--sm-accent, #c8102e);
   }
 }
 </style>
