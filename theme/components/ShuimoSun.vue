@@ -35,10 +35,11 @@ const locationLabel = computed(() => {
 })
 
 const sunStyle = computed(() => ({
-  left: `${state.value.sun.x}%`,
-  top: `${state.value.sun.y}%`,
-  width: `${props.size}px`,
-  height: `${props.size}px`,
+  'left': `${state.value.sun.x}%`,
+  'top': `${state.value.sun.y}%`,
+  'width': `${props.size}px`,
+  'height': `${props.size}px`,
+  '--sun-glow-color': `${sunColor.value}40`, // hex + 40 alpha suffix = ~25% opacity
 }))
 
 const isVisitorOverride = computed(() => {
@@ -100,6 +101,7 @@ const haloId = computed(() => `sun-halo-${props.size}`)
       :width="size"
       :height="size"
       :viewBox="`0 0 ${size} ${size}`"
+      overflow="visible"
       aria-hidden="true"
     >
       <defs>
@@ -149,7 +151,7 @@ const haloId = computed(() => `sun-halo-${props.size}`)
 
   &__svg {
     display: block;
-    filter: drop-shadow(0 0 20px rgba(217, 54, 46, 0.25));
+    filter: drop-shadow(0 0 20px var(--sun-glow-color, rgba(217, 54, 46, 0.25)));
   }
 
   &:hover :deep(.shuimo-celestial-pill),
