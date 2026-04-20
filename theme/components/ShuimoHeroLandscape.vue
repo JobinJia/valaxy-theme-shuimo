@@ -23,6 +23,7 @@ const svgContainer = ref<HTMLDivElement>()
 const { setBlankSide } = useBlankSide()
 const themeConfig = useThemeConfig()
 const nightSkyEnabled = computed(() => themeConfig.value?.astronomy?.enable !== false)
+const daySkyEnabled = computed(() => themeConfig.value?.astronomy?.enable !== false)
 const { isDark } = useValaxyDark()
 const paperUrl = ref<string | null>(null)
 
@@ -360,6 +361,8 @@ watch(isDark, async (dark) => {
   >
     <!-- 暗色模式：天文驱动的夜空（在 SVG 之前 → 自然位于山水之下） -->
     <ShuimoNightSky v-if="isDark && nightSkyEnabled" />
+    <!-- 亮色模式：天文驱动的白昼（包含日 / 朝霞 / 晚霞 / 飞鸟） -->
+    <ShuimoDaySky v-if="!isDark && daySkyEnabled" />
     <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
   </div>
 </template>
