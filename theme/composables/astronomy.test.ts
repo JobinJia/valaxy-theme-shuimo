@@ -9,6 +9,11 @@ describe('moonScreenPos', () => {
     expect(pos.hidden).toBe(true)
   })
 
+  it('hides moon when altitude is exactly at the horizon (0°)', () => {
+    const pos = moonScreenPos(0, 0, 30)
+    expect(pos.hidden).toBe(true)
+  })
+
   it('places moon at south-center when azimuth=0 (suncalc south=0)', () => {
     const pos = moonScreenPos(30 * D2R, 0, 30)
     expect(pos.hidden).toBe(false)
