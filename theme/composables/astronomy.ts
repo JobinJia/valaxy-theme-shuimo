@@ -45,10 +45,10 @@ export function celestialScreenPos(altitudeRad: number, azimuthRad: number, lat:
     xPct = 100 - xPct
 
   // Parabolic arc: Y peaks at the centre, drops to the bottom of the sky band at both edges.
-  // Horizon stays at y=65% so mountains can still occlude (山遮日 / 山遮月).
-  // Peak at y=10% so the sun / moon sit comfortably high at transit.
+  // Horizon at y=55% (top of the mountain band — still allows occasional 山遮日 / 山遮月).
+  // Peak at y=5% so the sun / moon sit high at transit rather than mid-screen.
   const arcHeight = 1 - (2 * azNorm - 1) ** 2 // 1 at centre, 0 at edges
-  const yPct = 65 - 55 * arcHeight
+  const yPct = 55 - 50 * arcHeight
 
   return { x: xPct, y: yPct, hidden: false }
 }
