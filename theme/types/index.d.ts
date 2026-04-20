@@ -299,8 +299,10 @@ export interface ThemeConfig extends DefaultTheme.Config {
     location: {
       lat: number
       lng: number
-      /** 可选，仅用于 hover 提示展示。不填时显示原始坐标。
-       *  TODO: 后续接入反向地理编码自动获取 */
+      /**
+       * 可选，仅用于 hover 提示展示。不填时显示原始坐标。
+       * TODO: 后续接入反向地理编码自动获取
+       */
       name?: string
     }
 
