@@ -62,9 +62,9 @@ const starsOpacity = computed(() => starsLinked.value ? 0.6 - 0.4 * state.value.
 /* Mist drift direction from seed — left or right */
 const mistDir = computed(() => seed.value % 2 === 0 ? 1 : -1)
 const mistAnimStyle = computed(() => ({
-  '--mist-duration': `${mistDuration.value}s`,
-  '--mist-direction': mistDir.value === 1 ? 'normal' : 'reverse',
-  'opacity': mistOpacity.value,
+  animationDuration: `${mistDuration.value}s`,
+  animationDirection: mistDir.value === 1 ? 'normal' : 'reverse',
+  opacity: mistOpacity.value,
 }))
 </script>
 
@@ -142,8 +142,9 @@ const mistAnimStyle = computed(() => ({
   pointer-events: none;
   mask-image: linear-gradient(to top, black 60%, transparent);
   -webkit-mask-image: linear-gradient(to top, black 60%, transparent);
-  animation: shuimo-mist-drift var(--mist-duration, 120s) ease-in-out infinite alternate;
-  animation-direction: var(--mist-direction, normal);
+  animation-name: shuimo-mist-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 @keyframes shuimo-mist-drift {
@@ -158,6 +159,10 @@ const mistAnimStyle = computed(() => ({
 @media (prefers-reduced-motion: reduce) {
   .shuimo-night-sky__mist {
     animation: none;
+  }
+  .shuimo-night-sky__bg,
+  .shuimo-night-sky__stars {
+    transition: none;
   }
 }
 
