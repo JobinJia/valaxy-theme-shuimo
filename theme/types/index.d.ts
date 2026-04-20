@@ -289,6 +289,56 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 编号前缀 @default '图' */
     prefix: string
   }>
+
+  /** 天文驱动的暗色夜空（仅 dark mode 生效，且仅在显示 Hero 的页面） */
+  astronomy?: Partial<{
+    /** 总开关 @default true */
+    enable: boolean
+
+    /** 博主默认坐标。未设置时兜底 = 重庆 N29.56° E106.55° */
+    location: {
+      lat: number
+      lng: number
+      /** 可选，仅用于 hover 提示展示。不填时显示原始坐标。
+       *  TODO: 后续接入反向地理编码自动获取 */
+      name?: string
+    }
+
+    /** 是否允许访客切换到自己的位置 @default true */
+    allowVisitorOverride: boolean
+
+    /** 各视觉层独立开关 */
+    layers: Partial<{
+      moon: boolean
+      stars: boolean
+      mist: boolean
+      vignette: boolean
+    }>
+
+    /** 月亮调节 */
+    moon: Partial<{
+      /** 月亮直径 px @default 70 */
+      size: number
+      /** 月相是否随纬度倾斜 @default true */
+      tiltByLatitude: boolean
+    }>
+
+    /** 星点调节 */
+    stars: Partial<{
+      /** 星点数量 @default 16 */
+      count: number
+      /** 是否随月相联动（月明星稀） @default true */
+      moonLinked: boolean
+    }>
+
+    /** 烟雾调节 */
+    mist: Partial<{
+      /** 烟雾透明度 @default 0.12 */
+      opacity: number
+      /** 漂移周期秒 @default 120 */
+      driftDuration: number
+    }>
+  }>
 }
 
 export interface NavItem {
