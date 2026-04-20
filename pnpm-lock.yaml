@@ -21,6 +21,9 @@ catalogs:
     '@shuimo-design/lunar':
       specifier: ^0.0.8
       version: 0.0.8
+    '@types/suncalc':
+      specifier: ^1.9.2
+      version: 1.9.2
     '@unocss/eslint-plugin':
       specifier: ^66.5.10
       version: 66.6.8
@@ -33,6 +36,9 @@ catalogs:
     eslint-plugin-format:
       specifier: ^1.1.0
       version: 1.5.0
+    suncalc:
+      specifier: ^1.9.0
+      version: 1.9.0
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
@@ -104,7 +110,13 @@ importers:
       '@shuimo-design/lunar':
         specifier: 'catalog:'
         version: 0.0.8
+      suncalc:
+        specifier: 'catalog:'
+        version: 1.9.0
     devDependencies:
+      '@types/suncalc':
+        specifier: 'catalog:'
+        version: 1.9.2
       valaxy:
         specifier: 'catalog:'
         version: 0.26.13(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.9)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3)
@@ -1535,6 +1547,9 @@ packages:
 
   '@types/node@25.6.0':
     resolution: {integrity: sha512-+qIYRKdNYJwY3vRCZMdJbPLJAtGjQBudzZzdzwQYkEPQd+PJGixUL5QfvCLDaULoLv+RhT3LDkwEfKaAkgSmNQ==}
+
+  '@types/suncalc@1.9.2':
+    resolution: {integrity: sha512-ATAGBHHfA1TlE2tjfidLyTcysjoT2JHHEAmWRULh73SU9UTn++j5fqHEW16X6Y/2Li87jEQXzgu4R/OOdlDqzw==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -4328,6 +4343,9 @@ packages:
   stylis@4.3.6:
     resolution: {integrity: sha512-yQ3rwFWRfwNUY7H5vpU0wfdkNSnvnJinhF9830Swlaxl03zsOjCfmX0ugac+3LtK0lYSgwL/KXc8oYL3mG4YFQ==}
 
+  suncalc@1.9.0:
+    resolution: {integrity: sha512-vMJ8Byp1uIPoj+wb9c1AdK4jpkSKVAywgHX0lqY7zt6+EWRRC3Z+0Ucfjy/0yxTVO1hwwchZe4uoFNqrIC24+A==}
+
   superjson@2.2.6:
     resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
     engines: {node: '>=16'}
@@ -6141,6 +6159,8 @@ snapshots:
   '@types/node@25.6.0':
     dependencies:
       undici-types: 7.19.2
+
+  '@types/suncalc@1.9.2': {}
 
   '@types/trusted-types@2.0.7':
     optional: true
@@ -9455,6 +9475,8 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
   stylis@4.3.6: {}
+
+  suncalc@1.9.0: {}
 
   superjson@2.2.6:
     dependencies:

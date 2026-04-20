@@ -27,9 +27,11 @@
   "dependencies": {
     "@iconify-json/ant-design": "catalog:",
     "@iconify-json/simple-icons": "catalog:",
-    "@shuimo-design/lunar": "catalog:"
+    "@shuimo-design/lunar": "catalog:",
+    "suncalc": "catalog:"
   },
   "devDependencies": {
+    "@types/suncalc": "catalog:",
     "valaxy": "catalog:"
   }
 }
