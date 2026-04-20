@@ -106,7 +106,7 @@ describe('resolveLocation priority', () => {
     localStorage.clear()
   })
 
-  it('URL beats localStorage beats config beats fallback', () => {
+  it('url beats localStorage beats config beats fallback', () => {
     writeLocationOverride({ lat: 10, lng: 20 })
     const out = resolveLocation({
       configLocation: { lat: 30, lng: 40 },
