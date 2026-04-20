@@ -26,7 +26,7 @@ const showMist = computed(() => layers.value.mist !== false)
 const showVignette = computed(() => layers.value.vignette !== false)
 
 /* Background tint: full-moon nights microscopically lighter. */
-const bgOverlayOpacity = computed(() => 0.04 * state.value.illumination)
+const bgOverlayOpacity = computed(() => 0.04 * state.value.moon.illumination)
 
 /* Stars: deterministic positions from seed; opacity = 0.6 - 0.4·illumination. */
 function mulberry32(s: number) {
@@ -57,7 +57,7 @@ const stars = computed<Star[]>(() => {
   return out
 })
 
-const starsOpacity = computed(() => starsLinked.value ? 0.6 - 0.4 * state.value.illumination : 0.5)
+const starsOpacity = computed(() => starsLinked.value ? 0.6 - 0.4 * state.value.moon.illumination : 0.5)
 
 /* Mist drift direction from seed — left or right */
 const mistDir = computed(() => seed.value % 2 === 0 ? 1 : -1)

@@ -4,14 +4,13 @@ import type { MoonPhaseKey } from './useMoonPhase'
 import suncalc from 'suncalc'
 import { computed, onUnmounted, ref } from 'vue'
 import {
+  celestialScreenPos,
   FALLBACK_LOCATION,
-
-  moonScreenPos,
   resolveLocation,
   writeLocationOverride,
 } from './astronomy'
 import { moonPhaseI18nKey } from './useMoonPhase'
-import { getTimeOfDay } from './useSolarTerm'
+import { getSolarTerm, getTimeOfDay } from './useSolarTerm'
 
 const REFRESH_MS = 60_000
 
@@ -20,17 +19,32 @@ export interface AstronomyOptions {
   allowVisitorOverride?: boolean
 }
 
-export interface AstronomyState {
-  location: Location
+export interface MoonState {
   hidden: boolean
-  x: number // % of width
-  y: number // % of height
-  illumination: number // 0..1
-  phase: number // 0..1
+  x: number
+  y: number
+  illumination: number
+  phase: number
   phaseKey: MoonPhaseKey
   parallacticAngleDeg: number
-  shichen: string // 子 / 丑 / 寅 / ...
+}
+
+export interface SunState {
+  hidden: boolean
+  x: number
+  y: number
+  altitudeDeg: number
+  azimuthDeg: number
+  isRising: boolean
+}
+
+export interface AstronomyState {
+  location: Location
   updatedAt: number
+  shichen: string
+  solarTermName: string
+  moon: MoonState
+  sun: SunState
 }
 
 /* ---------- module-level singleton state ---------- */
@@ -50,21 +64,37 @@ function compute(opts: Required<AstronomyOptions>): AstronomyState {
     search,
   })
   const now = new Date()
-  const pos = suncalc.getMoonPosition(now, location.lat, location.lng)
-  const illum = suncalc.getMoonIllumination(now)
-  const screen = moonScreenPos(pos.altitude, pos.azimuth, location.lat)
 
+  const moonPos = suncalc.getMoonPosition(now, location.lat, location.lng)
+  const illum = suncalc.getMoonIllumination(now)
+  const moonScreen = celestialScreenPos(moonPos.altitude, moonPos.azimuth, location.lat)
+
+  const sunPos = suncalc.getPosition(now, location.lat, location.lng)
+  const sunScreen = celestialScreenPos(sunPos.altitude, sunPos.azimuth, location.lat)
+
+  const R2D = 180 / Math.PI
   return {
     location,
-    hidden: screen.hidden,
-    x: screen.x,
-    y: screen.y,
-    illumination: illum.fraction,
-    phase: illum.phase,
-    phaseKey: moonPhaseI18nKey(illum.phase),
-    parallacticAngleDeg: pos.parallacticAngle * (180 / Math.PI),
-    shichen: getTimeOfDay(now).shichen,
     updatedAt: now.getTime(),
+    shichen: getTimeOfDay(now).shichen,
+    solarTermName: getSolarTerm(now).name,
+    moon: {
+      hidden: moonScreen.hidden,
+      x: moonScreen.x,
+      y: moonScreen.y,
+      illumination: illum.fraction,
+      phase: illum.phase,
+      phaseKey: moonPhaseI18nKey(illum.phase),
+      parallacticAngleDeg: moonPos.parallacticAngle * R2D,
+    },
+    sun: {
+      hidden: sunScreen.hidden,
+      x: sunScreen.x,
+      y: sunScreen.y,
+      altitudeDeg: sunPos.altitude * R2D,
+      azimuthDeg: sunPos.azimuth * R2D,
+      isRising: sunPos.azimuth < 0,
+    },
   }
 }
 

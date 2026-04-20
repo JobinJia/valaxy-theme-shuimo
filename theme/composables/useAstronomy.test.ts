@@ -11,6 +11,7 @@ vi.mock('suncalc', () => ({
       parallacticAngle: 0,
     })),
     getMoonIllumination: vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 })),
+    getPosition: vi.fn(() => ({ altitude: 0.4, azimuth: 0 })),
   },
 }))
 
@@ -37,9 +38,11 @@ describe('useAstronomy', () => {
       configLocation: { lat: 29.56, lng: 106.55, name: '重庆' },
       allowVisitorOverride: true,
     })
-    expect(state.value.hidden).toBe(false)
-    expect(state.value.phaseKey).toBe('first_quarter')
+    expect(state.value.moon.hidden).toBe(false)
+    expect(state.value.moon.phaseKey).toBe('first_quarter')
     expect(state.value.location.lat).toBe(29.56)
+    expect(state.value.sun.hidden).toBe(false)
+    expect(typeof state.value.solarTermName).toBe('string')
   })
 
   it('refreshes once per 60 s tick', async () => {

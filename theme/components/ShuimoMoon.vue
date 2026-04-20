@@ -22,10 +22,10 @@ const { state, setVisitorLocation, clearVisitorOverride } = useAstronomy({
 })
 
 const R = computed(() => props.size / 2 - 2)
-const shadowPath = computed(() => moonShadowPath(state.value.phase, props.size / 2, props.size / 2, R.value))
-const tiltDeg = computed(() => tiltByLatitude.value ? state.value.parallacticAngleDeg : 0)
+const shadowPath = computed(() => moonShadowPath(state.value.moon.phase, props.size / 2, props.size / 2, R.value))
+const tiltDeg = computed(() => tiltByLatitude.value ? state.value.moon.parallacticAngleDeg : 0)
 
-const phaseLabel = computed(() => t('shuimo.astronomy.label_phase', { name: t(`shuimo.astronomy.phase.${state.value.phaseKey}`) }))
+const phaseLabel = computed(() => t('shuimo.astronomy.label_phase', { name: t(`shuimo.astronomy.phase.${state.value.moon.phaseKey}`) }))
 const locationLabel = computed(() => {
   const { location } = state.value
   if (location.name)
@@ -36,8 +36,8 @@ const locationLabel = computed(() => {
 })
 
 const moonStyle = computed(() => ({
-  left: `${state.value.x}%`,
-  top: `${state.value.y}%`,
+  left: `${state.value.moon.x}%`,
+  top: `${state.value.moon.y}%`,
   width: `${props.size}px`,
   height: `${props.size}px`,
 }))
@@ -85,7 +85,7 @@ function requestVisitorLocation() {
 </script>
 
 <template>
-  <div v-if="!state.hidden" class="shuimo-moon-astro" :style="moonStyle">
+  <div v-if="!state.moon.hidden" class="shuimo-moon-astro" :style="moonStyle">
     <svg
       class="shuimo-moon-astro__svg"
       :width="size"
