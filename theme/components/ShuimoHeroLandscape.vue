@@ -358,9 +358,9 @@ watch(isDark, async (dark) => {
     class="shuimo-hero-landscape"
     :style="paperUrl ? { backgroundImage: `url(${paperUrl})`, backgroundRepeat: 'repeat', backgroundSize: '512px 512px' } : undefined"
   >
-    <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
-    <!-- 暗色模式：天文驱动的夜空（包含月亮 / 星点 / 烟雾 / 暗角） -->
+    <!-- 暗色模式：天文驱动的夜空（在 SVG 之前 → 自然位于山水之下） -->
     <ShuimoNightSky v-if="isDark && nightSkyEnabled" />
+    <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
   </div>
 </template>
 
@@ -379,8 +379,6 @@ watch(isDark, async (dark) => {
 }
 
 .shuimo-hero-landscape__svg {
-  position: relative;
-  z-index: 1;
   width: 100%;
   height: 100%;
 }
