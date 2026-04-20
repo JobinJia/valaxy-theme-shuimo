@@ -309,12 +309,17 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 是否允许访客切换到自己的位置 @default true */
     allowVisitorOverride: boolean
 
-    /** 各视觉层独立开关 */
+    /** 各视觉层独立开关（moon/stars/mist 为夜空；sun/glowMorning/glowDusk/bird/skyTint 为白昼；vignette 共享） */
     layers: Partial<{
       moon: boolean
       stars: boolean
       mist: boolean
       vignette: boolean
+      sun: boolean
+      glowMorning: boolean
+      glowDusk: boolean
+      bird: boolean
+      skyTint: boolean
     }>
 
     /** 月亮调节 */
@@ -331,6 +336,14 @@ export interface ThemeConfig extends DefaultTheme.Config {
       count: number
       /** 是否随月相联动（月明星稀） @default true */
       moonLinked: boolean
+    }>
+
+    /** 太阳调节 */
+    sun: Partial<{
+      /** 直径 px @default 60 */
+      size: number
+      /** 朱红色 @default '#D9362E' */
+      color: string
     }>
 
     /** 烟雾调节 */
