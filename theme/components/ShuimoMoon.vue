@@ -139,6 +139,19 @@ function requestVisitorLocation() {
   transform: translate(-50%, -50%);
   pointer-events: auto;
 
+  // Invisible hover bridge spanning the 8px gap between moon and pill —
+  // keeps :hover active on the parent while the cursor crosses the gap,
+  // so the pill's pointer-events stay enabled and the button is clickable.
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    height: 8px;
+  }
+
   &__svg {
     display: block;
     filter: drop-shadow(0 0 18px rgba(240, 230, 200, 0.18));
