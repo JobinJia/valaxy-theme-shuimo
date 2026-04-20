@@ -21,23 +21,31 @@ export interface ScreenPos {
 /**
  * Map (altitude, azimuth) → screen position inside Hero.
  * Northern-hemisphere observer faces south; southern-hemisphere mirrored.
+ *
+ * Y is a parabolic function of azimuth (purely visual arc), NOT of altitude.
+ * Altitude is only consulted to decide visibility (hidden when below horizon).
+ * This trades astronomical purity for a smooth elegant arc shape — the
+ * moon enters at one screen edge near the bottom, traces an arc up through
+ * the centre, and exits at the other edge. No "vertical drop at horizon".
  */
+const AZIMUTH_RANGE_DEG = 120 // wider than ±90° so seasonal arcs (high/low declination) don't pin to edges
+
 export function moonScreenPos(altitudeRad: number, azimuthRad: number, lat: number): ScreenPos {
   if (altitudeRad <= 0)
     return { x: 0, y: 0, hidden: true }
 
-  const azDeg = Math.max(-90, Math.min(90, azimuthRad * R2D))
-  // azDeg = -90 → east → x = 100
-  // azDeg =   0 → south → x = 50
-  // azDeg = +90 → west → x = 0
-  let xPct = 50 - (azDeg / 90) * 50
+  const azDeg = Math.max(-AZIMUTH_RANGE_DEG, Math.min(AZIMUTH_RANGE_DEG, azimuthRad * R2D))
+  // azNorm: 0 = east edge, 0.5 = south, 1 = west edge
+  const azNorm = (azDeg + AZIMUTH_RANGE_DEG) / (AZIMUTH_RANGE_DEG * 2)
+
+  let xPct = 100 - azNorm * 100
 
   if (lat < 0)
     xPct = 100 - xPct
 
-  // Altitude curve: 0° → bottom of sky band (y=65), 60°+ → top (y=15)
-  const altDeg = Math.min(60, altitudeRad * R2D)
-  const yPct = 65 - 50 * Math.sqrt(altDeg / 60)
+  // Parabolic arc: Y peaks at the centre, drops to the bottom of the sky band at both edges.
+  const arcHeight = 1 - (2 * azNorm - 1) ** 2 // 1 at centre, 0 at edges
+  const yPct = 65 - 50 * arcHeight
 
   return { x: xPct, y: yPct, hidden: false }
 }

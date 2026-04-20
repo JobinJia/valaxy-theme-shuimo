@@ -45,15 +45,15 @@ describe('moonScreenPos', () => {
     expect(north.x + south.x).toBeCloseTo(100, 1)
   })
 
-  it('places moon higher (smaller y) for higher altitudes', () => {
-    const low = moonScreenPos(5 * D2R, 0, 30)
-    const high = moonScreenPos(50 * D2R, 0, 30)
-    expect(high.y).toBeLessThan(low.y)
+  it('places moon higher (smaller y) when nearer transit (south, az=0) than near the edges', () => {
+    const nearEdge = moonScreenPos(20 * D2R, -100 * D2R, 30)
+    const atTransit = moonScreenPos(20 * D2R, 0, 30)
+    expect(atTransit.y).toBeLessThan(nearEdge.y)
   })
 
-  it('clamps azimuth outside [-90°, 90°] to the nearest edge', () => {
-    const farEast = moonScreenPos(20 * D2R, -120 * D2R, 30)
-    const justEast = moonScreenPos(20 * D2R, -90 * D2R, 30)
+  it('clamps azimuth outside [-120°, 120°] to the nearest edge', () => {
+    const farEast = moonScreenPos(20 * D2R, -150 * D2R, 30)
+    const justEast = moonScreenPos(20 * D2R, -120 * D2R, 30)
     expect(farEast.x).toBeCloseTo(justEast.x, 1)
   })
 })
