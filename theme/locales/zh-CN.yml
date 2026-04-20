@@ -29,6 +29,7 @@ shuimo:
       last_quarter: 下弦
       waning_crescent: 残月
     label_phase: '月相：{name}'
+    label_solar_term: '节气：{name}'
     switch_to_my_location: 切换到我所在地
     restore_blogger_view: 还原博主视角
     location_failed: 无法获取位置，已保留博主视角
