@@ -19,8 +19,9 @@ export interface ScreenPos {
 }
 
 /**
- * Map (altitude, azimuth) → screen position inside Hero.
- * Northern-hemisphere observer faces south; southern-hemisphere mirrored.
+ * Map (altitude, azimuth) → screen position inside Hero for any celestial
+ * body (moon, sun, …). Northern-hemisphere observer faces south;
+ * southern-hemisphere mirrored.
  *
  * Y is a parabolic function of azimuth (purely visual arc), NOT of altitude.
  * Altitude is only consulted to decide visibility (hidden when below horizon).
@@ -30,7 +31,7 @@ export interface ScreenPos {
  */
 const AZIMUTH_RANGE_DEG = 120 // wider than ±90° so seasonal arcs (high/low declination) don't pin to edges
 
-export function moonScreenPos(altitudeRad: number, azimuthRad: number, lat: number): ScreenPos {
+export function celestialScreenPos(altitudeRad: number, azimuthRad: number, lat: number): ScreenPos {
   if (altitudeRad <= 0)
     return { x: 0, y: 0, hidden: true }
 
@@ -49,6 +50,9 @@ export function moonScreenPos(altitudeRad: number, azimuthRad: number, lat: numb
 
   return { x: xPct, y: yPct, hidden: false }
 }
+
+/** @deprecated use `celestialScreenPos` — alias kept for compatibility */
+export const moonScreenPos = celestialScreenPos
 
 export interface Location {
   lat: number
