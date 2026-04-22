@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { Location } from './astronomy'
 import type { MoonPhaseKey } from './useMoonPhase'
-import { getMoonIllumination, getMoonPosition, getPosition } from 'suncalc'
+import * as SunCalcNs from 'suncalc'
 import { computed, onUnmounted, ref } from 'vue'
 import {
   celestialScreenPos,
@@ -11,6 +11,12 @@ import {
 } from './astronomy'
 import { moonPhaseI18nKey } from './useMoonPhase'
 import { getSolarTerm, getTimeOfDay } from './useSolarTerm'
+
+// suncalc ships as UMD/CJS (`module.exports = SunCalc`). Consumer Vite
+// dep-optimizes it with only a `default` export; native ESM / Vitest mocks
+// expose named members directly. Unwrap both shapes so destructuring works.
+const SunCalc = ((SunCalcNs as any).default ?? SunCalcNs) as typeof SunCalcNs
+const { getMoonIllumination, getMoonPosition, getPosition } = SunCalc
 
 const REFRESH_MS = 60_000
 

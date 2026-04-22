@@ -2,16 +2,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-vi.mock('suncalc', () => ({
-  getMoonPosition: vi.fn(() => ({
+vi.mock('suncalc', () => {
+  const getMoonPosition = vi.fn(() => ({
     altitude: 0.5,
     azimuth: 0,
     distance: 384000,
     parallacticAngle: 0,
-  })),
-  getMoonIllumination: vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 })),
-  getPosition: vi.fn(() => ({ altitude: 0.4, azimuth: 0 })),
-}))
+  }))
+  const getMoonIllumination = vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 }))
+  const getPosition = vi.fn(() => ({ altitude: 0.4, azimuth: 0 }))
+  // Expose both named + default shapes so the composable's CJS-interop unwrap
+  // (default ?? ns) resolves to the same fns in either branch.
+  return {
+    default: { getMoonPosition, getMoonIllumination, getPosition },
+    getMoonPosition,
+    getMoonIllumination,
+    getPosition,
+  }
+})
 
 // eslint-disable-next-line import/first
 import * as suncalc from 'suncalc'
