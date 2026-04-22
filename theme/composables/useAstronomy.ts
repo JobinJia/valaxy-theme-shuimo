@@ -12,10 +12,23 @@ import {
 import { moonPhaseI18nKey } from './useMoonPhase'
 import { getSolarTerm, getTimeOfDay } from './useSolarTerm'
 
-// suncalc ships as UMD/CJS (`module.exports = SunCalc`). Consumer Vite
-// dep-optimizes it with only a `default` export; native ESM / Vitest mocks
-// expose named members directly. Unwrap both shapes so destructuring works.
-const SunCalc = ((SunCalcNs as any).default ?? SunCalcNs) as typeof SunCalcNs
+// suncalc ships as UMD/CJS (`module.exports = SunCalc`) and surfaces under
+// several shapes depending on the consumer's bundler state:
+//   1. top-level namespace — native ESM / Vitest mocks
+//   2. ns.default — Vite dep-optimized CJS
+//   3. ns.default.default — Vite 8 + rolldown when the dep-scan phase crashes
+//      and falls through to the runtime CJS→ESM shim
+// Probe each layer for the real methods instead of guessing based on `.default`.
+export function _pickSunCalc(ns: any): typeof SunCalcNs {
+  const candidates = [ns, ns?.default, ns?.default?.default]
+  for (const c of candidates) {
+    if (c && typeof c.getMoonPosition === 'function')
+      return c
+  }
+  const keys = ns && typeof ns === 'object' ? Object.keys(ns).join(',') : typeof ns
+  throw new TypeError(`[shuimo-theme] Failed to unwrap suncalc module; shape: ${keys}`)
+}
+const SunCalc = _pickSunCalc(SunCalcNs)
 const { getMoonIllumination, getMoonPosition, getPosition } = SunCalc
 
 const REFRESH_MS = 60_000

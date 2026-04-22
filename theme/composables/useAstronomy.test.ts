@@ -24,7 +24,38 @@ vi.mock('suncalc', () => {
 // eslint-disable-next-line import/first
 import * as suncalc from 'suncalc'
 // eslint-disable-next-line import/first
-import { _resetAstronomyForTests, useAstronomy } from './useAstronomy'
+import { _pickSunCalc, _resetAstronomyForTests, useAstronomy } from './useAstronomy'
+
+describe('_pickSunCalc (module-shape unwrap)', () => {
+  const methods = {
+    getMoonPosition: () => 'x',
+    getMoonIllumination: () => 'x',
+    getPosition: () => 'x',
+  }
+
+  it('picks the top-level namespace when methods live there (native ESM / vitest mock)', () => {
+    const ns = { ...methods }
+    expect(_pickSunCalc(ns)).toBe(ns)
+  })
+
+  it('picks ns.default when Vite dep-optimizer wraps the CJS export', () => {
+    const inner = { ...methods }
+    const ns = { default: inner }
+    expect(_pickSunCalc(ns)).toBe(inner)
+  })
+
+  it('picks ns.default.default when the runtime CJS→ESM shim double-wraps', () => {
+    // Reproduces the Vite 8 + rolldown dep-scan-crash scenario: the outer
+    // .default is some pass-through wrapper without the real methods.
+    const inner = { ...methods }
+    const ns = { default: { default: inner, __esModule: true } }
+    expect(_pickSunCalc(ns)).toBe(inner)
+  })
+
+  it('throws a descriptive error when no layer exposes getMoonPosition', () => {
+    expect(() => _pickSunCalc({ foo: 1, bar: 2 })).toThrow(/suncalc/)
+  })
+})
 
 describe('useAstronomy', () => {
   beforeEach(() => {
