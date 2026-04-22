@@ -16,8 +16,8 @@ catalogs:
       specifier: ^1.2.61
       version: 1.2.77
     '@jobinjia/shuimo-core':
-      specifier: ^1.0.2
-      version: 1.0.2
+      specifier: 1.0.3-beta.2
+      version: 1.0.3-beta.2
     '@shuimo-design/lunar':
       specifier: ^0.0.8
       version: 0.0.8
@@ -88,7 +88,7 @@ importers:
     dependencies:
       '@jobinjia/shuimo-core':
         specifier: 'catalog:'
-        version: 1.0.2
+        version: 1.0.3-beta.2
       valaxy:
         specifier: 'catalog:'
         version: 0.26.13(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.9)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3)
@@ -105,8 +105,8 @@ importers:
         specifier: 'catalog:'
         version: 1.2.77
       '@jobinjia/shuimo-core':
-        specifier: '>=1.0.2'
-        version: 1.0.2
+        specifier: '>=1.0.3-beta.2'
+        version: 1.0.3-beta.2
       '@shuimo-design/lunar':
         specifier: 'catalog:'
         version: 0.0.8
@@ -942,8 +942,8 @@ packages:
       vue-i18n:
         optional: true
 
-  '@jobinjia/shuimo-core@1.0.2':
-    resolution: {integrity: sha512-OoqZp9GoBazzrxPaviNitg3R4v5NrIm0oKps4Dpz7RNvA+yInqhRifQhzkPG1mrUhv7gYXNHL2WMQYi6XorngA==}
+  '@jobinjia/shuimo-core@1.0.3-beta.2':
+    resolution: {integrity: sha512-EVpvkYDoAhCaRIYvBU+BHG5RXQt3bvg+pfTSYQiQ9wnWjczyQMWuLBZOWi7QYtroJL/PwBSlO5DLudDfnYBTUA==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -4583,8 +4583,8 @@ packages:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
 
-  uuid@13.0.0:
-    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+  uuid@14.0.0:
+    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
     hasBin: true
 
   valaxy@0.26.13:
@@ -5664,10 +5664,10 @@ snapshots:
       vue: 3.5.22(typescript@5.9.3)
       vue-i18n: 11.3.2(vue@3.5.22(typescript@5.9.3))
 
-  '@jobinjia/shuimo-core@1.0.2':
+  '@jobinjia/shuimo-core@1.0.3-beta.2':
     dependencies:
       opentype.js: 1.3.4
-      uuid: 13.0.0
+      uuid: 14.0.0
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -9758,7 +9758,7 @@ snapshots:
 
   uuid@11.1.0: {}
 
-  uuid@13.0.0: {}
+  uuid@14.0.0: {}
 
   valaxy@0.26.13(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.9)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3):
     dependencies:
