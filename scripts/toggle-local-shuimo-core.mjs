@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -28,9 +29,20 @@ const original = fs.readFileSync(workspaceFile, 'utf8')
 const blockRegex = new RegExp(`\\n*${BEGIN}[\\s\\S]*?${END}\\n?`, 'g')
 const stripped = original.replace(blockRegex, '\n').replace(/\n{3,}/g, '\n\n')
 
-const next = mode === 'on'
-  ? `${stripped.trimEnd()}\n\n${BLOCK}\n`
-  : (stripped.endsWith('\n') ? stripped : `${stripped}\n`)
+let next
+if (mode === 'on') {
+  // Insert before `catalog:` (top-level key) — eslint yaml/sort-keys expects
+  // `overrides` to precede `catalog` in pnpm-workspace.yaml.
+  const match = stripped.match(/^catalog:/m)
+  if (!match || match.index === undefined) {
+    console.error('Could not find top-level `catalog:` key in pnpm-workspace.yaml')
+    process.exit(1)
+  }
+  next = `${stripped.slice(0, match.index)}${BLOCK}\n\n${stripped.slice(match.index)}`
+}
+else {
+  next = stripped.endsWith('\n') ? stripped : `${stripped}\n`
+}
 
 if (next === original) {
   console.log(`shuimo-core local link: already ${mode}`)
