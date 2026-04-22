@@ -25,12 +25,3 @@ export function openInitialCurtain() {
   initialCurtainActive = false
   curtainRevealed.value = true
 }
-
-export function closeCurtainTransition(): Promise<void> {
-  curtainRevealed.value = false
-  return new Promise(resolve => setTimeout(resolve, 500))
-}
-
-export function openCurtainTransition() {
-  curtainRevealed.value = true
-}
