@@ -3,20 +3,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 vi.mock('suncalc', () => ({
-  default: {
-    getMoonPosition: vi.fn(() => ({
-      altitude: 0.5,
-      azimuth: 0,
-      distance: 384000,
-      parallacticAngle: 0,
-    })),
-    getMoonIllumination: vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 })),
-    getPosition: vi.fn(() => ({ altitude: 0.4, azimuth: 0 })),
-  },
+  getMoonPosition: vi.fn(() => ({
+    altitude: 0.5,
+    azimuth: 0,
+    distance: 384000,
+    parallacticAngle: 0,
+  })),
+  getMoonIllumination: vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 })),
+  getPosition: vi.fn(() => ({ altitude: 0.4, azimuth: 0 })),
 }))
 
 // eslint-disable-next-line import/first
-import suncalc from 'suncalc'
+import * as suncalc from 'suncalc'
 // eslint-disable-next-line import/first
 import { _resetAstronomyForTests, useAstronomy } from './useAstronomy'
 

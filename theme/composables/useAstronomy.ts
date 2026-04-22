@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { Location } from './astronomy'
 import type { MoonPhaseKey } from './useMoonPhase'
-import suncalc from 'suncalc'
+import { getMoonIllumination, getMoonPosition, getPosition } from 'suncalc'
 import { computed, onUnmounted, ref } from 'vue'
 import {
   celestialScreenPos,
@@ -65,11 +65,11 @@ function compute(opts: Required<AstronomyOptions>): AstronomyState {
   })
   const now = new Date()
 
-  const moonPos = suncalc.getMoonPosition(now, location.lat, location.lng)
-  const illum = suncalc.getMoonIllumination(now)
+  const moonPos = getMoonPosition(now, location.lat, location.lng)
+  const illum = getMoonIllumination(now)
   const moonScreen = celestialScreenPos(moonPos.altitude, moonPos.azimuth, location.lat)
 
-  const sunPos = suncalc.getPosition(now, location.lat, location.lng)
+  const sunPos = getPosition(now, location.lat, location.lng)
   const sunScreen = celestialScreenPos(sunPos.altitude, sunPos.azimuth, location.lat)
 
   const R2D = 180 / Math.PI
