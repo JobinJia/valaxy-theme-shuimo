@@ -3,10 +3,13 @@ import type { ThemeModeColor } from './types'
 import { useHead } from '@unhead/vue'
 import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import yishanFontUrl from './assets/fonts/yishanbeizhuanti.ttf?url'
 import { generateXuanPaperTexture, useThemeConfig } from './composables'
+import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
-import { curtainRevealed } from './composables/useCurtainTransition'
+
+setupInitialCurtain(useRoute().path)
 
 const { urlA, urlB, active } = useGlobalXuanPaper()
 const themeConfig = useThemeConfig()

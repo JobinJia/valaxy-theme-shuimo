@@ -1,23 +1,24 @@
 import { ref } from 'vue'
 
-function isHomePath(): boolean {
-  if (typeof window === 'undefined')
-    return false
-  const path = window.location.pathname.replace(/\/$/, '') || '/'
-  return path === '/'
-}
-
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined')
     return false
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
-const needsInitialCurtain = isHomePath() && !prefersReducedMotion()
+export const curtainRevealed = ref(true)
 
-export const curtainRevealed = ref(!needsInitialCurtain)
+let initialCurtainActive = false
 
-let initialCurtainActive = needsInitialCurtain
+// Call synchronously from the root component's setup so each SSG-prerendered
+// route captures the correct curtain state (closed on home, open elsewhere);
+// SSR has no window, so the old module-top approach always produced "open".
+export function setupInitialCurtain(pathname: string) {
+  const normalized = pathname.replace(/\/$/, '') || '/'
+  const needsCurtain = normalized === '/' && !prefersReducedMotion()
+  curtainRevealed.value = !needsCurtain
+  initialCurtainActive = needsCurtain
+}
 
 export function openInitialCurtain() {
   if (!initialCurtainActive)
