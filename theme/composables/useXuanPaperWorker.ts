@@ -107,7 +107,6 @@ export async function generateTiledInWorkers(
       workers.push(w)
     }
 
-    const t0 = performance.now()
     const blobs = await Promise.all(
       tiles.map((tile, i) => {
         const id = nextId++
@@ -125,7 +124,6 @@ export async function generateTiledInWorkers(
       bitmaps[i]!.close()
     }
 
-    console.log(`[XuanPaper] ${tiles.length} 分片并行完成 ${(performance.now() - t0).toFixed(0)}ms`)
     return canvas.toDataURL('image/png')
   }
   finally {
