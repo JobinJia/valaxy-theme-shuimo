@@ -1,6 +1,9 @@
 import type { ResolvedValaxyOptions } from 'valaxy'
 import type { Plugin } from 'vite'
 import type { ThemeConfig } from '../types'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /**
  * Default Config
@@ -164,7 +167,31 @@ export const defaultThemeConfig: ThemeConfig = {
   preface: {},
 }
 
+// shuimo-core 的 XuanPaper worker chunk 走 Vite 的 `?worker_file` 路径，
+// 该路径对 server.fs.allow 的检查比普通模块路径更严（不享受 pnpm 符号链接的宽松），
+// 本地联调（pnpm dev:local → link: 到仓库外）会 403。这里把 shuimo-core 的真实
+// 目录显式加进白名单。Production build 下 fs.allow 不生效，无副作用。
+// 用 node_modules 符号链接解真实路径 —— 比 require.resolve 更稳（后者对严格 exports
+// 的包会因 'package.json' 不在 exports 中而失败）
+function resolveShuimoCoreRealDir(): string | null {
+  try {
+    let dir = path.dirname(fileURLToPath(import.meta.url))
+    while (dir !== path.dirname(dir)) {
+      const candidate = path.join(dir, 'node_modules', '@jobinjia', 'shuimo-core')
+      if (fs.existsSync(candidate))
+        return fs.realpathSync(candidate)
+      dir = path.dirname(dir)
+    }
+    return null
+  }
+  catch {
+    return null
+  }
+}
+
 export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
+  const shuimoCoreDir = resolveShuimoCoreRealDir()
+
   return {
     name: 'valaxy-theme-shuimo',
 
@@ -173,6 +200,13 @@ export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugi
         optimizeDeps: {
           include: ['@jobinjia/shuimo-core', '@jobinjia/shuimo-core/drawing', '@jobinjia/shuimo-core/elements'],
         },
+        server: shuimoCoreDir
+          ? {
+              fs: {
+                allow: [shuimoCoreDir],
+              },
+            }
+          : undefined,
       }
     },
   }

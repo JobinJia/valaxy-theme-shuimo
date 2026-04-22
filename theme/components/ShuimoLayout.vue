@@ -2,10 +2,10 @@
 import type { ThemeModeColor } from '../types'
 import { useHead } from '@unhead/vue'
 import { useValaxyDark } from 'valaxy'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
-import { generateXuanPaperTexture, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
+import { generateXuanPaperTexture, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
 
 const props = withDefaults(defineProps<{
   verticalNav?: boolean
@@ -78,15 +78,22 @@ const showSeedControl = computed(() =>
   heroLandscapeEnabled.value && themeConfig.value?.hero?.showSeedControl === true,
 )
 const curtainPaperUrl = ref<string | null>(null)
-const curtainStyle = computed(() => {
-  const userColor = resolveModeColor(themeConfig.value?.decorations?.curtainColor, isDark.value)
-  return {
-    backgroundColor: userColor || 'var(--sm-curtain-bg)',
-    backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
-    backgroundRepeat: curtainPaperUrl.value ? 'repeat' : undefined,
-    backgroundSize: curtainPaperUrl.value ? '512px 512px' : undefined,
-  }
-})
+// 幕布两半共享一张"完整"视口宽的纸：左半 background-position: left 显示左半，
+// 右半 position: right 显示右半，合起来就是一张被沿中线剖开的连续宣纸
+function makeCurtainStyle(side: 'left' | 'right') {
+  return computed(() => {
+    const userColor = resolveModeColor(themeConfig.value?.decorations?.curtainColor, isDark.value)
+    return {
+      backgroundColor: userColor || 'var(--sm-curtain-bg)',
+      backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
+      backgroundRepeat: curtainPaperUrl.value ? 'no-repeat' : undefined,
+      backgroundSize: curtainPaperUrl.value ? '200% 100%' : undefined,
+      backgroundPosition: curtainPaperUrl.value ? `${side} center` : undefined,
+    }
+  })
+}
+const curtainLeftStyle = makeCurtainStyle('left')
+const curtainRightStyle = makeCurtainStyle('right')
 const revealed = ref(
   !heroLandscapeEnabled.value
   || curtainPlayedInSession
@@ -121,27 +128,37 @@ async function ensureCurtainStampFontReady() {
   }
 }
 
+// 幕布按视口尺寸生成；localStorage 缓存由 generateXuanPaperTexture 通用实现
+let curtainDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
 async function ensureCurtainPaperReady() {
   const xuanPaper = themeConfig.value?.xuanPaper
   if (xuanPaper?.enable === false)
     return
 
-  // 幕布纸色默认与首页宣纸不同，做出"拉开时有层次"的观感：
-  //   亮色：#E8D7A5 金褐陈年纸 vs 首页 #FCF8E6 米白宣纸
-  //   暗色：#1D2230 青黛夜幕 vs 首页纯黑宣纸（冷暖对比）
-  // 用户通过 decorations.curtainPaperColor 自定义时以用户配置为准
+  // 幕布纸色默认与首页宣纸不同，做出"拉开时有层次"的观感
   const userBase = resolveModeColor(themeConfig.value?.decorations?.curtainPaperColor, isDark.value)
   const baseColor = userBase || (isDark.value ? '#1D2230' : '#E8D7A5')
 
+  // 幕布底色偏金黄，对比度差 → 金屑密度单独放大 3 倍下限 0.2
+  const userGold = xuanPaper?.goldDensity
+  const curtainGold = typeof userGold === 'number'
+    ? Math.max(userGold * 3, 0.2)
+    : undefined
+
+  const variant = xuanPaper?.variant || 'processed'
+  const width = Math.max(320, Math.ceil(Math.min(window.innerWidth, 1920) / 50) * 50)
+  const height = Math.max(320, Math.ceil(Math.min(window.innerHeight, 1080) / 50) * 50)
+
   try {
     curtainPaperUrl.value = await generateXuanPaperTexture({
-      variant: xuanPaper?.variant || 'processed',
-      width: 512,
-      height: 512,
+      variant,
+      width,
+      height,
       seed: 42,
       baseColor,
       isDark: isDark.value,
-      goldDensity: xuanPaper?.goldDensity,
+      goldDensity: curtainGold,
     })
   }
   catch {
@@ -149,27 +166,86 @@ async function ensureCurtainPaperReady() {
   }
 }
 
+function scheduleCurtainRegen() {
+  if (curtainDebounceTimer)
+    clearTimeout(curtainDebounceTimer)
+  curtainDebounceTimer = setTimeout(ensureCurtainPaperReady, 200)
+}
+
 function onSeedGenerated(seed: number) {
   currentSeed.value = seed
 }
 
-function onLandscapeReady() {
+function openCurtain() {
+  if (revealed.value)
+    return
   curtainPlayedInSession = true
-  requestAnimationFrame(() => {
-    revealed.value = true
-  })
+  revealed.value = true
 }
+
+// 幕布打开条件：幕布纸 + 主页宣纸 + 山水 SVG + 主内容宣纸，四者都就绪才开
+// 幕后全部准备好再拉开，打开时用户看到的就是"成品"，不需要任何淡入过渡
+// 兜底 2.5s 超时，万一哪个环节挂了也保证开幕
+let curtainTriggered = false
+const heroPaperReady = ref(false)
+const landscapeReady = ref(false)
+const contentPaperReady = ref(false)
+
+function tryOpenCurtain() {
+  if (curtainTriggered)
+    return
+  if (!curtainPaperUrl.value || !heroPaperReady.value || !landscapeReady.value || !contentPaperReady.value)
+    return
+  curtainTriggered = true
+  openCurtain()
+}
+
+function onHeroPaperReady() {
+  heroPaperReady.value = true
+  tryOpenCurtain()
+}
+
+function onLandscapeReady() {
+  landscapeReady.value = true
+  tryOpenCurtain()
+}
+
+function onContentPaperReady() {
+  contentPaperReady.value = true
+  tryOpenCurtain()
+}
+
+// 1s 兜底 —— 任何环节在 1s 内没就绪就强制开幕（dev 下 worker 冷启动慢会触发；prod 下正常都在 500ms 内就绪）
+setTimeout(() => {
+  if (!curtainTriggered) {
+    curtainTriggered = true
+    openCurtain()
+  }
+}, 1000)
+
+watch(() => curtainPaperUrl.value, () => tryOpenCurtain())
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
   if (typeof heroSeed === 'number')
     setFixedSeed(heroSeed)
 
+  // 空闲时预热 workers，减少首次生成的冷启动延迟
+  preheatXuanPaperWorker()
+  preheatHeroSceneWorker()
+
   if (!heroLandscapeEnabled.value)
     return
 
   ensureCurtainStampFontReady()
   ensureCurtainPaperReady()
+  window.addEventListener('resize', scheduleCurtainRegen)
+})
+
+onUnmounted(() => {
+  if (curtainDebounceTimer)
+    clearTimeout(curtainDebounceTimer)
+  window.removeEventListener('resize', scheduleCurtainRegen)
 })
 
 // 暗色模式切换时同步幕布纸纹：仅在本页启用了幕布时才需要
@@ -203,14 +279,14 @@ watch(() => route.path, () => {
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]" :style="themeCssVars">
     <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     <ShuimoThemeToggle />
-    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" @seed-generated="onSeedGenerated" />
+    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" @paper-ready="onHeroPaperReady" @seed-generated="onSeedGenerated" />
     <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="revealed" />
 
     <div class="shuimo-app__paper">
-      <ShuimoXuanPaper class="shuimo-app__paper-surface">
+      <ShuimoXuanPaper class="shuimo-app__paper-surface" @loaded="onContentPaperReady">
         <!-- 竖排模式下桌面端隐藏 header，移动端仍显示 -->
         <ShuimoHeader :class="{ 'shuimo-header--hidden-desktop': verticalNav }" />
 
@@ -228,14 +304,14 @@ watch(() => route.path, () => {
     </div>
 
     <!-- 开屏幕布 -->
-    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" :style="curtainStyle">
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed }" :style="curtainLeftStyle">
       <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
         <ShuimoStamp
           v-bind="curtainStampProps"
         />
       </div>
     </div>
-    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" :style="curtainStyle">
+    <div v-if="heroLandscapeEnabled" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed }" :style="curtainRightStyle">
       <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
         <ShuimoStamp
           v-bind="curtainStampProps"
@@ -324,7 +400,7 @@ watch(() => route.path, () => {
 
   &.revealed {
     // 展开用匀速线性过渡，避免尾部有明显"减速停顿"感
-    transition: transform 1.2s linear;
+    transition: transform 0.7s linear;
 
     &.shuimo-curtain--left {
       transform: translateX(-100%);

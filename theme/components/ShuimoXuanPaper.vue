@@ -1,55 +1,100 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
-import { ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useThemeConfig } from '../composables/config'
 import { generateXuanPaperTexture } from '../composables/useXuanPaperTexture'
 
 const props = withDefaults(defineProps<{
   variant?: 'processed' | 'aged' | 'gold'
-  width?: number
-  height?: number
   seed?: number
 }>(), {
   variant: 'processed',
-  width: 256,
-  height: 256,
   seed: 42,
 })
 
+const emit = defineEmits<{
+  loaded: []
+}>()
+
 const themeConfig = useThemeConfig()
 const { isDark } = useValaxyDark()
+const rootEl = ref<HTMLElement | null>(null)
 const paperUrl = ref<string | null>(null)
 const loaded = ref(false)
 
+// 按元素实际尺寸生成一张覆盖全部内容的宣纸，不平铺
+// 用 50px 分桶避免内容微调导致的频繁重绘
+let lastBucketW = 0
+let lastBucketH = 0
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let resizeObserver: ResizeObserver | null = null
+
 async function regenerate() {
+  const el = rootEl.value
+  if (!el)
+    return
   const cfg = themeConfig.value
   if (cfg?.xuanPaper?.enable === false)
     return
 
+  const bucketW = Math.max(320, Math.ceil(el.offsetWidth / 50) * 50)
+  const bucketH = Math.max(320, Math.ceil(el.offsetHeight / 50) * 50)
+  if (bucketW === lastBucketW && bucketH === lastBucketH && paperUrl.value)
+    return
+  lastBucketW = bucketW
+  lastBucketH = bucketH
+
   try {
     const url = await generateXuanPaperTexture({
       variant: cfg?.xuanPaper?.variant || props.variant,
-      width: props.width,
-      height: props.height,
+      width: bucketW,
+      height: bucketH,
       seed: props.seed,
       isDark: isDark.value,
       goldDensity: cfg?.xuanPaper?.goldDensity,
     })
-
+    const wasFirst = !paperUrl.value
     paperUrl.value = url
     loaded.value = true
+    if (wasFirst)
+      emit('loaded')
   }
   catch {
     loaded.value = false
   }
 }
 
-// 初次挂载 + 暗色模式切换都重新生成纹理
-watch(isDark, regenerate, { immediate: true })
+function schedule() {
+  if (debounceTimer)
+    clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(regenerate, 200)
+}
+
+watch(isDark, () => {
+  // 暗色切换时强制重绘（尺寸未变但变体不同）
+  lastBucketW = 0
+  lastBucketH = 0
+  schedule()
+})
+
+onMounted(() => {
+  schedule()
+  if (rootEl.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(schedule)
+    resizeObserver.observe(rootEl.value)
+  }
+})
+
+onUnmounted(() => {
+  if (debounceTimer)
+    clearTimeout(debounceTimer)
+  resizeObserver?.disconnect()
+})
 </script>
 
 <template>
   <div
+    ref="rootEl"
     class="shuimo-xuan-paper"
     :class="{ 'shuimo-xuan-paper--loaded': loaded }"
     :style="paperUrl ? { backgroundImage: `url(${paperUrl})` } : undefined"
@@ -79,8 +124,8 @@ watch(isDark, regenerate, { immediate: true })
     );
 
   &--loaded {
-    background-size: 512px 512px;
-    background-repeat: repeat;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
   }
 }
 </style>

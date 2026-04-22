@@ -7,7 +7,30 @@ export function hashString(str: string): number {
   return Math.abs(hash)
 }
 
-const sessionSeed = ref(Math.floor(Math.random() * 100000))
+// 种子在 tab 会话内保持粘性：刷新同一个 tab 保留，新 tab / 关闭重开则随机
+// 粘性让 hero scene 的 sessionStorage 缓存能在刷新后命中
+const SEED_STORAGE_KEY = 'shuimo-session-seed'
+function loadOrInitSeed(): number {
+  if (typeof window === 'undefined')
+    return Math.floor(Math.random() * 100000)
+  try {
+    const stored = sessionStorage.getItem(SEED_STORAGE_KEY)
+    if (stored) {
+      const n = Number(stored)
+      if (Number.isFinite(n))
+        return n
+    }
+  }
+  catch {}
+  const seed = Math.floor(Math.random() * 100000)
+  try {
+    sessionStorage.setItem(SEED_STORAGE_KEY, String(seed))
+  }
+  catch {}
+  return seed
+}
+
+const sessionSeed = ref(loadOrInitSeed())
 
 export function usePageSeed() {
   return computed(() => sessionSeed.value)
@@ -18,7 +41,14 @@ export function useComponentSeed(name: string) {
 }
 
 export function refreshSeed() {
-  sessionSeed.value = Math.floor(Math.random() * 100000)
+  const seed = Math.floor(Math.random() * 100000)
+  sessionSeed.value = seed
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem(SEED_STORAGE_KEY, String(seed))
+    }
+    catch {}
+  }
 }
 
 export function setFixedSeed(seed: number) {
