@@ -1,5 +1,7 @@
 import { generateCached } from './useShuimoCache'
-import { generateInXuanPaperWorker } from './useXuanPaperWorker'
+import { generateInXuanPaperWorker, generateTiledInWorkers } from './useXuanPaperWorker'
+
+const TILE_THRESHOLD = 512 * 512
 
 // localStorage 持久缓存：xuan paper 生成是确定性的（给定所有参数结果完全一致），
 // 一次生成后所有后续访问（包括新 tab / 新会话）都零计算命中
@@ -137,17 +139,30 @@ export async function generateXuanPaperTexture(options?: {
       textureOptions.goldDensity = goldDensity
     }
 
-    // 优先走 Worker（不阻塞主线程）；失败退回同步路径
     let url: string | null = null
-    const workerPromise = generateInXuanPaperWorker(textureOptions)
-    if (workerPromise) {
+    const pixels = width * height
+
+    if (pixels > TILE_THRESHOLD) {
       try {
-        url = await workerPromise
+        url = await generateTiledInWorkers(textureOptions)
       }
       catch (err) {
-        console.warn('[shuimo] XuanPaper worker generation failed, falling back to sync:', err)
+        console.warn('[shuimo] tiled worker failed, trying single worker:', err)
       }
     }
+
+    if (!url) {
+      const workerPromise = generateInXuanPaperWorker(textureOptions)
+      if (workerPromise) {
+        try {
+          url = await workerPromise
+        }
+        catch (err) {
+          console.warn('[shuimo] single worker failed, falling back to sync:', err)
+        }
+      }
+    }
+
     if (!url) {
       const { XuanPaper } = await import('@jobinjia/shuimo-core/elements')
       url = XuanPaper.generateDataURL(textureOptions)
