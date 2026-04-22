@@ -8,7 +8,7 @@
     "ci:publish": "pnpm -r publish --access public --no-git-checks",
     "dev": "pnpm demo",
     "dev:local": "node scripts/toggle-local-shuimo-core.mjs on && pnpm install && pnpm dev",
-    "dev:reset": "node scripts/toggle-local-shuimo-core.mjs off && pnpm install",
+    "dev:reset": "node scripts/toggle-local-shuimo-core.mjs off && pnpm install && pnpm dev",
     "demo": "pnpm -C demo dev",
     "lint": "eslint .",
     "release": "pnpm build && cd theme && git add -A && bumpp --all && pnpm -r publish --access public --no-git-checks",
