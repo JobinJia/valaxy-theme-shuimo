@@ -81,10 +81,16 @@ const pageType = computed(() => {
 <style lang="scss" scoped>
 .shuimo-page {
   min-height: 100vh;
-  background: var(--sm-paper);
+  background: transparent;
   color: var(--sm-ink-dark);
   position: relative;
   overflow: hidden;
+  animation: shuimo-fade-in 0.5s ease;
+}
+
+@keyframes shuimo-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .shuimo-page__paper {

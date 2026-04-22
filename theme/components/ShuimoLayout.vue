@@ -327,12 +327,13 @@ watch(() => route.path, () => {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
+  animation: shuimo-fade-in 0.5s ease;
 
   &__paper {
     position: relative;
     z-index: 1;
     flex: 1;
-    background-color: var(--sm-paper-overlay);
+    background-color: transparent;
   }
 
   &__paper-surface {
@@ -433,5 +434,10 @@ watch(() => route.path, () => {
   .shuimo-curtain {
     display: none;
   }
+}
+
+@keyframes shuimo-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

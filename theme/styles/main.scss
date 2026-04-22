@@ -20,6 +20,11 @@
 }
 
 // 全局基础样式
+html {
+  // 覆盖 Valaxy 的 --va-c-bg，纹理加载前的兜底色
+  background-color: var(--sm-paper) !important;
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -27,7 +32,7 @@ body {
 }
 
 body {
-  background-color: var(--sm-paper);
+  background-color: transparent;
   color: var(--sm-ink-medium);
   font-family: var(--va-font-family-base);
 
