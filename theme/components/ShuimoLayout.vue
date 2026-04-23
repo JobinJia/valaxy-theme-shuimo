@@ -86,7 +86,9 @@ onMounted(() => {
 
 <template>
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]" :style="themeCssVars">
-    <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
+    <ClientOnly>
+      <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
+    </ClientOnly>
     <ShuimoThemeToggle />
     <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" @paper-ready="onHeroPaperReady" @seed-generated="onSeedGenerated" />
     <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />

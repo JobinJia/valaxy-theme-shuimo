@@ -222,9 +222,13 @@ watch(isDark, () => {
     :style="paperUrl ? { backgroundImage: `url(${paperUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: '100% 100%' } : undefined"
   >
     <!-- 暗色模式：天文驱动的夜空（在 SVG 之前 → 自然位于山水之下） -->
-    <ShuimoNightSky v-if="isDark && nightSkyEnabled" />
+    <ClientOnly>
+      <ShuimoNightSky v-if="isDark && nightSkyEnabled" />
+    </ClientOnly>
     <!-- 亮色模式：天文驱动的白昼（包含日 / 朝霞 / 晚霞 / 飞鸟） -->
-    <ShuimoDaySky v-if="!isDark && daySkyEnabled" />
+    <ClientOnly>
+      <ShuimoDaySky v-if="!isDark && daySkyEnabled" />
+    </ClientOnly>
     <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
   </div>
 </template>

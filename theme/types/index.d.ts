@@ -272,6 +272,12 @@ export interface ThemeConfig extends DefaultTheme.Config {
     source: string
   }>
 
+  /** 首页组件显隐配置 */
+  home: Partial<{
+    /** 文章列表 @default true */
+    postList: boolean
+  }>
+
   /** 首页山水 seed 配置 */
   hero: Partial<{
     /** 固定 seed（设置后每次加载画面相同） */

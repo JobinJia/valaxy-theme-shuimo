@@ -17,9 +17,9 @@ import { useArticleContentObserver, useThemeConfig } from '../composables'
 
 const { t, locale } = useI18n()
 const themeConfig = useThemeConfig()
-const route = useRoute()
+const route = useRoute() as ReturnType<typeof useRoute> | undefined
 const config = computed(() => themeConfig.value?.readingInfo)
-const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
+const frontmatter = computed(() => (route?.meta?.frontmatter || {}) as any)
 
 const wordCount = ref(0)
 const readingTime = ref(frontmatter.value.readingTime ?? 0)
@@ -57,7 +57,7 @@ watch(frontmatter, () => {
   countWords()
 })
 
-watch(() => route.path, () => {
+watch(() => route?.path, () => {
   articleRef.value = null
   readingTime.value = frontmatter.value.readingTime ?? 0
   wordCount.value = 0

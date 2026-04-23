@@ -9,10 +9,10 @@ const { goBack } = useGoBack()
 const themeCssVars = useThemeCssVars()
 const themeConfig = useThemeConfig()
 
-const route = useRoute()
+const route = useRoute() as ReturnType<typeof useRoute> | undefined
 
 const pageType = computed(() => {
-  const path = route.path.replace(/\/$/, '') || '/'
+  const path = (route?.path ?? '/').replace(/\/$/, '') || '/'
   if (path === '/')
     return 'home'
   if (path === '/about')

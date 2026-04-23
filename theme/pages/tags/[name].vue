@@ -3,8 +3,8 @@ import { usePostList } from 'valaxy'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-const route = useRoute()
-const tagName = computed(() => decodeURIComponent(route.params.name as string))
+const route = useRoute() as ReturnType<typeof useRoute> | undefined
+const tagName = computed(() => decodeURIComponent((route?.params?.name ?? '') as string))
 const postList = usePostList()
 
 const posts = computed(() => {

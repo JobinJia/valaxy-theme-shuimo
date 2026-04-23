@@ -4,6 +4,7 @@ import { useThemeConfig } from '../composables'
 
 const themeConfig = useThemeConfig()
 const preface = computed(() => themeConfig.value?.preface)
+const showPostList = computed(() => themeConfig.value?.home?.postList !== false)
 </script>
 
 <template>
@@ -12,7 +13,7 @@ const preface = computed(() => themeConfig.value?.preface)
     :quote="preface.quote"
     :source="preface.source"
   />
-  <ShuimoPostList />
+  <ShuimoPostList v-if="showPostList" />
 </template>
 
 <route lang="yaml">

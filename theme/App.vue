@@ -9,7 +9,10 @@ import { generateXuanPaperTexture, useThemeConfig } from './composables'
 import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 
-setupInitialCurtain(useRoute().path)
+// useRoute() can be undefined during SSG app init or under duplicate vue-router
+// instances (e.g. when this theme is consumed via `link:` workspaces).
+const initialRoute = useRoute() as ReturnType<typeof useRoute> | undefined
+setupInitialCurtain(initialRoute?.path ?? '/')
 
 const { urlA, urlB, active } = useGlobalXuanPaper()
 const themeConfig = useThemeConfig()

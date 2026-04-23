@@ -15,7 +15,7 @@ import { useRoute } from 'vue-router'
 import { useArticleContentObserver, useThemeConfig } from '../composables'
 
 const { t } = useI18n()
-const route = useRoute()
+const route = useRoute() as ReturnType<typeof useRoute> | undefined
 const themeConfig = useThemeConfig()
 const tocConfig = computed(() => themeConfig.value?.toc)
 const maxDepth = computed(() => tocConfig.value?.maxDepth ?? 3)
@@ -147,7 +147,7 @@ watch(() => route.hash, () => {
   initFromHash()
 })
 
-watch(() => route.path, () => {
+watch(() => route?.path, () => {
   articleRef.value = null
   headings.value = []
   activeId.value = ''

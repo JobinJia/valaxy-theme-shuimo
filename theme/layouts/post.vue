@@ -16,9 +16,9 @@ const { t } = useI18n()
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
 const stampConfig = computed(() => themeConfig.value?.stamp)
-const route = useRoute()
+const route = useRoute() as ReturnType<typeof useRoute> | undefined
 const router = useRouter()
-const frontmatter = computed(() => (route.meta?.frontmatter || {}) as any)
+const frontmatter = computed(() => (route?.meta?.frontmatter || {}) as any)
 const [prev, next] = usePrevNext()
 
 const articleRef = ref<HTMLElement>()
@@ -76,7 +76,7 @@ function goBack() {
 <template>
   <ShuimoClickPetals />
   <ShuimoLayout>
-    <div :key="route.path" class="shuimo-post-page">
+    <div :key="route?.path" class="shuimo-post-page">
       <!-- 顶部返回 -->
       <a href="#" class="shuimo-post-page__back shuimo-post-page__back--top" @click.prevent="goBack">
         ← {{ t('shuimo.back') }}

@@ -165,6 +165,10 @@ export const defaultThemeConfig: ThemeConfig = {
   },
 
   preface: {},
+
+  home: {
+    postList: true,
+  },
 }
 
 // shuimo-core 的 XuanPaper worker chunk 走 Vite 的 `?worker_file` 路径，
