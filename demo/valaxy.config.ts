@@ -97,6 +97,7 @@ export default defineConfig<ThemeConfig>({
 
     hero: {
       showSeedControl: true,
+      sceneHeight: 600,
     },
 
     preface: {

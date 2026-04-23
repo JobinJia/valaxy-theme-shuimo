@@ -136,6 +136,7 @@ export const defaultThemeConfig: ThemeConfig = {
 
   hero: {
     showSeedControl: false,
+    sceneHeight: 800,
   },
 
   imageCaption: {
