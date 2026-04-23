@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
 import { preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
 import { curtainRevealed, openInitialCurtain } from '../composables/useCurtainTransition'
+import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 
 const props = withDefaults(defineProps<{
   verticalNav?: boolean
@@ -42,15 +43,23 @@ let initialCurtainTriggered = false
 const heroPaperReady = ref(false)
 const landscapeReady = ref(false)
 const contentPaperReady = ref(false)
+const { ready: globalPaperReady } = useGlobalXuanPaper()
 
 function tryOpenInitialCurtain() {
   if (initialCurtainTriggered)
     return
   if (!heroPaperReady.value || !landscapeReady.value || !contentPaperReady.value)
     return
+  if (!globalPaperReady.value)
+    return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
+
+watch(globalPaperReady, (v) => {
+  if (v)
+    tryOpenInitialCurtain()
+})
 
 function onHeroPaperReady() {
   heroPaperReady.value = true
@@ -67,12 +76,15 @@ function onContentPaperReady() {
   tryOpenInitialCurtain()
 }
 
+// 兜底：worker 异常 / 网络挂死时也必须开幕，避免幕布永远挡着页面。
+// 冷启动强制刷新下宣纸 worker 生成可能需要 1-3s，所以给 6s 的宽裕窗口，
+// 让 globalPaperReady 有充分时间点亮再触发。正常路径都走 gate，不走这里。
 setTimeout(() => {
   if (!initialCurtainTriggered) {
     initialCurtainTriggered = true
     openInitialCurtain()
   }
-}, 1000)
+}, 6000)
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
@@ -122,7 +134,6 @@ onMounted(() => {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  animation: shuimo-fade-in 0.5s ease;
 
   &__paper {
     position: relative;
@@ -166,15 +177,6 @@ onMounted(() => {
   // 移动端首页：隐藏 paper 层，只保留竖排导航 + 山水画
   .shuimo-app.has-vertical-nav .shuimo-app__paper {
     display: none;
-  }
-}
-
-@keyframes shuimo-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 </style>

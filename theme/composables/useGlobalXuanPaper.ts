@@ -6,6 +6,7 @@ import { generateXuanPaperTexture } from './useXuanPaperTexture'
 const urlA = ref<string | null>(null)
 const urlB = ref<string | null>(null)
 const active = ref<'a' | 'b'>('a')
+const ready = ref(false)
 
 let lastW = 0
 let lastH = 0
@@ -34,14 +35,24 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
       goldDensity: xuanPaper?.goldDensity as number | undefined,
     })
 
+    // 预解码 blob URL：确保图片已在浏览器内解码完成，
+    // 后面 ready=true 触发幕布打开时，中央宣纸保证已真正上屏，
+    // 不会出现幕布拉开 → 中央短暂空白 → 纹理才浮现的闪白
+    try {
+      const img = new Image()
+      img.src = url
+      await img.decode()
+    }
+    catch {}
+
     const next = active.value === 'a' ? 'b' : 'a'
     if (next === 'a')
       urlA.value = url
     else
       urlB.value = url
     await nextTick()
-    await new Promise(r => setTimeout(r, 50))
     active.value = next
+    ready.value = true
   }
   catch {}
 }
@@ -54,7 +65,7 @@ function scheduleRegenerate(isDark: boolean, themeConfig: Record<string, unknown
 
 export function useGlobalXuanPaper() {
   if (typeof window === 'undefined')
-    return { urlA, urlB, active }
+    return { urlA, urlB, active, ready }
 
   if (!initialized) {
     initialized = true
@@ -75,5 +86,5 @@ export function useGlobalXuanPaper() {
     window.addEventListener('resize', trigger)
   }
 
-  return { urlA, urlB, active }
+  return { urlA, urlB, active, ready }
 }

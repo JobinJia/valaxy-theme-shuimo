@@ -205,7 +205,6 @@ watch(isDark, () => {
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 0.6s ease;
 }
 
 .shuimo-paper-bg__layer--active {
