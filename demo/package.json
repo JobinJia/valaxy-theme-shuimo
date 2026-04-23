@@ -5,9 +5,9 @@
     "build": "pnpm build:ssg",
     "build:spa": "valaxy build",
     "build:ssg": "valaxy build --ssg",
-    "dev": "valaxy",
+    "dev": "valaxy --port 4860",
     "rss": "valaxy rss",
-    "serve": "vite preview"
+    "serve": "vite preview --port 4861 --strictPort"
   },
   "dependencies": {
     "@jobinjia/shuimo-core": "catalog:",

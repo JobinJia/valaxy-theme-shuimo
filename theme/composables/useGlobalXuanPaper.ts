@@ -1,5 +1,5 @@
-import { nextTick, ref, watch } from 'vue'
 import { useValaxyDark } from 'valaxy'
+import { nextTick, ref, watch } from 'vue'
 import { useThemeConfig } from './config'
 import { generateXuanPaperTexture } from './useXuanPaperTexture'
 
@@ -67,7 +67,11 @@ export function useGlobalXuanPaper() {
     }
 
     trigger()
-    watch(isDark, () => { lastW = 0; lastH = 0; trigger() })
+    watch(isDark, () => {
+      lastW = 0
+      lastH = 0
+      trigger()
+    })
     window.addEventListener('resize', trigger)
   }
 
