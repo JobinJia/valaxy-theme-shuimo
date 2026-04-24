@@ -1,7 +1,6 @@
-// Pure boat planning + water/boat SVG fragment composition.
-// No shuimo-core imports — actual rendering is injected via `Renderers` so
-// this module is testable in a plain node env. Used by useHeroScene.ts
-// (which runs in both the main thread and the hero-scene worker).
+// Pure boat planning module for the hero landscape water layer. No
+// shuimo-core imports — rendering is injected, keeping this module testable
+// in a plain node env and safe to import from the hero-scene worker.
 
 /**
  * Deterministic PRNG (mulberry32). Seed is coerced to uint32.
