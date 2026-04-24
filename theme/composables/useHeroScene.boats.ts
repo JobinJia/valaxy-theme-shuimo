@@ -128,3 +128,58 @@ export function planBoats(nativeW: number, seed: number): WaterPlan {
 
   return { baseline, boats }
 }
+
+/**
+ * Injectable renderers — matches the signatures of shuimo-core's
+ * `Arch.boat01` and `Water.generate`. Injected so this module stays
+ * shuimo-core-free and can be unit-tested with spies.
+ */
+export interface Renderers {
+  boat: (
+    x: number,
+    y: number,
+    seed: number,
+    opts: { len: number, sca: number, fli: boolean },
+  ) => string
+  water: (
+    x: number,
+    y: number,
+    seed: number,
+    opts: { hei: number, len: number, clu: number },
+  ) => string
+}
+
+const RIPPLE_X_OFFSET = -70 // ripple cluster starts left of boat center
+const RIPPLE_Y_OFFSET = 8 // ripple cluster sits just below hull
+const BASELINE_HEI = 2
+const BASELINE_CLU = 2
+const RIPPLE_HEI = 3
+const RIPPLE_CLU = 2
+const BASELINE_OPACITY = 0.35
+
+/**
+ * Render the theme-owned water + boat layer as an SVG fragment. Designed
+ * to be appended immediately before `</svg>` in the hero scene so boats
+ * render on top of everything the painter generated.
+ *
+ * Output order (and therefore z-order from bottom to top):
+ *   1. faint baseline wrapped in <g opacity=0.35>
+ *   2. for each boat: local ripples, then boat hull
+ */
+export function buildWaterAndBoats(plan: WaterPlan, r: Renderers): string {
+  const baseline = r.water(plan.baseline.x, plan.baseline.y, plan.baseline.seed, {
+    hei: BASELINE_HEI,
+    len: plan.baseline.len,
+    clu: BASELINE_CLU,
+  })
+  const parts: string[] = [`<g style="opacity:${BASELINE_OPACITY}">${baseline}</g>`]
+  for (const b of plan.boats) {
+    parts.push(r.water(b.x + RIPPLE_X_OFFSET, b.y + RIPPLE_Y_OFFSET, b.rippleSeed, {
+      hei: RIPPLE_HEI,
+      len: b.len,
+      clu: RIPPLE_CLU,
+    }))
+    parts.push(r.boat(b.x, b.y, b.boatSeed, { len: b.len, sca: 1, fli: b.fli }))
+  }
+  return parts.join('')
+}

@@ -1,5 +1,6 @@
+import type { Renderers, WaterPlan } from './useHeroScene.boats'
 import { describe, expect, it } from 'vitest'
-import { decideBoatCount, mulberry32, planBoats } from './useHeroScene.boats'
+import { buildWaterAndBoats, decideBoatCount, mulberry32, planBoats } from './useHeroScene.boats'
 
 describe('mulberry32', () => {
   it('is deterministic for the same seed', () => {
@@ -118,5 +119,78 @@ describe('planBoats', () => {
       expect(a.rippleSeed).not.toBe(b.rippleSeed)
       expect(a.boatSeed).not.toBe(a.rippleSeed)
     })
+  })
+})
+
+describe('buildWaterAndBoats', () => {
+  // Spy-style renderers that record calls and return identifiable strings.
+  interface Call { kind: 'boat' | 'water', x: number, y: number, seed: number, opts: unknown }
+  function makeRenderers(): { r: Renderers, calls: Call[] } {
+    const calls: Call[] = []
+    const r: Renderers = {
+      boat: (x, y, seed, opts) => {
+        calls.push({ kind: 'boat', x, y, seed, opts })
+        return `<!--boat seed=${seed}-->`
+      },
+      water: (x, y, seed, opts) => {
+        calls.push({ kind: 'water', x, y, seed, opts })
+        return `<!--water seed=${seed}-->`
+      },
+    }
+    return { r, calls }
+  }
+
+  const samplePlan: WaterPlan = {
+    baseline: { x: 300, y: 625, len: 1400, seed: 0xA17E },
+    boats: [
+      { x: 600, y: 595, fli: false, len: 140, boatSeed: 11, rippleSeed: 22 },
+      { x: 2200, y: 605, fli: true, len: 140, boatSeed: 33, rippleSeed: 44 },
+    ],
+  }
+
+  it('wraps only the baseline in the 0.35-opacity group', () => {
+    const { r } = makeRenderers()
+    const out = buildWaterAndBoats(samplePlan, r)
+    expect(out).toContain('<g style="opacity:0.35"><!--water seed=41342--></g>')
+    // Local ripples are OUTSIDE any opacity wrapper.
+    expect(out).toContain('<!--water seed=22-->')
+    expect(out).not.toContain('<g style="opacity:0.35"><!--water seed=22-->')
+  })
+
+  it('calls water for baseline first, then (ripples, boat) per placement', () => {
+    const { r, calls } = makeRenderers()
+    buildWaterAndBoats(samplePlan, r)
+    expect(calls.map(c => `${c.kind}:${c.seed}`)).toEqual([
+      'water:41342', // baseline (0xA17E)
+      'water:22', // boat 0 ripples
+      'boat:11', // boat 0 hull
+      'water:44', // boat 1 ripples
+      'boat:33', // boat 1 hull
+    ])
+  })
+
+  it('offsets ripples to (x-70, y+8) and passes boat len', () => {
+    const { r, calls } = makeRenderers()
+    buildWaterAndBoats(samplePlan, r)
+    const ripple0 = calls.find(c => c.kind === 'water' && c.seed === 22)!
+    expect(ripple0.x).toBe(530)
+    expect(ripple0.y).toBe(603)
+    expect(ripple0.opts).toEqual({ hei: 3, len: 140, clu: 2 })
+  })
+
+  it('passes boat options including fli through untouched', () => {
+    const { r, calls } = makeRenderers()
+    buildWaterAndBoats(samplePlan, r)
+    const boatCalls = calls.filter(c => c.kind === 'boat')
+    expect(boatCalls[0].opts).toEqual({ len: 140, sca: 1, fli: false })
+    expect(boatCalls[1].opts).toEqual({ len: 140, sca: 1, fli: true })
+  })
+
+  it('returns a concatenated string starting with the baseline and ending with the last boat', () => {
+    const { r } = makeRenderers()
+    const out = buildWaterAndBoats(samplePlan, r)
+    // Pure concatenation — easy to splice into the SVG string.
+    expect(out.startsWith('<g style="opacity:0.35">')).toBe(true)
+    expect(out.endsWith('<!--boat seed=33-->')).toBe(true)
   })
 })
