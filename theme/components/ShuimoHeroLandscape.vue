@@ -83,7 +83,10 @@ onMounted(async () => {
   emit('paperReady')
 
   try {
-    const W = Math.min(window.innerWidth, 1920)
+    // W 必须跟实际视口宽度一致：外层 <img object-fit:cover> 在容器 vs PNG 宽高比
+    // 不匹配时会做垂直裁剪（4K 下容器 3840×800 / PNG 1920×800 → 上下各切 400px，
+    // 山顶和地面线都没了）。和 useGlobalXuanPaper 一样不设 1920 上限。
+    const W = window.innerWidth
     // H 是 SVG 画布高度（scene 坐标系），由 themeConfig.hero.sceneHeight 决定
     const H = themeConfig.value?.hero?.sceneHeight ?? 800
     const scene = await getHeroScene(W, H)
