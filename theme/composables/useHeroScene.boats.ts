@@ -56,13 +56,17 @@ export interface BaselinePlan {
   seed: number
 }
 
+/**
+ * Full plan for the theme-owned water + boat layer: a faint baseline
+ * stroke plus one or two boat placements.
+ */
 export interface WaterPlan {
   baseline: BaselinePlan
   boats: BoatPlacement[]
 }
 
 const BOAT_Y_BASE = 600
-const BOAT_Y_JITTER = 20 // full range → y ∈ [590, 610]
+const BOAT_Y_JITTER = 20 // full range → y ∈ [590, 610)
 const BOAT_LEN = 140
 const BASELINE_Y = 625
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decideBoatCount, mulberry32 } from './useHeroScene.boats'
+import { decideBoatCount, mulberry32, planBoats } from './useHeroScene.boats'
 
 describe('mulberry32', () => {
   it('is deterministic for the same seed', () => {
@@ -41,8 +41,6 @@ describe('decideBoatCount', () => {
   })
 })
 
-import { planBoats } from './useHeroScene.boats'
-
 describe('planBoats', () => {
   it('returns 1 boat at narrow widths', () => {
     const plan = planBoats(1000, 42)
@@ -57,7 +55,7 @@ describe('planBoats', () => {
 
   it('produces baseline spanning 70% of nativeW starting at 15%', () => {
     const plan = planBoats(2000, 1)
-    expect(plan.baseline.x).toBeCloseTo(300, 5)   // 2000 * 0.15
+    expect(plan.baseline.x).toBeCloseTo(300, 5) // 2000 * 0.15
     expect(plan.baseline.len).toBeCloseTo(1400, 5) // 2000 * 0.70
     expect(plan.baseline.y).toBe(625)
   })
@@ -87,7 +85,7 @@ describe('planBoats', () => {
   })
 
   describe('two-boat case', () => {
-    // Find a (nativeW, seed) that produces 2 boats.
+    // Find one (nativeW, seed) that yields 2 boats; reused across this block.
     function findTwoBoatSeed(): { nativeW: number, seed: number } {
       for (let s = 0; s < 200; s++) {
         const p = planBoats(3000, s)
@@ -96,9 +94,9 @@ describe('planBoats', () => {
       }
       throw new Error('unable to find 2-boat seed in first 200 integers')
     }
+    const { nativeW, seed } = findTwoBoatSeed()
 
     it('places left boat at 22–32% and right boat at 68–78% of nativeW', () => {
-      const { nativeW, seed } = findTwoBoatSeed()
       const plan = planBoats(nativeW, seed)
       const [left, right] = plan.boats
       expect(left.x).toBeGreaterThanOrEqual(nativeW * 0.22)
@@ -108,14 +106,12 @@ describe('planBoats', () => {
     })
 
     it('orients fishermen inward (left fli=false, right fli=true)', () => {
-      const { nativeW, seed } = findTwoBoatSeed()
       const plan = planBoats(nativeW, seed)
       expect(plan.boats[0].fli).toBe(false)
       expect(plan.boats[1].fli).toBe(true)
     })
 
     it('gives each boat a distinct sub-seed', () => {
-      const { nativeW, seed } = findTwoBoatSeed()
       const plan = planBoats(nativeW, seed)
       const [a, b] = plan.boats
       expect(a.boatSeed).not.toBe(b.boatSeed)
