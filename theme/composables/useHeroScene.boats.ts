@@ -1,6 +1,6 @@
-// Pure boat planning module for the hero landscape water layer. No
-// shuimo-core imports — rendering is injected, keeping this module testable
-// in a plain node env and safe to import from the hero-scene worker.
+// Pure boat planning + SVG fragment composition for the hero landscape
+// water layer. No shuimo-core imports — rendering is injected, keeping this
+// module testable in a plain node env and safe to import from the hero-scene worker.
 
 /**
  * Deterministic PRNG (mulberry32). Seed is coerced to uint32.
