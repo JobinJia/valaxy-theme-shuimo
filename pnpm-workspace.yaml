@@ -8,14 +8,13 @@ trustPolicy: no-downgrade
 packages:
   - theme
   - demo
-overrides:
-  '@jobinjia/shuimo-core': link:/Users/jiabinbin/myself/github/shuimo-core/packages/core
+overrides: {}
 
 catalog:
   '@antfu/eslint-config': ^6.4.2
   '@iconify-json/ant-design': ^1.2.5
   '@iconify-json/simple-icons': ^1.2.61
-  '@jobinjia/shuimo-core': 1.2.0
+  '@jobinjia/shuimo-core': 1.2.1-beta.1
   '@jobinjia/vite-plugin-shuimo-font-subset': ^1.0.0
   '@shuimo-design/lunar': ^0.0.8
   '@types/suncalc': ^1.9.2
