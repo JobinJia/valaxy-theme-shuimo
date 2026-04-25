@@ -18,7 +18,7 @@
   "types": "types/index.ts",
   "peerDependencies": {
     "@jobinjia/shuimo-core": ">=1.2.0",
-    "@jobinjia/vite-plugin-shuimo-font-subset": ">=0.1.0"
+    "@jobinjia/vite-plugin-shuimo-font-subset": ">=1.0.0"
   },
   "peerDependenciesMeta": {
     "@jobinjia/shuimo-core": {
