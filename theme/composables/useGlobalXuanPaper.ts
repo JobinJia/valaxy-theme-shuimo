@@ -13,6 +13,18 @@ let lastH = 0
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let initialized = false
 
+function revokeTextureUrl(url: string | null) {
+  if (url?.startsWith('blob:'))
+    URL.revokeObjectURL(url)
+}
+
+function setTextureUrl(slot: typeof urlA, url: string) {
+  if (slot.value === url)
+    return
+  revokeTextureUrl(slot.value)
+  slot.value = url
+}
+
 async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> | undefined) {
   const w = Math.max(320, Math.ceil(window.innerWidth / 50) * 50)
   const h = Math.max(320, Math.ceil(window.innerHeight / 50) * 50)
@@ -47,9 +59,9 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
 
     const next = active.value === 'a' ? 'b' : 'a'
     if (next === 'a')
-      urlA.value = url
+      setTextureUrl(urlA, url)
     else
-      urlB.value = url
+      setTextureUrl(urlB, url)
     await nextTick()
     active.value = next
     ready.value = true

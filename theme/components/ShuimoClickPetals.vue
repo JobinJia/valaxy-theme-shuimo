@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 
-const isMobile = typeof window !== 'undefined' && window.innerWidth <= 767
+function isMobileViewport() {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+}
 
 function createPetal(x: number, y: number) {
+  const isMobile = isMobileViewport()
   const petal = document.createElement('div')
   petal.className = 'shuimo-petal'
 
@@ -40,6 +43,7 @@ function createPetal(x: number, y: number) {
 
 let lastClick = 0
 function onClick(e: MouseEvent) {
+  const isMobile = isMobileViewport()
   // 移动端节流：至少间隔 300ms
   if (isMobile) {
     const now = Date.now()

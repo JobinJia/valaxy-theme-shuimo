@@ -114,7 +114,7 @@ function setupObserver() {
  * set it as active immediately so the TOC highlights correctly on load.
  */
 function initFromHash() {
-  const hash = route.hash || window.location.hash
+  const hash = route?.hash || window.location.hash
   if (!hash)
     return
   const id = decodeURIComponent(hash.slice(1))
@@ -143,7 +143,7 @@ function refreshToc() {
   }
 }
 
-watch(() => route.hash, () => {
+watch(() => route?.hash, () => {
   initFromHash()
 })
 

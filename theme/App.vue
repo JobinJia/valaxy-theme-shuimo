@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { ThemeModeColor } from './types'
-import { useHead } from '@unhead/vue'
 import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import yishanFontUrl from './assets/fonts/yishanbeizhuanti.ttf?url'
 import { generateXuanPaperTexture, useThemeConfig } from './composables'
 import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
@@ -102,6 +100,14 @@ const curtainRightStyle = makeCurtainStyle('right')
 
 let curtainDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
+function setCurtainPaperUrl(url: string | null) {
+  if (curtainPaperUrl.value === url)
+    return
+  if (curtainPaperUrl.value?.startsWith('blob:'))
+    URL.revokeObjectURL(curtainPaperUrl.value)
+  curtainPaperUrl.value = url
+}
+
 async function ensureCurtainPaperReady() {
   const xuanPaper = themeConfig.value?.xuanPaper
   if (xuanPaper?.enable === false)
@@ -120,7 +126,7 @@ async function ensureCurtainPaperReady() {
   const height = Math.max(320, Math.ceil(Math.min(window.innerHeight, 1080) / 50) * 50)
 
   try {
-    curtainPaperUrl.value = await generateXuanPaperTexture({
+    setCurtainPaperUrl(await generateXuanPaperTexture({
       variant,
       width,
       height,
@@ -128,10 +134,10 @@ async function ensureCurtainPaperReady() {
       baseColor,
       isDark: isDark.value,
       goldDensity: curtainGold,
-    })
+    }))
   }
   catch {
-    curtainPaperUrl.value = null
+    setCurtainPaperUrl(null)
   }
 }
 
@@ -140,12 +146,6 @@ function scheduleCurtainRegen() {
     clearTimeout(curtainDebounceTimer)
   curtainDebounceTimer = setTimeout(ensureCurtainPaperReady, 200)
 }
-
-useHead({
-  link: [
-    { rel: 'preload', href: yishanFontUrl, as: 'font', type: 'font/ttf', crossorigin: 'anonymous' },
-  ],
-})
 
 onMounted(() => {
   ensureCurtainStampFontReady()
@@ -156,6 +156,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (curtainDebounceTimer)
     clearTimeout(curtainDebounceTimer)
+  setCurtainPaperUrl(null)
   window.removeEventListener('resize', scheduleCurtainRegen)
 })
 
@@ -251,6 +252,14 @@ watch(isDark, () => {
     right: 0;
   }
 
+  &:not(.revealed) {
+    animation: shuimo-curtain-auto-open 0.7s linear 0.7s forwards;
+  }
+
+  &--right:not(.revealed) {
+    animation-name: shuimo-curtain-auto-open-right;
+  }
+
   &.revealed {
     transition: transform 0.7s linear;
 
@@ -264,9 +273,27 @@ watch(isDark, () => {
   }
 }
 
+@keyframes shuimo-curtain-auto-open {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes shuimo-curtain-auto-open-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (max-width: 767px) {
   .shuimo-curtain {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shuimo-curtain:not(.revealed) {
+    animation: none;
   }
 }
 </style>

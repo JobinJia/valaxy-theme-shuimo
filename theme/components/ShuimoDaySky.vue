@@ -18,7 +18,11 @@ const showSun = computed(() => layers.value.sun !== false)
 const showGlowMorning = computed(() => layers.value.glowMorning !== false)
 const showGlowDusk = computed(() => layers.value.glowDusk !== false)
 const showSkyTint = computed(() => layers.value.skyTint !== false)
-const showVignette = computed(() => layers.value.vignette !== false)
+// NOTE: day vignette 已移除 —— 即使 alpha=0.06 的 radial-gradient 背景，在
+// hero 容器里仍会与全局 fixed 的 .shuimo-paper-bg 发生 Chrome 合成冲突，
+// 导致 banner 区域纸纹"被吃掉"，对比外部纸面出现明显色差。
+// dark mode 的 NightSky vignette 不受此影响（alpha 0.4 本就是夜色装饰的核心，
+// 视觉上正好遮掩色差），保持不动。
 
 // ---------- tint / glow opacity math (pure CSS-driven) ----------
 
@@ -64,11 +68,13 @@ const sunX = computed(() => state.value.sun.x)
 
 <template>
   <div class="shuimo-day-sky" aria-hidden="true">
-    <!-- 1. sky tint (three overlays, additive) -->
+    <!-- 1. sky tint (three overlays, additive) —— 挂载条件必须是"实际要显示"才挂；
+         opacity:0 的空元素在 hero 容器内会创建 stacking context，与全局 fixed 的
+         shuimo-paper-bg 发生合成冲突（Chrome），banner 区域纸纹会消失/变浅 -->
     <template v-if="showSkyTint">
-      <div class="shuimo-day-sky__tint shuimo-day-sky__tint--morning" :style="{ opacity: morningTintOpacity }" />
-      <div class="shuimo-day-sky__tint shuimo-day-sky__tint--dusk" :style="{ opacity: duskTintOpacity }" />
-      <div class="shuimo-day-sky__tint shuimo-day-sky__tint--noon" :style="{ opacity: noonTintOpacity }" />
+      <div v-if="morningTintOpacity > 0" class="shuimo-day-sky__tint shuimo-day-sky__tint--morning" :style="{ opacity: morningTintOpacity }" />
+      <div v-if="duskTintOpacity > 0" class="shuimo-day-sky__tint shuimo-day-sky__tint--dusk" :style="{ opacity: duskTintOpacity }" />
+      <div v-if="noonTintOpacity > 0" class="shuimo-day-sky__tint shuimo-day-sky__tint--noon" :style="{ opacity: noonTintOpacity }" />
     </template>
 
     <!-- 2. horizon glow -->
@@ -82,9 +88,6 @@ const sunX = computed(() => state.value.sun.x)
       class="shuimo-day-sky__glow shuimo-day-sky__glow--dusk"
       :style="{ opacity: duskGlowOpacity, left: `calc(${sunX}% - 40%)` }"
     />
-
-    <!-- 3. vignette -->
-    <div v-if="showVignette" class="shuimo-day-sky__vignette" />
 
     <!-- 4. sun -->
     <ShuimoSun v-if="showSun" :size="sunSize" />
@@ -128,13 +131,6 @@ const sunX = computed(() => state.value.sun.x)
   &--dusk {
     background: radial-gradient(ellipse at 50% 100%, rgba(200, 120, 70, 1) 0%, transparent 70%);
   }
-}
-
-.shuimo-day-sky__vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(8, 12, 24, 0.4) 100%);
-  opacity: 0.15;
 }
 
 @media (prefers-reduced-motion: reduce) {

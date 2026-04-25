@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { HeroSceneResult } from '../composables/useHeroSceneWorker'
+import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, ref } from 'vue'
 import { buildHeroScene, buildHeroSceneInWorker, getSessionSeed, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
+import ShuimoDaySky from './ShuimoDaySky.vue'
+import ShuimoNightSky from './ShuimoNightSky.vue'
 
 const emit = defineEmits<{
   ready: []
@@ -24,6 +27,9 @@ let cachedHeroScene: HeroSceneCache | null = null
 const svgContainer = ref<HTMLDivElement>()
 const { setBlankSide } = useBlankSide()
 const themeConfig = useThemeConfig()
+
+const { isDark } = useValaxyDark()
+const skyEnabled = computed(() => themeConfig.value?.astronomy?.enable !== false)
 
 const sceneHeight = computed(() => themeConfig.value?.hero?.sceneHeight ?? 800)
 const containerStyle = computed(() => ({
@@ -94,6 +100,9 @@ onMounted(async () => {
     emit('seedGenerated', scene.seed)
     const img = new Image()
     img.decoding = 'async'
+    // shuimo-core transparent:true 输出无根 multiply 的 SVG，但保留内部 fill:white
+    // 层次遮挡。主题层这里套一层 mix-blend-mode:multiply：白色 multiply 下层纸 = 纸
+    // （零色差穿透），墨色 multiply 成深墨。单层合成，不会双重 multiply。
     img.style.cssText = 'width:100%;height:100%;mix-blend-mode:multiply;object-fit:cover'
     img.onload = () => emit('ready')
     img.onerror = () => emit('ready')
@@ -115,6 +124,14 @@ onMounted(async () => {
     class="shuimo-hero-landscape"
     :style="containerStyle"
   >
+    <!-- 暗色：天文驱动的夜空（月 / 星 / 雾） -->
+    <ClientOnly>
+      <ShuimoNightSky v-if="isDark && skyEnabled" />
+    </ClientOnly>
+    <!-- 亮色：天文驱动的白昼（日 / 朝霞 / 晚霞） -->
+    <ClientOnly>
+      <ShuimoDaySky v-if="!isDark && skyEnabled" />
+    </ClientOnly>
     <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
   </div>
 </template>

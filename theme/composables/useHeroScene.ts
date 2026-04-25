@@ -45,6 +45,10 @@ export async function buildHeroScene(W: number, H: number, seed: number): Promis
       height: NATIVE_HEIGHT,
       seed,
       onXuanPaper: false,
+      // 透明输出：根 SVG 无 mix-blend-mode、fill:white 遮挡改 fill:none。
+      // 条幅由主题层整页宣纸做底，无需 shuimo-core 自带 multiply；
+      // 关掉后外层 <img> 也不再 multiply，彻底无色差接缝。
+      transparent: true,
       // 'none' = 不做 blank-area 过滤，按正常流程把整条幅画满
       blankPosition: 'none',
       // 兜底：保证场景不空旷（boat 由主题自绘，被 no-op 掉）
@@ -68,13 +72,15 @@ export async function buildHeroScene(W: number, H: number, seed: number): Promis
   // 后处理：
   // 1. viewBox 从 "0 0 nativeW 1000" 改为 "0 NATIVE_TOP nativeW NATIVE_HEIGHT"，
   //    让 y<0 的山顶完整出现在视口内
-  // 2. `fill:white` → 宣纸底色 #fcfaf0，墨色 multiply 后与页面纸同色（保层次遮挡）
-  // 3. 加 preserveAspectRatio=slice（aspect 匹配时 slice/meet 效果相同，写明更保险）
-  // 4. 把自绘的水面 + 船拼到 </svg> 前
+  // 2. 加 preserveAspectRatio=slice（aspect 匹配时 slice/meet 效果相同，写明更保险）
+  // 3. 把自绘的水面 + 船拼到 </svg> 前
+  //
+  // 注：shuimo-core 输出里的 `fill:white`（用于山体层次遮挡）故意不替换 —— img
+  // 带 mix-blend-mode:multiply，白色 multiply 下层即透明，banner 与整页纸面
+  // 接缝处完全无色差。代价是后山被前山遮挡的部分可能轻微穿帮。
   const svg = result.svg
     .replace(/viewBox="0 0 [^"]+"/, `viewBox="0 ${NATIVE_TOP} ${nativeW} ${NATIVE_HEIGHT}"`)
     .replace(/^<svg /, '<svg preserveAspectRatio="xMidYMid slice" ')
-    .replace(/fill\s*:\s*white/gi, 'fill:#fcfaf0')
     .replace(/<\/svg>\s*$/, `${fragment}</svg>`)
 
   return { svg, blankSide, seed }

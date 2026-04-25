@@ -1,3 +1,4 @@
+import { XUAN_PAPER_LIGHT_RGB } from './paperColor'
 import { generateCached } from './useShuimoCache'
 import { generateInXuanPaperWorker, generateTiledInWorkers } from './useXuanPaperWorker'
 
@@ -54,7 +55,8 @@ async function blobUrlToDataURL(blobUrl: string): Promise<string> {
 export type XuanPaperVariant = 'processed' | 'aged' | 'gold'
 
 const lightColorPresets: Record<XuanPaperVariant, [number, number, number]> = {
-  processed: [252, 248, 230],
+  // processed 必须与 useHeroScene 条幅 fill 替换色保持一致（见 paperColor.ts）
+  processed: [...XUAN_PAPER_LIGHT_RGB] as [number, number, number],
   aged: [235, 220, 190],
   gold: [250, 245, 225],
 }

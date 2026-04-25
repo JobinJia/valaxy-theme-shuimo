@@ -28,7 +28,7 @@ defineProps<{
       </span>
     </div>
 
-    <p v-if="post.excerpt" class="shuimo-card__excerpt" v-html="post.excerpt" />
+    <div v-if="post.excerpt" class="shuimo-card__excerpt" v-html="post.excerpt" />
 
     <div class="shuimo-card__read-more">
       <router-link :to="post.path || ''">

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, ref, watch } from 'vue'
-import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
+import { computed, onMounted, ref } from 'vue'
 import { preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
 import { curtainRevealed, openInitialCurtain } from '../composables/useCurtainTransition'
-import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 
 const props = withDefaults(defineProps<{
   verticalNav?: boolean
@@ -28,7 +26,6 @@ const showSeedControl = computed(() =>
 const fontUrl = computed(() => themeConfig.value?.fonts?.url)
 useHead({
   link: computed(() => [
-    { rel: 'preload', href: yishanFontUrl, as: 'font', type: 'font/ttf', crossorigin: 'anonymous' },
     ...(fontUrl.value ? [{ rel: 'stylesheet', href: fontUrl.value }] : []),
   ]),
 })
@@ -37,54 +34,14 @@ function onSeedGenerated(seed: number) {
   currentSeed.value = seed
 }
 
-// --- Initial curtain: signal when hero resources are ready ---
-
 let initialCurtainTriggered = false
-const heroPaperReady = ref(false)
-const landscapeReady = ref(false)
-const contentPaperReady = ref(false)
-const { ready: globalPaperReady } = useGlobalXuanPaper()
 
-function tryOpenInitialCurtain() {
+function openInitialCurtainOnce() {
   if (initialCurtainTriggered)
-    return
-  if (!heroPaperReady.value || !landscapeReady.value || !contentPaperReady.value)
-    return
-  if (!globalPaperReady.value)
     return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
-
-watch(globalPaperReady, (v) => {
-  if (v)
-    tryOpenInitialCurtain()
-})
-
-function onHeroPaperReady() {
-  heroPaperReady.value = true
-  tryOpenInitialCurtain()
-}
-
-function onLandscapeReady() {
-  landscapeReady.value = true
-  tryOpenInitialCurtain()
-}
-
-function onContentPaperReady() {
-  contentPaperReady.value = true
-  tryOpenInitialCurtain()
-}
-
-// 兜底：worker 异常 / 网络挂死时也必须开幕，避免幕布永远挡着页面。
-// 冷启动强制刷新下宣纸 worker 生成可能需要 1-3s，所以给 6s 的宽裕窗口，
-// 让 globalPaperReady 有充分时间点亮再触发。正常路径都走 gate，不走这里。
-setTimeout(() => {
-  if (!initialCurtainTriggered) {
-    initialCurtainTriggered = true
-    openInitialCurtain()
-  }
-}, 6000)
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
@@ -93,6 +50,8 @@ onMounted(() => {
 
   preheatXuanPaperWorker()
   preheatHeroSceneWorker()
+
+  window.setTimeout(openInitialCurtainOnce, 700)
 })
 </script>
 
@@ -102,16 +61,15 @@ onMounted(() => {
       <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     </ClientOnly>
     <ShuimoThemeToggle />
-    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @ready="onLandscapeReady" @paper-ready="onHeroPaperReady" @seed-generated="onSeedGenerated" />
+    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @seed-generated="onSeedGenerated" />
     <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="curtainRevealed" />
 
-    <div class="shuimo-app__paper">
-      <ShuimoXuanPaper class="shuimo-app__paper-surface" @loaded="onContentPaperReady">
-        <!-- 竖排模式下桌面端隐藏 header，移动端仍显示 -->
-        <ShuimoHeader :class="{ 'shuimo-header--hidden-desktop': verticalNav }" />
+    <div v-if="!verticalNav" class="shuimo-app__paper">
+      <ShuimoXuanPaper class="shuimo-app__paper-surface">
+        <ShuimoHeader />
 
         <slot>
           <router-view />
