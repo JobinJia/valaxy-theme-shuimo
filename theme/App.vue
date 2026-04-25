@@ -252,14 +252,6 @@ watch(isDark, () => {
     right: 0;
   }
 
-  &:not(.revealed) {
-    animation: shuimo-curtain-auto-open 0.7s linear 0.7s forwards;
-  }
-
-  &--right:not(.revealed) {
-    animation-name: shuimo-curtain-auto-open-right;
-  }
-
   &.revealed {
     transition: transform 0.7s linear;
 
@@ -273,27 +265,9 @@ watch(isDark, () => {
   }
 }
 
-@keyframes shuimo-curtain-auto-open {
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes shuimo-curtain-auto-open-right {
-  to {
-    transform: translateX(100%);
-  }
-}
-
 @media (max-width: 767px) {
   .shuimo-curtain {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shuimo-curtain:not(.revealed) {
-    animation: none;
   }
 }
 </style>

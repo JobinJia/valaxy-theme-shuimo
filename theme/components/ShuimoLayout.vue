@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars } from '../composables'
 import { curtainRevealed, openInitialCurtain } from '../composables/useCurtainTransition'
+import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 
 const props = withDefaults(defineProps<{
   verticalNav?: boolean
@@ -34,14 +35,63 @@ function onSeedGenerated(seed: number) {
   currentSeed.value = seed
 }
 
-let initialCurtainTriggered = false
+// --- Initial curtain: signal when hero resources are ready ---
+//
+// The home-page curtain only opens once the visual layers underneath it have
+// actually rendered. A pure-CSS auto-open (commit 1babfbd) shipped to prod and
+// produced a blank reveal on cold loads — workers need 1–3s to generate xuan
+// paper and the hero SVG, but the CSS animation fired at 1.4s regardless.
+// Restoring the multi-signal gate plus the safety timer fixes that.
 
-function openInitialCurtainOnce() {
+let initialCurtainTriggered = false
+const heroPaperReady = ref(false)
+const landscapeReady = ref(false)
+const contentPaperReady = ref(false)
+const { ready: globalPaperReady } = useGlobalXuanPaper()
+
+function tryOpenInitialCurtain() {
   if (initialCurtainTriggered)
+    return
+  if (!globalPaperReady.value)
+    return
+  if (heroLandscapeEnabled.value && (!heroPaperReady.value || !landscapeReady.value))
+    return
+  // verticalNav 模式（首页）不渲染 ShuimoXuanPaper，没有 contentPaperReady 信号
+  if (!props.verticalNav && !contentPaperReady.value)
     return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
+
+watch(globalPaperReady, (v) => {
+  if (v)
+    tryOpenInitialCurtain()
+})
+
+function onHeroPaperReady() {
+  heroPaperReady.value = true
+  tryOpenInitialCurtain()
+}
+
+function onLandscapeReady() {
+  landscapeReady.value = true
+  tryOpenInitialCurtain()
+}
+
+function onContentPaperReady() {
+  contentPaperReady.value = true
+  tryOpenInitialCurtain()
+}
+
+// 兜底：worker 异常 / 网络挂死时也必须开幕，避免幕布永远挡着页面。
+// 冷启动强制刷新下宣纸 worker 生成可能需要 1-3s，所以给 6s 的宽裕窗口，
+// 让 globalPaperReady 有充分时间点亮再触发。正常路径都走 gate，不走这里。
+setTimeout(() => {
+  if (!initialCurtainTriggered) {
+    initialCurtainTriggered = true
+    openInitialCurtain()
+  }
+}, 6000)
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
@@ -50,8 +100,6 @@ onMounted(() => {
 
   preheatXuanPaperWorker()
   preheatHeroSceneWorker()
-
-  window.setTimeout(openInitialCurtainOnce, 700)
 })
 </script>
 
@@ -61,14 +109,19 @@ onMounted(() => {
       <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false" />
     </ClientOnly>
     <ShuimoThemeToggle />
-    <ShuimoHeroLandscape v-if="heroLandscapeEnabled" @seed-generated="onSeedGenerated" />
+    <ShuimoHeroLandscape
+      v-if="heroLandscapeEnabled"
+      @ready="onLandscapeReady"
+      @paper-ready="onHeroPaperReady"
+      @seed-generated="onSeedGenerated"
+    />
     <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <ShuimoVerticalNav v-if="verticalNav" :revealed="curtainRevealed" />
 
     <div v-if="!verticalNav" class="shuimo-app__paper">
-      <ShuimoXuanPaper class="shuimo-app__paper-surface">
+      <ShuimoXuanPaper class="shuimo-app__paper-surface" @loaded="onContentPaperReady">
         <ShuimoHeader />
 
         <slot>
