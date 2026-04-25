@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@jobinjia/shuimo-core": "catalog:",
+    "@jobinjia/vite-plugin-shuimo-font-subset": "catalog:",
     "valaxy": "catalog:",
     "valaxy-theme-shuimo": "workspace:@jobinjia/valaxy-theme-shuimo@*"
   }

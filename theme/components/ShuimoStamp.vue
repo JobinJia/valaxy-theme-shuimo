@@ -14,7 +14,7 @@
  * Default font: YiShanBeiZhuan (seal script / 篆书).
  */
 import { onMounted, ref, watch } from 'vue'
-import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.ttf?url'
+import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.woff2?url'
 import { useThemeConfig } from '../composables'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 

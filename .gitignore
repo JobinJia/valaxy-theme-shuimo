@@ -47,3 +47,7 @@ build/
 .VSCodeCounter
 .superpowers/
 planning/
+
+# Original full TTF — kept locally for regenerating the subset woff2;
+# only the subset woff2 ships in the published theme.
+theme/assets/fonts/yishanbeizhuanti-original.ttf
