@@ -35,6 +35,14 @@ pnpm add @jobinjia/valaxy-theme-shuimo
 pnpm add @jobinjia/shuimo-core
 ```
 
+可选安装 `@jobinjia/vite-plugin-shuimo-font-subset` 以在站点构建时按实际用字进一步裁剪内置篆书字体（`yishanbeizhuanti.woff2`）。不安装也能正常使用，主题会回退到打包内的 ~280KB top-1000 汉字子集；安装后构建产物体积通常可降到几十 KB：
+
+```bash
+pnpm add -D @jobinjia/vite-plugin-shuimo-font-subset
+```
+
+启用后无需任何配置 —— 主题会自动加载该插件并扫描 `pages/**/*.{md,mdx,vue}` 与 `valaxy.config.{ts,js,mjs}` 收集字符。
+
 ## 使用 / Usage
 
 在 `valaxy.config.ts` 中配置：
