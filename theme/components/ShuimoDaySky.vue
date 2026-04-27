@@ -77,16 +77,16 @@ const sunX = computed(() => state.value.sun.x)
       <div v-if="noonTintOpacity > 0" class="shuimo-day-sky__tint shuimo-day-sky__tint--noon" :style="{ opacity: noonTintOpacity }" />
     </template>
 
-    <!-- 2. horizon glow -->
+    <!-- 2. horizon glow —— sunX 通过 CSS 变量传给渐变中心，元素自身 inset:0 全屏 -->
     <div
       v-if="showGlowMorning && morningGlowOpacity > 0"
       class="shuimo-day-sky__glow shuimo-day-sky__glow--morning"
-      :style="{ opacity: morningGlowOpacity, left: `calc(${sunX}% - 40%)` }"
+      :style="{ 'opacity': morningGlowOpacity, '--sky-sun-x': sunX }"
     />
     <div
       v-if="showGlowDusk && duskGlowOpacity > 0"
       class="shuimo-day-sky__glow shuimo-day-sky__glow--dusk"
-      :style="{ opacity: duskGlowOpacity, left: `calc(${sunX}% - 40%)` }"
+      :style="{ 'opacity': duskGlowOpacity, '--sky-sun-x': sunX }"
     />
 
     <!-- 4. sun -->
@@ -96,7 +96,9 @@ const sunX = computed(() => state.value.sun.x)
 
 <style lang="scss" scoped>
 .shuimo-day-sky {
-  position: absolute;
+  /* viewport 层定位：此组件在 App.vue 顶层渲染，独立于 hero 容器，
+     所以晚霞 / 朝霞渐变可以用 vh/vw 单位在视口内自然淡出 */
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
@@ -120,16 +122,34 @@ const sunX = computed(() => state.value.sun.x)
 
 .shuimo-day-sky__glow {
   position: absolute;
-  bottom: 0;
-  width: 80%;
-  height: 60%;
+  inset: 0;
   transition: opacity 1s ease;
+  /* 视口边软淡出 mask —— 与 sunX 无关、固定锚在视口中下，
+     在 70%-100% 区间从黑（全显）渐变到透明（全隐），让 gradient
+     不论被 viewport 切到哪都不会出现硬边。这与 background gradient
+     解耦，使 gradient 本身可以放大到原版的晚霞铺满尺度 */
+  mask-image: radial-gradient(50vw 45vh at 50% 50%, black 0%, black 70%, transparent 100%);
+  -webkit-mask-image: radial-gradient(50vw 45vh at 50% 50%, black 0%, black 70%, transparent 100%);
 
   &--morning {
-    background: radial-gradient(ellipse at 50% 100%, rgba(220, 110, 90, 1) 0%, transparent 70%);
+    background: radial-gradient(
+      70vw 60vh at calc(var(--sky-sun-x, 50) * 1%) 50%,
+      rgba(220, 110, 90, 1) 0%,
+      rgba(220, 110, 90, 0.6) 25%,
+      rgba(220, 110, 90, 0.3) 55%,
+      rgba(220, 110, 90, 0.1) 80%,
+      transparent 100%
+    );
   }
   &--dusk {
-    background: radial-gradient(ellipse at 50% 100%, rgba(200, 120, 70, 1) 0%, transparent 70%);
+    background: radial-gradient(
+      70vw 60vh at calc(var(--sky-sun-x, 50) * 1%) 50%,
+      rgba(200, 120, 70, 1) 0%,
+      rgba(200, 120, 70, 0.6) 25%,
+      rgba(200, 120, 70, 0.3) 55%,
+      rgba(200, 120, 70, 0.1) 80%,
+      transparent 100%
+    );
   }
 }
 

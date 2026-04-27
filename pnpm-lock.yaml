@@ -19,8 +19,8 @@ catalogs:
       specifier: 1.2.1-beta.1
       version: 1.2.1-beta.1
     '@jobinjia/vite-plugin-shuimo-font-subset':
-      specifier: ^1.0.0
-      version: 1.0.0
+      specifier: 1.0.1-beta.2
+      version: 1.0.1-beta.2
     '@shuimo-design/lunar':
       specifier: ^0.0.8
       version: 0.0.8
@@ -94,7 +94,7 @@ importers:
         version: 1.2.1-beta.1
       '@jobinjia/vite-plugin-shuimo-font-subset':
         specifier: 'catalog:'
-        version: 1.0.0(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
+        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
       valaxy:
         specifier: 'catalog:'
         version: 0.28.5(@babel/parser@7.29.2)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.32)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(esbuild@0.27.7)(eslint@9.39.4(jiti@2.6.1))(postcss@8.5.10)(prettier@3.8.2)(rollup@4.60.1)(terser@5.46.1)(typescript@5.9.3)(yaml@2.8.3)
@@ -114,8 +114,8 @@ importers:
         specifier: '>=1.2.1-beta.1'
         version: 1.2.1-beta.1
       '@jobinjia/vite-plugin-shuimo-font-subset':
-        specifier: '>=1.0.0'
-        version: 1.0.0(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
+        specifier: '>=1.0.1-beta.2'
+        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))
       '@shuimo-design/lunar':
         specifier: 'catalog:'
         version: 0.0.8
@@ -969,8 +969,8 @@ packages:
   '@jobinjia/shuimo-core@1.2.1-beta.1':
     resolution: {integrity: sha512-TcpQczY8dARp4PzHAMbU1KxkxbBznSVPF4PPtiSuVVxrM52rdADSIjHMjcvXnp8H4Xo4hplDHTyU5OEj9Q8QQw==}
 
-  '@jobinjia/vite-plugin-shuimo-font-subset@1.0.0':
-    resolution: {integrity: sha512-IP7grwp70wZFRwTbtPdwTCdzPp61ziPnPcq2cfIFRn59hvu/k6kPgPqmzutcfW7z7nHaRR2Rt4yJM2Bi3AfdjA==}
+  '@jobinjia/vite-plugin-shuimo-font-subset@1.0.1-beta.2':
+    resolution: {integrity: sha512-Ahau8Hasi4tzTdj8AXZObgmVtvpIWaL6FJ6nmb60OiedYqvd4/kUswj2mTT/Ljo4xnSUnsE50HKs893pvz7ZMA==}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
@@ -5994,7 +5994,7 @@ snapshots:
       fontkit: 2.0.4
       uuid: 14.0.0
 
-  '@jobinjia/vite-plugin-shuimo-font-subset@1.0.0(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))':
+  '@jobinjia/vite-plugin-shuimo-font-subset@1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))':
     dependencies:
       globby: 14.1.0
       subset-font: 2.5.0

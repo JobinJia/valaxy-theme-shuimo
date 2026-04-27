@@ -113,7 +113,8 @@ const mistAnimStyle = computed(() => ({
 
 <style lang="scss" scoped>
 .shuimo-night-sky {
-  position: absolute;
+  /* viewport 层定位：此组件在 App.vue 顶层渲染，与 ShuimoDaySky 对称 */
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0; // mountains in parent should be z-index ≥ 1

@@ -15,7 +15,7 @@ catalog:
   '@iconify-json/ant-design': ^1.2.5
   '@iconify-json/simple-icons': ^1.2.61
   '@jobinjia/shuimo-core': 1.2.1-beta.1
-  '@jobinjia/vite-plugin-shuimo-font-subset': ^1.0.0
+  '@jobinjia/vite-plugin-shuimo-font-subset': 1.0.1-beta.2
   '@shuimo-design/lunar': ^0.0.8
   '@types/suncalc': ^1.9.2
   '@unocss/eslint-plugin': ^66.5.10

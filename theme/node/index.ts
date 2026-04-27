@@ -277,6 +277,10 @@ export function buildShuimoFontSubsetPlugin(
     ],
     format: 'woff2',
     // 兜底字符：默认配置里写死的印章/标题字，扫描覆盖不到的运行时字符
-    extraChars: '受命于天既寿永昌墨韵书斋',
+    // - 受命于天既寿永昌：ShuimoStamp 默认 text
+    // - 墨韵书斋：默认站点标题/印章
+    // - 日照月映：ShuimoThemeToggle 亮/暗模式印章
+    // - 迷：404 layout 印章
+    extraChars: '受命于天既寿永昌墨韵书斋日照月映迷',
   })
 }

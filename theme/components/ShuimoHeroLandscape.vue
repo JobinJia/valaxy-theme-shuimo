@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { HeroSceneResult } from '../composables/useHeroSceneWorker'
-import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, ref } from 'vue'
 import { buildHeroScene, buildHeroSceneInWorker, getSessionSeed, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
-import ShuimoDaySky from './ShuimoDaySky.vue'
-import ShuimoNightSky from './ShuimoNightSky.vue'
 
 const emit = defineEmits<{
   ready: []
@@ -27,9 +24,6 @@ let cachedHeroScene: HeroSceneCache | null = null
 const svgContainer = ref<HTMLDivElement>()
 const { setBlankSide } = useBlankSide()
 const themeConfig = useThemeConfig()
-
-const { isDark } = useValaxyDark()
-const skyEnabled = computed(() => themeConfig.value?.astronomy?.enable !== false)
 
 const sceneHeight = computed(() => themeConfig.value?.hero?.sceneHeight ?? 800)
 const containerStyle = computed(() => ({
@@ -124,14 +118,9 @@ onMounted(async () => {
     class="shuimo-hero-landscape"
     :style="containerStyle"
   >
-    <!-- 暗色：天文驱动的夜空（月 / 星 / 雾） -->
-    <ClientOnly>
-      <ShuimoNightSky v-if="isDark && skyEnabled" />
-    </ClientOnly>
-    <!-- 亮色：天文驱动的白昼（日 / 朝霞 / 晚霞） -->
-    <ClientOnly>
-      <ShuimoDaySky v-if="!isDark && skyEnabled" />
-    </ClientOnly>
+    <!-- 注意：ShuimoDaySky / ShuimoNightSky 已迁出到 App.vue 顶层渲染。
+         hero 容器的 overflow 限制和 sceneHeight 的几何会让晚霞/朝霞渐变
+         无法在视口边缘软淡出，必须挂到 viewport 层用 vh/vw 单位画。 -->
     <div ref="svgContainer" class="shuimo-hero-landscape__svg" />
   </div>
 </template>
@@ -149,12 +138,16 @@ onMounted(async () => {
   right: 0;
   /* 高度 + margin-top 偏移由 inline style 控制 */
   pointer-events: none;
-  overflow: hidden;
+  /* 故意 overflow: visible —— 让 ShuimoDaySky 的晚霞 / 朝霞 radial-gradient
+     可以柔和地延伸到 hero 矩形之外，避免在容器底/侧出现硬切。SVG <img> 自身
+     由 object-fit:cover + width/height:100% 约束在 __svg 容器里，不会越界。 */
+  overflow: visible;
 }
 
 .shuimo-hero-landscape__svg {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 </style>
 

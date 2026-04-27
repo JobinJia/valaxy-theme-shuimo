@@ -16,6 +16,13 @@ const { urlA, urlB, active } = useGlobalXuanPaper()
 const themeConfig = useThemeConfig()
 const { isDark } = useValaxyDark()
 
+// Sky overlays (sun/moon/glow/tints) live at viewport level so the dusk/dawn
+// radial-gradient can fade out in vh/vw space without any rectangle clipping.
+// They previously sat inside ShuimoHeroLandscape but hero's overflow + sceneHeight
+// geometry made it impossible to keep both "wide visible glow" and "no hard cut
+// at viewport edges".
+const skyEnabled = computed(() => themeConfig.value?.astronomy?.enable !== false)
+
 function resolveModeColor(value: ThemeModeColor | undefined, dark: boolean): string | undefined {
   if (!value)
     return undefined
@@ -178,6 +185,15 @@ watch(isDark, () => {
       :style="urlB ? { backgroundImage: `url(${urlB})` } : undefined"
     />
   </div>
+
+  <!-- 天文驱动的天空层（晚霞 / 朝霞 / 月 / 星 / 雾），挂在 paper-bg 之上、
+       hero 与内容之下，全 viewport 几何，避免被 hero 矩形裁出硬边 -->
+  <ClientOnly>
+    <ShuimoNightSky v-if="isDark && skyEnabled" />
+  </ClientOnly>
+  <ClientOnly>
+    <ShuimoDaySky v-if="!isDark && skyEnabled" />
+  </ClientOnly>
 
   <!-- 开屏幕布 -->
   <div class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">

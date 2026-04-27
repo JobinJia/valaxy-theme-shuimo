@@ -34,12 +34,26 @@ const locationLabel = computed(() => {
   return `${lat} ${lng}`
 })
 
+// Halo intensity: bell curve peaking at 5° altitude, zero at -5° and 15°.
+// Sun visually low (sunrise / sunset) → halo present, pairs with dawn/dusk
+// sky glow. Sun high (noon) → halo fades to 0; clean disk, no false 霞光.
+const haloIntensity = computed(() => {
+  const d = (state.value.sun.altitudeDeg - 5) / 10
+  return Math.max(0, 1 - d * d)
+})
+
+const sunGlowAlphaHex = computed(() => {
+  const a = Math.round(0x40 * haloIntensity.value)
+  return a.toString(16).padStart(2, '0')
+})
+
 const sunStyle = computed(() => ({
   'left': `${state.value.sun.x}%`,
   'top': `${state.value.sun.y}%`,
   'width': `${props.size}px`,
   'height': `${props.size}px`,
-  '--sun-glow-color': `${sunColor.value}40`, // hex + 40 alpha suffix = ~25% opacity
+  // Hex + dynamic alpha suffix; 0x40 ≈ 25% at peak, 0x00 at noon
+  '--sun-glow-color': `${sunColor.value}${sunGlowAlphaHex.value}`,
 }))
 
 const isVisitorOverride = computed(() => {
@@ -111,7 +125,7 @@ const haloId = computed(() => `sun-halo-${props.size}`)
           <stop offset="100%" :stop-color="sunColor" stop-opacity="0" />
         </radialGradient>
         <radialGradient :id="haloId" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" :stop-color="sunColor" stop-opacity="0.35" />
+          <stop offset="0%" :stop-color="sunColor" :stop-opacity="0.35 * haloIntensity" />
           <stop offset="100%" :stop-color="sunColor" stop-opacity="0" />
         </radialGradient>
       </defs>
