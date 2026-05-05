@@ -25,22 +25,36 @@ if (mode === 'on' && !fs.existsSync(LOCAL_PATH)) {
   process.exit(1)
 }
 
+// Matches a top-level `overrides:` key — either the empty `{}` placeholder
+// or a multi-line block whose children are indented. Anchored to start of
+// line so we never touch the top-level `catalog:` mapping.
+const overridesRegex = /^overrides:[^\S\n]*(?:\{\}\n?|\n(?:[ \t].*\n?)*)/m
+
 const original = fs.readFileSync(workspaceFile, 'utf8')
 const blockRegex = new RegExp(`\\n*${BEGIN}[\\s\\S]*?${END}\\n?`, 'g')
+// First strip our managed block so the file has at most one `overrides:`.
 const stripped = original.replace(blockRegex, '\n').replace(/\n{3,}/g, '\n\n')
 
 let next
 if (mode === 'on') {
-  // Insert before `catalog:` (top-level key) — eslint yaml/sort-keys expects
-  // `overrides` to precede `catalog` in pnpm-workspace.yaml.
-  const match = stripped.match(/^catalog:/m)
-  if (!match || match.index === undefined) {
-    console.error('Could not find top-level `catalog:` key in pnpm-workspace.yaml')
-    process.exit(1)
+  if (overridesRegex.test(stripped)) {
+    // Replace the existing `overrides:` value (placeholder or multi-line)
+    // in-place so we don't introduce a duplicate top-level key.
+    next = stripped.replace(overridesRegex, `${BLOCK}\n`)
   }
-  next = `${stripped.slice(0, match.index)}${BLOCK}\n\n${stripped.slice(match.index)}`
+  else {
+    // No existing `overrides:` — insert before `catalog:`. eslint yaml/sort-keys
+    // expects `overrides` to precede `catalog` in pnpm-workspace.yaml.
+    const match = stripped.match(/^catalog:/m)
+    if (!match || match.index === undefined) {
+      console.error('Could not find top-level `overrides:` or `catalog:` key in pnpm-workspace.yaml')
+      process.exit(1)
+    }
+    next = `${stripped.slice(0, match.index)}${BLOCK}\n\n${stripped.slice(match.index)}`
+  }
 }
 else {
+  // off: leave any existing `overrides:` value alone; only ensure trailing newline.
   next = stripped.endsWith('\n') ? stripped : `${stripped}\n`
 }
 
