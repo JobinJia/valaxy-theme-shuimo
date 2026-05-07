@@ -19,7 +19,9 @@ export function usePageSeed() {
 }
 
 export function useComponentSeed(name: string) {
-  return computed(() => sessionSeed.value ^ hashString(name))
+  // hash 提到 computed 外：name 是常量，每次 sessionSeed 变化没必要重 hash
+  const nameHash = hashString(name)
+  return computed(() => sessionSeed.value ^ nameHash)
 }
 
 export function refreshSeed() {
@@ -45,13 +47,13 @@ export function getCurrentSeason(): 'spring' | 'summer' | 'autumn' | 'winter' {
   return 'winter'
 }
 
+const SEASON_FLORA = {
+  spring: 'orchid',
+  summer: 'bamboo',
+  autumn: 'chrysanthemum',
+  winter: 'plum',
+} as const
+
 export function getSeasonFlora(): 'orchid' | 'bamboo' | 'chrysanthemum' | 'plum' {
-  const season = getCurrentSeason()
-  const floraMap = {
-    spring: 'orchid' as const,
-    summer: 'bamboo' as const,
-    autumn: 'chrysanthemum' as const,
-    winter: 'plum' as const,
-  }
-  return floraMap[season]
+  return SEASON_FLORA[getCurrentSeason()]
 }

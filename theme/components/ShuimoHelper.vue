@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { rafDebounce } from '../composables/useRafDebounce'
 
 const visible = ref(false)
 const scrollContainer = inject<Ref<HTMLElement | null>>('scrollContainer', ref(null))
@@ -14,27 +15,28 @@ function getScrollTop(): number {
   return t ? t.scrollTop : window.scrollY
 }
 
-function onScroll() {
+// rAF 节流：scroll 事件原生 ~60-120Hz，每次都读 scrollTop 触发 layout flush。
+// 合并到下一帧只读一次；ref 自带相等性 dedupe，反复写同状态无 reactivity 成本
+const updateVisible = rafDebounce(() => {
   visible.value = getScrollTop() > 200
-}
+})
 
 function scrollToTop() {
   const t = scrollContainer.value
-  if (t) {
+  if (t)
     t.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-  else {
+  else
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 }
 
 onMounted(() => {
-  getTarget().addEventListener('scroll', onScroll, { passive: true })
-  onScroll()
+  getTarget().addEventListener('scroll', updateVisible.schedule, { passive: true })
+  updateVisible.schedule()
 })
 
 onBeforeUnmount(() => {
-  getTarget().removeEventListener('scroll', onScroll)
+  getTarget().removeEventListener('scroll', updateVisible.schedule)
+  updateVisible.cancel()
 })
 </script>
 

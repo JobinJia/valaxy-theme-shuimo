@@ -5,8 +5,9 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
 import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
-import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
+import { curtainRevealed, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
+import { timedDebounce } from './composables/useTimedCallback'
 
 // useRoute() can be undefined during SSG app init or under duplicate vue-router
 // instances (e.g. when this theme is consumed via `link:` workspaces).
@@ -43,10 +44,6 @@ const curtainStampFont = computed(() =>
   || themeConfig.value?.fonts?.title
   || 'YiShanBeiZhuan, serif',
 )
-const curtainStampFontFamily = computed(() => {
-  const primaryFont = curtainStampFont.value.split(',')[0]?.trim()
-  return primaryFont?.replace(/^['"]|['"]$/g, '') || 'YiShanBeiZhuan'
-})
 const curtainStampSize = computed(() => {
   const userSize = curtainStampConfig.value.size
   if (typeof userSize === 'number' && userSize > 0)
@@ -67,8 +64,6 @@ const curtainStampProps = computed(() => ({
   size: curtainStampSize.value,
 }))
 
-const curtainStampReady = ref(false)
-
 const isMobile = useIsMobile()
 
 const showMobileFlower = computed(() => isMobile.value && initialRoute?.path === '/')
@@ -77,23 +72,6 @@ function onFlowerSeedGenerated(seed: number) {
 }
 function onFlowerReady() {
   mobileFlowerReady.value = true
-}
-
-async function ensureCurtainStampFontReady() {
-  if (typeof document === 'undefined' || !('fonts' in document)) {
-    curtainStampReady.value = true
-    return
-  }
-
-  const loadPromise = document.fonts.load(`16px "${curtainStampFontFamily.value}"`)
-  const timeoutPromise = new Promise<void>(resolve => setTimeout(resolve, 1200))
-
-  try {
-    await Promise.race([loadPromise, timeoutPromise])
-  }
-  finally {
-    curtainStampReady.value = true
-  }
 }
 
 // --- Curtain paper texture ---
@@ -124,8 +102,6 @@ const curtainLeftStyle = makeCurtainBgStyle('left')
 const curtainRightStyle = makeCurtainBgStyle('right')
 const curtainTopStyle = makeCurtainBgStyle('top')
 const curtainBottomStyle = makeCurtainBgStyle('bottom')
-
-let curtainDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function setCurtainPaperUrl(url: string | null) {
   if (curtainPaperUrl.value === url)
@@ -168,23 +144,21 @@ async function ensureCurtainPaperReady() {
   }
 }
 
-function scheduleCurtainRegen() {
-  if (curtainDebounceTimer)
-    clearTimeout(curtainDebounceTimer)
-  curtainDebounceTimer = setTimeout(ensureCurtainPaperReady, 200)
-}
+// trailing debounce 200ms：拖窗期间持续 reset 计时，停下后才真跑 worker。
+// 之前用 rAF 每帧合并，但 resize 事件本身约 30Hz，每次 w/h 都不同导致 worker
+// 内部 lastW/lastH dedup 不生效，拖窗期间会 ~30/s 跑 worker。trailing 版本
+// 拖动期 0 次实跑，停下来才一次到位
+const curtainRegen = timedDebounce(ensureCurtainPaperReady, 200)
 
 onMounted(() => {
-  ensureCurtainStampFontReady()
   ensureCurtainPaperReady()
-  window.addEventListener('resize', scheduleCurtainRegen)
+  window.addEventListener('resize', curtainRegen.schedule)
 })
 
 onUnmounted(() => {
-  if (curtainDebounceTimer)
-    clearTimeout(curtainDebounceTimer)
+  curtainRegen.cancel()
   setCurtainPaperUrl(null)
-  window.removeEventListener('resize', scheduleCurtainRegen)
+  window.removeEventListener('resize', curtainRegen.schedule)
 })
 
 watch(isDark, () => {
@@ -226,25 +200,25 @@ watch(isDark, () => {
 
   <!-- 开屏幕布：桌面（左右） -->
   <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
-    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
-      <ShuimoStamp v-bind="curtainStampProps" />
+    <div class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
+      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
     </div>
   </div>
   <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
-    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
-      <ShuimoStamp v-bind="curtainStampProps" />
+    <div class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
+      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
     </div>
   </div>
 
   <!-- 开屏幕布：移动端（上下） -->
   <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--top" :class="{ revealed: curtainRevealed }" :style="curtainTopStyle">
-    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--top">
-      <ShuimoStamp v-bind="curtainStampProps" />
+    <div class="shuimo-curtain__stamp shuimo-curtain__stamp--top">
+      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
     </div>
   </div>
   <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--bottom" :class="{ revealed: curtainRevealed }" :style="curtainBottomStyle">
-    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--bottom">
-      <ShuimoStamp v-bind="curtainStampProps" />
+    <div class="shuimo-curtain__stamp shuimo-curtain__stamp--bottom">
+      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
     </div>
   </div>
 </template>

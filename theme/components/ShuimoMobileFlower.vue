@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { buildMobileFlower, getCachedMobileFlower, getSessionSeed, mobileFlowerReady, mobileFlowerSeed, resolveFlowerType, scheduleShuimoTask, setCachedMobileFlower, useThemeConfig } from '../composables'
+import { rafDebounce } from '../composables/useRafDebounce'
 
 const emit = defineEmits<{
   ready: []
@@ -10,7 +11,6 @@ const emit = defineEmits<{
 const themeConfig = useThemeConfig()
 const canvasRef = useTemplateRef<HTMLCanvasElement>('flowerCanvas')
 let currentFlowerCanvas: HTMLCanvasElement | null = null
-let resizeTimer: ReturnType<typeof setTimeout> | null = null
 let disposed = false
 
 const flowerType = computed(() =>
@@ -20,26 +20,21 @@ const flowerOpacity = computed(() =>
   themeConfig.value?.hero?.mobileFlower?.opacity ?? 0.8,
 )
 
+const regen = rafDebounce(regenerateFlower)
+
 onMounted(async () => {
   if (typeof window === 'undefined')
     return
 
-  window.addEventListener('resize', scheduleRegenerate)
+  window.addEventListener('resize', regen.schedule)
   regenerateFlower()
 })
 
 onUnmounted(() => {
   disposed = true
-  if (resizeTimer)
-    clearTimeout(resizeTimer)
-  window.removeEventListener('resize', scheduleRegenerate)
+  regen.cancel()
+  window.removeEventListener('resize', regen.schedule)
 })
-
-function scheduleRegenerate() {
-  if (resizeTimer)
-    clearTimeout(resizeTimer)
-  resizeTimer = setTimeout(regenerateFlower, 150)
-}
 
 async function regenerateFlower() {
   const { width, height } = getViewportSize()

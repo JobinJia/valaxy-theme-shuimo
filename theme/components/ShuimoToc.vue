@@ -13,6 +13,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useArticleContentObserver, useThemeConfig } from '../composables'
+import { rafDebounce } from '../composables/useRafDebounce'
 
 const { t } = useI18n()
 const route = useRoute() as ReturnType<typeof useRoute> | undefined
@@ -38,6 +39,18 @@ function slugifyHeading(text: string): string {
     .replace(/[^\p{Letter}\p{Number}\s-]/gu, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
+}
+
+function sameItems(a: TocItem[], b: TocItem[]): boolean {
+  if (a.length !== b.length)
+    return false
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i]
+    const y = b[i]
+    if (x.id !== y.id || x.text !== y.text || x.level !== y.level)
+      return false
+  }
+  return true
 }
 
 /**
@@ -70,11 +83,17 @@ function extractHeadings() {
       level: Number.parseInt(el.tagName[1]),
     })
   })
-  headings.value = items
+
+  // diff 后再赋值——MutationObserver 在长文里图片懒加载/代码块高亮回填都会触发；
+  // 大多数 mutation 不影响 heading 列表，跳过赋值就能避免整个 <ul> 重渲 + observer 全 re-observe
+  if (!sameItems(headings.value, items))
+    headings.value = items
 }
 
 let observer: IntersectionObserver | null = null
-let activeDebounceTimer: ReturnType<typeof setTimeout> | null = null
+const setActive = rafDebounce((id: string) => {
+  activeId.value = id
+})
 
 /**
  * Set up an IntersectionObserver to track which heading is currently
@@ -87,12 +106,7 @@ function setupObserver() {
     (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          const id = entry.target.id
-          if (activeDebounceTimer)
-            clearTimeout(activeDebounceTimer)
-          activeDebounceTimer = setTimeout(() => {
-            activeId.value = id
-          }, 30)
+          setActive.schedule(entry.target.id)
           break
         }
       }
@@ -134,7 +148,12 @@ function scrollTo(id: string) {
 }
 
 function refreshToc() {
+  const before = headings.value
   extractHeadings()
+  // 只在 heading 列表真正变化时才重置 activeId + 重新挂 observer。
+  // 图片懒加载等触发的 mutation 不该清空当前高亮
+  if (headings.value === before)
+    return
   observer?.disconnect()
   activeId.value = ''
   if (headings.value.length) {
@@ -156,8 +175,7 @@ watch(() => route?.path, () => {
 })
 
 onBeforeUnmount(() => {
-  if (activeDebounceTimer)
-    clearTimeout(activeDebounceTimer)
+  setActive.cancel()
   observer?.disconnect()
 })
 

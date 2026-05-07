@@ -75,16 +75,34 @@ const props = withDefaults(defineProps<{
   regularShape: true,
 })
 
+const emit = defineEmits<{
+  rendered: []
+}>()
+
 const stampSvg = ref<string | null>(null)
-const hasShuimoCore = ref(false)
 const showFallback = ref(false)
 const themeConfig = useThemeConfig()
+let firstRenderEmitted = false
 
+function emitFirstRender() {
+  if (firstRenderEmitted)
+    return
+  firstRenderEmitted = true
+  emit('rendered')
+}
+
+// stampUid 在 onMounted 才生成：setup 顶层走 SSR 会用 Math.random / crypto，
+// 服务端和客户端值不同导致 hydration 警告 + 整 stamp 重渲。renderStamp 也是
+// onMounted 才跑，stamp 在 SSR 阶段不可见，延后到 client 完全 OK
 let stampUid = ''
-if (typeof crypto !== 'undefined' && crypto.randomUUID)
-  stampUid = crypto.randomUUID().slice(0, 8)
-else
-  stampUid = Math.random().toString(36).slice(2, 10)
+function ensureStampUid() {
+  if (stampUid)
+    return
+  if (typeof crypto !== 'undefined' && crypto.randomUUID)
+    stampUid = crypto.randomUUID().slice(0, 8)
+  else
+    stampUid = Math.random().toString(36).slice(2, 10)
+}
 
 // Cache the dynamic import so we only load shuimo-core once
 let generateStampAsync: any = null
@@ -100,14 +118,16 @@ function parseStampText(text: string | string[]): string[] {
 
 /** Generate the stamp SVG via shuimo-core. Called on mount and when props change. */
 async function renderStamp() {
+  ensureStampUid()
   try {
     if (!generateStampAsync) {
       const mod = await import('@jobinjia/shuimo-core/drawing')
       generateStampAsync = mod.generateStampAsync
-      hasShuimoCore.value = true
     }
 
-    await document.fonts.ready
+    // 不等 document.fonts.ready —— 它会等正文/标题等所有 webfont 一起到位，
+    // 最慢可能 1-2s。stamp 实际只需要 yishan 字体，shuimo-core 通过 fontUrl
+    // 接收并在内部 FontFace.load 自己 await，所以这里不需要再等全局字体。
 
     const textArray = parseStampText(props.text)
     const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
@@ -155,7 +175,6 @@ async function renderStamp() {
     }
   }
   catch (err) {
-    hasShuimoCore.value = false
     showFallback.value = true
     if (import.meta.env.DEV && !warnMissingShuimoCore.fired) {
       warnMissingShuimoCore.fired = true
@@ -166,6 +185,7 @@ async function renderStamp() {
       )
     }
   }
+  emitFirstRender()
 }
 
 onMounted(renderStamp)

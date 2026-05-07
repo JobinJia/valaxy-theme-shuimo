@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FALLBACK_LOCATION } from '../composables/astronomy'
 import { useThemeConfig } from '../composables/config'
 import { useAstronomy } from '../composables/useAstronomy'
+import { useFlashMessage } from '../composables/useFlashMessage'
 
 const props = withDefaults(defineProps<{
   size?: number
@@ -61,38 +62,22 @@ const isVisitorOverride = computed(() => {
   return state.value.location.lat !== cfg.lat || state.value.location.lng !== cfg.lng
 })
 
-const message = ref<string | null>(null)
-let messageTimer: ReturnType<typeof setTimeout> | null = null
-function flashMessage(text: string, ms = 3000) {
-  message.value = text
-  if (messageTimer)
-    clearTimeout(messageTimer)
-  messageTimer = setTimeout(() => {
-    message.value = null
-  }, ms)
-}
-
-onUnmounted(() => {
-  if (messageTimer) {
-    clearTimeout(messageTimer)
-    messageTimer = null
-  }
-})
+const { message, flash } = useFlashMessage()
 
 function requestVisitorLocation() {
   if (!allowVisitorOverride.value)
     return
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
-    flashMessage(t('shuimo.astronomy.location_failed'))
+    flash(t('shuimo.astronomy.location_failed'))
     return
   }
-  flashMessage(t('shuimo.astronomy.locating'), 60000)
+  flash(t('shuimo.astronomy.locating'), 60000)
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       setVisitorLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
       message.value = null
     },
-    () => flashMessage(t('shuimo.astronomy.location_failed')),
+    () => flash(t('shuimo.astronomy.location_failed')),
     { timeout: 5000 },
   )
 }

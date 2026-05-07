@@ -31,27 +31,38 @@ const SOLAR_TERMS: [string, string][] = [
   ['冬至', 'Dongzhi'],
 ]
 
-// 2024-2030 节气日期近似表（每月两个节气，日期仅存"日"）
+// 节气日期近似表（每月两个节气，日期仅存"日"）
 // 实际天文节气每年偏移 ±1 天，用固定近似足够
-const TERM_DAYS: number[][] = [
-  // [m1d1, m1d2, m2d1, m2d2, ..., m12d1, m12d2]
-  [5, 20, 4, 19, 5, 20, 4, 20, 5, 21, 5, 21, 7, 22, 7, 23, 7, 23, 8, 23, 7, 22, 7, 21],
-]
+// 顺序：[m1d1, m1d2, m2d1, m2d2, ..., m12d1, m12d2]
+const TERM_DAYS = [5, 20, 4, 19, 5, 20, 4, 20, 5, 21, 5, 21, 7, 22, 7, 23, 7, 23, 8, 23, 7, 22, 7, 21] as const
+
+// day-level 缓存：节气一天才变一次，所有订阅者每分钟 refresh 完全没必要重算
+let cachedTermDayKey = -1
+let cachedTerm: SolarTerm | null = null
+
+function dayKeyOf(date: Date): number {
+  return date.getFullYear() * 1000 + date.getMonth() * 40 + date.getDate()
+}
 
 export function getSolarTerm(date: Date = new Date()): SolarTerm {
+  const dayKey = dayKeyOf(date)
+  if (dayKey === cachedTermDayKey && cachedTerm)
+    return cachedTerm
+
   const month = date.getMonth()
   const day = date.getDate()
-
-  const d1 = TERM_DAYS[0][month * 2]
-  const d2 = TERM_DAYS[0][month * 2 + 1]
+  const d1 = TERM_DAYS[month * 2]
+  const d2 = TERM_DAYS[month * 2 + 1]
   const termIndex = month * 2 + (day >= d2 ? 1 : day >= d1 ? 0 : -1)
   const idx = ((termIndex + 24) % 24 + 24) % 24
 
-  return {
+  cachedTermDayKey = dayKey
+  cachedTerm = {
     name: SOLAR_TERMS[idx][0],
     nameEn: SOLAR_TERMS[idx][1],
     index: idx,
   }
+  return cachedTerm
 }
 
 export interface TimeOfDay {
@@ -61,7 +72,15 @@ export interface TimeOfDay {
 
 const SHICHEN = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
 
+// hour-level 缓存：时辰/period 一小时才变，避免每分钟 refresh 都重算
+let cachedTimeHourKey = -1
+let cachedTime: TimeOfDay | null = null
+
 export function getTimeOfDay(date: Date = new Date()): TimeOfDay {
+  const hourKey = dayKeyOf(date) * 24 + date.getHours()
+  if (hourKey === cachedTimeHourKey && cachedTime)
+    return cachedTime
+
   const hour = date.getHours()
   const shichenIdx = Math.floor(((hour + 1) % 24) / 2)
   const shichen = SHICHEN[shichenIdx]
@@ -80,7 +99,9 @@ export function getTimeOfDay(date: Date = new Date()): TimeOfDay {
   else
     period = 'night'
 
-  return { shichen, period }
+  cachedTimeHourKey = hourKey
+  cachedTime = { shichen, period }
+  return cachedTime
 }
 
 export interface SolarTermStyle {

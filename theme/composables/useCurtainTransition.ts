@@ -7,6 +7,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export const curtainRevealed = ref(true)
+export const curtainStampReady = ref(false)
 
 let initialCurtainActive = false
 
@@ -25,4 +26,8 @@ export function openInitialCurtain() {
     return
   initialCurtainActive = false
   curtainRevealed.value = true
+}
+
+export function markCurtainStampReady() {
+  curtainStampReady.value = true
 }

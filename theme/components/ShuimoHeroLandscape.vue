@@ -4,8 +4,6 @@ import { computed, onMounted, ref } from 'vue'
 import { buildHeroScene, buildHeroSceneInWorker, getSessionSeed, scheduleShuimoTask, useBlankSide, useThemeConfig } from '../composables'
 
 const emit = defineEmits<{
-  ready: []
-  paperReady: []
   seedGenerated: [seed: number]
 }>()
 
@@ -69,6 +67,10 @@ async function getHeroScene(W: number, H: number): Promise<HeroSceneCache> {
     throw new Error('[shuimo] hero scene worker returned empty')
   }
 
+  // 覆盖旧缓存前 revoke 旧 blob URL，避免 SPA 内 resize/seed 切换累积大 PNG 内存
+  if (cachedHeroScene)
+    URL.revokeObjectURL(cachedHeroScene.imgUrl)
+
   cachedHeroScene = { imgUrl, blankSide: result.blankSide, seed: result.seed, W, H }
   return cachedHeroScene
 }
@@ -77,10 +79,6 @@ onMounted(async () => {
   const el = svgContainer.value
   if (!el)
     return
-
-  // 条幅不再自己生成宣纸（外层 useGlobalXuanPaper 已负责整页纸纹）；
-  // paperReady 直接发出让幕布可以开打动画
-  emit('paperReady')
 
   try {
     // W 必须跟实际视口宽度一致：外层 <img object-fit:cover> 在容器 vs PNG 宽高比
@@ -98,8 +96,6 @@ onMounted(async () => {
     // 层次遮挡。主题层这里套一层 mix-blend-mode:multiply：白色 multiply 下层纸 = 纸
     // （零色差穿透），墨色 multiply 成深墨。单层合成，不会双重 multiply。
     img.style.cssText = 'width:100%;height:100%;mix-blend-mode:multiply;object-fit:cover'
-    img.onload = () => emit('ready')
-    img.onerror = () => emit('ready')
     img.src = scene.imgUrl
     el.innerHTML = ''
     el.appendChild(img)

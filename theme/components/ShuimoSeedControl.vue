@@ -16,9 +16,6 @@ async function copySeed(seed: number) {
   try {
     await navigator.clipboard.writeText(String(seed))
     copied.value = true
-    setTimeout(() => {
-      copied.value = false
-    }, 1500)
   }
   catch {}
 }
@@ -36,8 +33,10 @@ function regenerate() {
     <span class="shuimo-seed-control__value">{{ seed }}</span>
     <button
       class="shuimo-seed-control__btn"
+      :class="{ 'shuimo-seed-control__btn--copied': copied }"
       :title="copied ? '已复制' : '复制 seed'"
       @click="copySeed(seed)"
+      @animationend="copied = false"
     >
       {{ copied ? '✓' : '⎘' }}
     </button>
@@ -102,6 +101,22 @@ function regenerate() {
       background: var(--sm-primary-faint);
       color: var(--sm-accent);
     }
+
+    // 复制成功后跑一个 1.5s 的 dummy 动画，结束触发 animationend
+    // 让 vue 把 copied 状态自己清掉，比 setTimeout 更精确（动画时长改了不用同步）
+    &--copied {
+      animation: shuimo-seed-copied-flash 1.5s linear forwards;
+    }
+  }
+}
+
+@keyframes shuimo-seed-copied-flash {
+  0%,
+  90% {
+    color: var(--sm-accent);
+  }
+  100% {
+    color: var(--sm-ink-medium);
   }
 }
 

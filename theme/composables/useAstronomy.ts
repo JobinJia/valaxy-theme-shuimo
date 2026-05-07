@@ -1,8 +1,9 @@
 import type { ComputedRef } from 'vue'
 import type { Location } from './astronomy'
 import type { MoonPhaseKey } from './useMoonPhase'
+import type { TimedCallbackHandle } from './useTimedCallback'
 import * as SunCalcNs from 'suncalc'
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, getCurrentInstance, onUnmounted, ref } from 'vue'
 import {
   celestialScreenPos,
   FALLBACK_LOCATION,
@@ -11,6 +12,7 @@ import {
 } from './astronomy'
 import { moonPhaseI18nKey } from './useMoonPhase'
 import { getSolarTerm, getTimeOfDay } from './useSolarTerm'
+import { intervalCallback } from './useTimedCallback'
 
 // suncalc ships as UMD/CJS (`module.exports = SunCalc`) and surfaces under
 // several shapes depending on the consumer's bundler state:
@@ -67,21 +69,36 @@ export interface AstronomyState {
 }
 
 /* ---------- module-level singleton state ---------- */
-let intervalId: ReturnType<typeof setInterval> | null = null
+let intervalHandle: TimedCallbackHandle | null = null
 let subscriberCount = 0
 let currentOptions: Required<AstronomyOptions> = {
   configLocation: FALLBACK_LOCATION,
   allowVisitorOverride: true,
 }
-const stateRef = ref<AstronomyState>(compute(currentOptions))
-
-function compute(opts: Required<AstronomyOptions>): AstronomyState {
+// location 缓存：parseLocationFromUrl + readLocationOverride 各一次解析+读 localStorage，
+// 没必要每分钟 refresh 都重做。仅在 options/visitor override 变化时显式 invalidate
+let cachedLocation: Location | null = null
+function invalidateLocation() {
+  cachedLocation = null
+}
+function getLocation(opts: Required<AstronomyOptions>): Location {
+  if (cachedLocation)
+    return cachedLocation
   const search = typeof window !== 'undefined' ? window.location.search : ''
-  const location = resolveLocation({
+  cachedLocation = resolveLocation({
     configLocation: opts.configLocation,
     allowVisitorOverride: opts.allowVisitorOverride,
     search,
   })
+  return cachedLocation
+}
+
+// stateRef lazy 初始化：模块顶层 compute 会触发 SunCalc 计算，SSR 进入此模块也会跑，
+// 而 SSR 的快照马上会被客户端 hydrate 后的首次 refresh 覆盖，是浪费
+const stateRef = ref<AstronomyState | null>(null)
+
+function compute(opts: Required<AstronomyOptions>): AstronomyState {
+  const location = getLocation(opts)
   const now = new Date()
 
   const moonPos = getMoonPosition(now, location.lat, location.lng)
@@ -123,15 +140,16 @@ function refresh() {
 
 /** TEST-ONLY: reset singleton between tests. */
 export function _resetAstronomyForTests() {
-  if (intervalId) {
-    clearInterval(intervalId)
-    intervalId = null
+  if (intervalHandle) {
+    intervalHandle.cancel()
+    intervalHandle = null
   }
   subscriberCount = 0
   currentOptions = {
     configLocation: FALLBACK_LOCATION,
     allowVisitorOverride: true,
   }
+  invalidateLocation()
   stateRef.value = compute(currentOptions)
 }
 
@@ -148,39 +166,52 @@ export function useAstronomy(opts: AstronomyOptions = {}): {
   // different options (especially `allowVisitorOverride`), the new value will
   // affect setVisitorLocation/clearVisitorOverride behavior for ALL active
   // subscribers — not just the new one.
-  currentOptions = {
+  const newOptions = {
     configLocation: opts.configLocation ?? currentOptions.configLocation ?? FALLBACK_LOCATION,
     allowVisitorOverride: opts.allowVisitorOverride ?? currentOptions.allowVisitorOverride ?? true,
   }
+  // options 变才需要 invalidate location 缓存（不 invalidate 会用旧 cached location）
+  if (newOptions.configLocation !== currentOptions.configLocation
+    || newOptions.allowVisitorOverride !== currentOptions.allowVisitorOverride) {
+    invalidateLocation()
+  }
+  currentOptions = newOptions
   refresh()
 
   subscriberCount++
-  if (intervalId === null && typeof window !== 'undefined')
-    intervalId = setInterval(refresh, REFRESH_MS)
+  if (intervalHandle === null && typeof window !== 'undefined')
+    intervalHandle = intervalCallback(REFRESH_MS, refresh)
 
-  onUnmounted(() => {
-    subscriberCount--
-    if (subscriberCount <= 0 && intervalId !== null) {
-      clearInterval(intervalId)
-      intervalId = null
-      subscriberCount = 0
-    }
-  })
+  // 只在组件 setup 内才挂 onUnmounted，否则（router guard / module top-level 调用）
+  // Vue 会警告且永远不会减计数，导致 subscriberCount 单调上涨、interval 永不释放
+  if (getCurrentInstance()) {
+    onUnmounted(() => {
+      subscriberCount--
+      if (subscriberCount <= 0 && intervalHandle !== null) {
+        intervalHandle.cancel()
+        intervalHandle = null
+        subscriberCount = 0
+      }
+    })
+  }
 
   function setVisitorLocation(loc: Location) {
     if (!currentOptions.allowVisitorOverride)
       return
     writeLocationOverride(loc)
+    invalidateLocation()
     refresh()
   }
 
   function clearVisitorOverride() {
     writeLocationOverride(null)
+    invalidateLocation()
     refresh()
   }
 
   return {
-    state: computed(() => stateRef.value),
+    // stateRef lazy 初始化后第一次 refresh 已经填好；模板访问时 stateRef.value 必然 truthy
+    state: computed(() => stateRef.value!),
     setVisitorLocation,
     clearVisitorOverride,
   }

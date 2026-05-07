@@ -49,11 +49,16 @@ export async function buildMobileFlower(
     height,
   })
 
-  removeFlowerPaperBackground(canvas)
+  await removeFlowerPaperBackground(canvas)
   return { canvas, seed, width, height }
 }
 
-function removeFlowerPaperBackground(canvas: HTMLCanvasElement) {
+// 全屏移动端 canvas（如 1080×2400 = 260 万像素）一次性扫描需 100-300ms 阻塞主线程，
+// 直接卡首屏。改为分 chunk + rAF 让出：每帧只处理 64K 像素（~8ms），其它 UI 不被阻塞，
+// 总耗时不变但分摊到几帧；视觉上花卉略有渐显效果，移动端体感优于一次性 freeze
+const PIXEL_CHUNK = 64 * 1024 * 4 // 64K 像素 × RGBA = 256KB
+
+async function removeFlowerPaperBackground(canvas: HTMLCanvasElement): Promise<void> {
   const ctx = canvas.getContext('2d')
   if (!ctx)
     return
@@ -61,19 +66,27 @@ function removeFlowerPaperBackground(canvas: HTMLCanvasElement) {
   const { width, height } = canvas
   const image = ctx.getImageData(0, 0, width, height)
   const data = image.data
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i]!
-    const g = data[i + 1]!
-    const b = data[i + 2]!
-    const brightness = (r + g + b) / 3
-    const saturation = Math.max(r, g, b) - Math.min(r, g, b)
+  const total = data.length
 
-    if (brightness > 248 && saturation < 10) {
-      data[i + 3] = 0
+  let i = 0
+  while (i < total) {
+    const end = Math.min(i + PIXEL_CHUNK, total)
+    for (; i < end; i += 4) {
+      const r = data[i]!
+      const g = data[i + 1]!
+      const b = data[i + 2]!
+      const brightness = (r + g + b) / 3
+      const saturation = Math.max(r, g, b) - Math.min(r, g, b)
+
+      if (brightness > 248 && saturation < 10) {
+        data[i + 3] = 0
+      }
+      else if (brightness > 236 && saturation < 16) {
+        data[i + 3] = Math.round(data[i + 3]! * ((248 - brightness) / 12))
+      }
     }
-    else if (brightness > 236 && saturation < 16) {
-      data[i + 3] = Math.round(data[i + 3]! * ((248 - brightness) / 12))
-    }
+    if (i < total)
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
   }
   ctx.putImageData(image, 0, 0)
 }

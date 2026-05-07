@@ -10,25 +10,38 @@ const author = computed(() => themeConfig.value?.sidebar?.author)
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const postList = usePostList()
 
-// 按年份分组，倒序
+interface ArchivePost {
+  path?: string
+  // title 在 valaxy 里可能是 string 或多语言 Record，模板兜底逻辑沿用原有 `|| '无题'`
+  title?: string | Record<string, string>
+  formattedDate: string
+  ts: number
+}
+
+// 按年份分组，倒序。
+// 在 group 阶段一次性把日期 parse + format 投影到 post 字段；模板 v-for 直接读字段，
+// 不会因任何 reactive tick 触发整列表 re-render 时反复 new Date()
 const postsByYear = computed(() => {
-  const groups: Record<number, any[]> = {}
+  const groups = new Map<number, ArchivePost[]>()
   for (const post of (postList.value || [])) {
-    const year = new Date(post.date ?? 0).getFullYear()
-    ;(groups[year] ||= []).push(post)
+    const d = new Date(post.date ?? 0)
+    const year = d.getFullYear()
+    const ts = d.getTime()
+    const formattedDate = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    let bucket = groups.get(year)
+    if (!bucket) {
+      bucket = []
+      groups.set(year, bucket)
+    }
+    bucket.push({ path: post.path, title: post.title, formattedDate, ts })
   }
-  return Object.entries(groups)
-    .sort(([a], [b]) => +b - +a)
+  return [...groups.entries()]
+    .sort(([a], [b]) => b - a)
     .map(([year, posts]) => ({
-      year: +year,
-      posts: posts.sort((a: any, b: any) => +new Date(b.date ?? 0) - +new Date(a.date ?? 0)),
+      year,
+      posts: posts.sort((a, b) => b.ts - a.ts),
     }))
 })
-
-function formatDate(date: string | Date) {
-  const d = new Date(date)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 </script>
 
 <template>
@@ -59,7 +72,7 @@ function formatDate(date: string | Date) {
             <span class="shuimo-archives-page__dot" />
             <router-link :to="post.path || '/'" class="shuimo-archives-page__post-link">
               <span class="shuimo-archives-page__post-title">{{ post.title || '无题' }}</span>
-              <span class="shuimo-archives-page__post-date">{{ formatDate(post.date) }}</span>
+              <span class="shuimo-archives-page__post-date">{{ post.formattedDate }}</span>
             </router-link>
           </li>
         </ul>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
-import { curtainRevealed, openInitialCurtain } from '../composables/useCurtainTransition'
+import { computed, onMounted, watch } from 'vue'
+import { mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
+import { curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
 
@@ -47,18 +47,12 @@ function onSeedGenerated(seed: number) {
   mobileFlowerSeed.value = seed
 }
 
-// --- Initial curtain: signal when hero resources are ready ---
+// --- Initial curtain ---
 //
-// The home-page curtain only opens once the visual layers underneath it have
-// actually rendered. A pure-CSS auto-open (commit 1babfbd) shipped to prod and
-// produced a blank reveal on cold loads — workers need 1–3s to generate xuan
-// paper and the hero SVG, but the CSS animation fired at 1.4s regardless.
-// Restoring the multi-signal gate plus the safety timer fixes that.
+// 幕布只等"宣纸 + 印章"两条信号到位就开。山水/花卉等慢资源不再阻塞幕布——
+// 它们在幕布拉开后继续在底下完成，用户先看到完整宣纸 + 印章，然后慢慢出层次。
 
 let initialCurtainTriggered = false
-const heroPaperReady = ref(false)
-const landscapeReady = ref(false)
-const contentPaperReady = ref(false)
 const { ready: globalPaperReady } = useGlobalXuanPaper()
 
 function tryOpenInitialCurtain() {
@@ -66,43 +60,13 @@ function tryOpenInitialCurtain() {
     return
   if (!globalPaperReady.value)
     return
-  if (shouldRenderHeroLandscape.value && (!heroPaperReady.value || !landscapeReady.value))
-    return
-  if (shouldRenderMobileFlower.value && !mobileFlowerReady.value)
-    return
-  // verticalNav 模式（首页）不渲染 ShuimoXuanPaper，没有 contentPaperReady 信号
-  if (!props.verticalNav && !contentPaperReady.value)
+  if (!curtainStampReady.value)
     return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
 
-watch([globalPaperReady, shouldRenderHeroLandscape, shouldRenderMobileFlower, mobileFlowerReady], tryOpenInitialCurtain, { immediate: true })
-
-function onHeroPaperReady() {
-  heroPaperReady.value = true
-  tryOpenInitialCurtain()
-}
-
-function onLandscapeReady() {
-  landscapeReady.value = true
-  tryOpenInitialCurtain()
-}
-
-function onContentPaperReady() {
-  contentPaperReady.value = true
-  tryOpenInitialCurtain()
-}
-
-// 兜底：worker 异常 / 网络挂死时也必须开幕，避免幕布永远挡着页面。
-// 冷启动强制刷新下宣纸 worker 生成可能需要 1-3s，所以给 6s 的宽裕窗口，
-// 让 globalPaperReady 有充分时间点亮再触发。正常路径都走 gate，不走这里。
-const fallbackTimer = setTimeout(() => {
-  if (!initialCurtainTriggered) {
-    initialCurtainTriggered = true
-    openInitialCurtain()
-  }
-}, 6000)
+watch([globalPaperReady, curtainStampReady], tryOpenInitialCurtain, { immediate: true })
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
@@ -111,10 +75,6 @@ onMounted(() => {
 
   preheatXuanPaperWorker()
   preheatHeroSceneWorker()
-})
-
-onUnmounted(() => {
-  clearTimeout(fallbackTimer)
 })
 </script>
 
@@ -126,8 +86,6 @@ onUnmounted(() => {
     <ShuimoThemeToggle v-if="!isMobile" />
     <ShuimoHeroLandscape
       v-if="shouldRenderHeroLandscape"
-      @ready="onLandscapeReady"
-      @paper-ready="onHeroPaperReady"
       @seed-generated="onSeedGenerated"
     />
     <ClientOnly>
@@ -146,7 +104,7 @@ onUnmounted(() => {
     <ShuimoVerticalNav v-else-if="verticalNav" :revealed="curtainRevealed" />
 
     <div v-if="!verticalNav" class="shuimo-app__paper">
-      <ShuimoXuanPaper class="shuimo-app__paper-surface" @loaded="onContentPaperReady">
+      <ShuimoXuanPaper class="shuimo-app__paper-surface">
         <ShuimoHeader />
 
         <slot>

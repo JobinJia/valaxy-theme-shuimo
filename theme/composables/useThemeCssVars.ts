@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { ThemeConfig } from '../types'
-import { computed } from 'vue'
+import { shallowRef, watchEffect } from 'vue'
 import { useThemeConfig } from './config'
 
 const DEFAULT_SERIF_FONT = '\'Noto Serif SC\', \'Source Han Serif SC\', \'SimSun\', Georgia, \'Times New Roman\', serif'
@@ -76,7 +76,28 @@ export function buildThemeCssVars(themeConfig: Partial<ThemeConfig> | undefined 
   return cssVars
 }
 
+// 浅层 key/value 比较：themeConfig 的 reactive tick 经常触发但 cssVars 内容很少真正变化
+// （cssVars 是扁平对象 { '--var': 'value' }），相同内容时不更新 ref 避免 :style patch
+function shallowEqual(a: Record<string, string>, b: Record<string, string>): boolean {
+  const aKeys = Object.keys(a)
+  if (aKeys.length !== Object.keys(b).length)
+    return false
+  for (const k of aKeys) {
+    if (a[k] !== b[k])
+      return false
+  }
+  return true
+}
+
 export function useThemeCssVars() {
   const themeConfig = useThemeConfig()
-  return computed<CSSProperties>(() => buildThemeCssVars(themeConfig.value) as CSSProperties)
+  const cssVars = shallowRef<CSSProperties>(buildThemeCssVars(themeConfig.value) as CSSProperties)
+
+  watchEffect(() => {
+    const next = buildThemeCssVars(themeConfig.value)
+    if (!shallowEqual(cssVars.value as Record<string, string>, next))
+      cssVars.value = next as CSSProperties
+  })
+
+  return cssVars
 }

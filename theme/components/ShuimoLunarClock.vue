@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { lunar } from '@shuimo-design/lunar'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { ref } from 'vue'
+import { useInterval } from '../composables/useTimedCallback'
 
 const now = ref(new Date())
-let timer: ReturnType<typeof setInterval> | null = null
 
 function formatDate(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -23,16 +23,9 @@ function getLunarDisplay(d: Date) {
 
 const lunarInfo = ref(getLunarDisplay(now.value))
 
-onMounted(() => {
-  timer = setInterval(() => {
-    now.value = new Date()
-    lunarInfo.value = getLunarDisplay(now.value)
-  }, 1000)
-})
-
-onUnmounted(() => {
-  if (timer)
-    clearInterval(timer)
+useInterval(1000, () => {
+  now.value = new Date()
+  lunarInfo.value = getLunarDisplay(now.value)
 })
 </script>
 

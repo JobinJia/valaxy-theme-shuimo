@@ -38,7 +38,7 @@ function createPetal(x: number, y: number) {
   `
 
   document.body.appendChild(petal)
-  setTimeout(() => petal.remove(), (duration + delay) * 1000 + 100)
+  petal.addEventListener('animationend', () => petal.remove(), { once: true })
 }
 
 let lastClick = 0

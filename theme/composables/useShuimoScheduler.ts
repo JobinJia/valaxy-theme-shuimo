@@ -31,12 +31,12 @@ async function processQueue() {
 
 function yieldToMain(): Promise<void> {
   return new Promise((resolve) => {
-    if (typeof requestIdleCallback !== 'undefined') {
+    if (typeof requestIdleCallback !== 'undefined')
       requestIdleCallback(() => resolve(), { timeout: 100 })
-    }
-    else {
-      setTimeout(resolve, 16)
-    }
+    else if (typeof requestAnimationFrame !== 'undefined')
+      requestAnimationFrame(() => resolve())
+    else
+      queueMicrotask(() => resolve())
   })
 }
 
