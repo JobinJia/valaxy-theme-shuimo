@@ -291,6 +291,25 @@ export interface ThemeConfig extends DefaultTheme.Config {
      * @default 800
      */
     sceneHeight: number
+
+    /** 移动端花卉背景（替换移动端山水画） */
+    mobileFlower: Partial<{
+      /** 开关 @default true */
+      enable: boolean
+      /**
+       * 花卉类型
+       * - 'woody': 木本
+       * - 'herbal': 草本
+       * - 'random': 每次随机
+       * - 'season': 根据季节自动（春兰/夏竹/秋菊/冬梅 → herbal/woody）
+       * @default 'season'
+       */
+      type: 'woody' | 'herbal' | 'random' | 'season'
+      /** 固定种子，不设则每次刷新随机 */
+      seed: number
+      /** 透明度 0-1 @default 0.8 */
+      opacity: number
+    }>
   }>
 
   /** 图片题注配置 */

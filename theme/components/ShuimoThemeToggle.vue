@@ -1,27 +1,34 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
-import { useThemeConfig } from '../composables'
+import { useIsMobile, useThemeConfig } from '../composables'
 
 const { isDark, toggleDark } = useValaxyDark()
 const themeConfig = useThemeConfig()
 const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
+const isMobile = useIsMobile()
+const toggleSize = computed(() => isMobile.value ? 32 : 48)
+const toggleStyle = computed(() => ({
+  width: `${toggleSize.value}px`,
+  height: `${toggleSize.value}px`,
+}))
 </script>
 
 <template>
   <button
     class="shuimo-theme-toggle"
     :title="isDark ? '切换亮色' : '切换暗色'"
+    :style="toggleStyle"
     @click="toggleDark()"
   >
-    <span class="shuimo-theme-toggle__stamp">
+    <span class="shuimo-theme-toggle__stamp" :style="toggleStyle">
       <ShuimoStamp
         :text="isDark ? '月映' : '日照'"
         :type="isDark ? 'yin' : 'yang'"
         shape="rectangle"
         color="#8B2500"
         :font-family="titleFont"
-        :size="80"
+        :size="toggleSize"
       />
     </span>
   </button>
@@ -37,11 +44,7 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
   background: none;
   cursor: pointer;
   padding: 0;
-  transform: scale(0.5);
-  transform-origin: top right;
   opacity: 0.65;
-  width: 80px;
-  height: 80px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -51,8 +54,6 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
   }
 
   &__stamp {
-    width: 80px;
-    height: 80px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -65,7 +66,6 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZh
   .shuimo-theme-toggle {
     top: 6px;
     right: 6px;
-    transform: scale(0.38);
   }
 }
 </style>

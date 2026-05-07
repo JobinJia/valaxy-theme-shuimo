@@ -3,7 +3,7 @@ import type { ThemeModeColor } from './types'
 import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { generateXuanPaperTexture, useThemeConfig } from './composables'
+import { generateXuanPaperTexture, useIsMobile, useThemeConfig } from './composables'
 import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 
@@ -68,6 +68,8 @@ const curtainStampProps = computed(() => ({
 
 const curtainStampReady = ref(false)
 
+const isMobile = useIsMobile()
+
 async function ensureCurtainStampFontReady() {
   if (typeof document === 'undefined' || !('fonts' in document)) {
     curtainStampReady.value = true
@@ -89,21 +91,30 @@ async function ensureCurtainStampFontReady() {
 
 const curtainPaperUrl = ref<string | null>(null)
 
-function makeCurtainStyle(side: 'left' | 'right') {
+function makeCurtainBgStyle(side: 'left' | 'right' | 'top' | 'bottom') {
   return computed(() => {
     const userColor = resolveModeColor(themeConfig.value?.decorations?.curtainColor, isDark.value)
+    const isVertical = side === 'top' || side === 'bottom'
     return {
       backgroundColor: userColor || 'var(--sm-curtain-bg)',
       backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
       backgroundRepeat: curtainPaperUrl.value ? 'no-repeat' : undefined,
-      backgroundSize: curtainPaperUrl.value ? '200% 100%' : undefined,
-      backgroundPosition: curtainPaperUrl.value ? `${side} center` : undefined,
+      backgroundSize: curtainPaperUrl.value
+        ? (isVertical ? '100% 200%' : '200% 100%')
+        : undefined,
+      backgroundPosition: curtainPaperUrl.value
+        ? (isVertical
+            ? `center ${side}`
+            : `${side} center`)
+        : undefined,
     }
   })
 }
 
-const curtainLeftStyle = makeCurtainStyle('left')
-const curtainRightStyle = makeCurtainStyle('right')
+const curtainLeftStyle = makeCurtainBgStyle('left')
+const curtainRightStyle = makeCurtainBgStyle('right')
+const curtainTopStyle = makeCurtainBgStyle('top')
+const curtainBottomStyle = makeCurtainBgStyle('bottom')
 
 let curtainDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -195,14 +206,26 @@ watch(isDark, () => {
     <ShuimoDaySky v-if="!isDark && skyEnabled" />
   </ClientOnly>
 
-  <!-- 开屏幕布 -->
-  <div class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
+  <!-- 开屏幕布：桌面（左右） -->
+  <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
     <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
       <ShuimoStamp v-bind="curtainStampProps" />
     </div>
   </div>
-  <div class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
+  <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
     <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
+      <ShuimoStamp v-bind="curtainStampProps" />
+    </div>
+  </div>
+
+  <!-- 开屏幕布：移动端（上下） -->
+  <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--top" :class="{ revealed: curtainRevealed }" :style="curtainTopStyle">
+    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--top">
+      <ShuimoStamp v-bind="curtainStampProps" />
+    </div>
+  </div>
+  <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--bottom" :class="{ revealed: curtainRevealed }" :style="curtainBottomStyle">
+    <div v-if="curtainStampReady" class="shuimo-curtain__stamp shuimo-curtain__stamp--bottom">
       <ShuimoStamp v-bind="curtainStampProps" />
     </div>
   </div>
@@ -230,34 +253,19 @@ watch(isDark, () => {
 
 .shuimo-curtain {
   position: fixed;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  background: var(--sm-paper);
   z-index: 9999;
   pointer-events: none;
   overflow: hidden;
   will-change: transform;
   transition: transform 0.5s ease-in;
 
-  &__stamp {
-    position: absolute;
-    top: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.96;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
-
-    &--left {
-      right: 0;
-      transform: translate(50%, -50%);
-    }
-
-    &--right {
-      left: 0;
-      transform: translate(-50%, -50%);
-    }
+  // Desktop: left-right split
+  &--left,
+  &--right {
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--sm-paper);
   }
 
   &--left {
@@ -266,6 +274,58 @@ watch(isDark, () => {
 
   &--right {
     right: 0;
+  }
+
+  // Mobile: top-bottom split
+  &--top,
+  &--bottom {
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: var(--sm-paper);
+  }
+
+  &--top {
+    top: 0;
+  }
+
+  &--bottom {
+    bottom: 0;
+  }
+
+  &__stamp {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.96;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+
+    // Desktop: centered on vertical seam
+    &--left {
+      top: 50%;
+      right: 0;
+      transform: translate(50%, -50%);
+    }
+
+    &--right {
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+    }
+
+    // Mobile: centered on horizontal seam
+    &--top {
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 50%);
+    }
+
+    &--bottom {
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 
   &.revealed {
@@ -278,12 +338,14 @@ watch(isDark, () => {
     &.shuimo-curtain--right {
       transform: translateX(100%);
     }
-  }
-}
 
-@media (max-width: 767px) {
-  .shuimo-curtain {
-    display: none;
+    &.shuimo-curtain--top {
+      transform: translateY(-100%);
+    }
+
+    &.shuimo-curtain--bottom {
+      transform: translateY(100%);
+    }
   }
 }
 </style>

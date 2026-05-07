@@ -8,9 +8,9 @@ An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/
 
 ## 预览 / Preview
 
-| Light                                  | Dark                                         |
-| -------------------------------------- | -------------------------------------------- |
-| ![Light Mode](./screenshots/home.png)  | ![Dark Mode](./screenshots/preview-dark.png) |
+| Light                                 | Dark                                         |
+| ------------------------------------- | -------------------------------------------- |
+| ![Light Mode](./screenshots/home.png) | ![Dark Mode](./screenshots/preview-dark.png) |
 
 开屏幕布动效 / Curtain reveal animation：
 

@@ -137,6 +137,11 @@ export const defaultThemeConfig: ThemeConfig = {
   hero: {
     showSeedControl: false,
     sceneHeight: 800,
+    mobileFlower: {
+      enable: true,
+      type: 'season',
+      opacity: 0.8,
+    },
   },
 
   imageCaption: {
