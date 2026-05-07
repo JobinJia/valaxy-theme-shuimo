@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
+import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
 import { curtainRevealed, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
-import ShuimoMobileFlower from './ShuimoMobileFlower.vue'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
 
 const props = withDefaults(defineProps<{
@@ -23,7 +22,6 @@ const isMobile = useIsMobile()
 const heroLandscapeEnabled = computed(() =>
   props.heroLandscape && themeConfig.value?.decorations?.heroLandscape !== false,
 )
-const currentSeed = ref(0)
 
 const mobileFlowerEnabled = computed(() =>
   themeConfig.value?.hero?.mobileFlower?.enable !== false,
@@ -46,7 +44,7 @@ useHead({
 })
 
 function onSeedGenerated(seed: number) {
-  currentSeed.value = seed
+  mobileFlowerSeed.value = seed
 }
 
 // --- Initial curtain: signal when hero resources are ready ---
@@ -60,7 +58,6 @@ function onSeedGenerated(seed: number) {
 let initialCurtainTriggered = false
 const heroPaperReady = ref(false)
 const landscapeReady = ref(false)
-const flowerReady = ref(false)
 const contentPaperReady = ref(false)
 const { ready: globalPaperReady } = useGlobalXuanPaper()
 
@@ -71,7 +68,7 @@ function tryOpenInitialCurtain() {
     return
   if (shouldRenderHeroLandscape.value && (!heroPaperReady.value || !landscapeReady.value))
     return
-  if (shouldRenderMobileFlower.value && !flowerReady.value)
+  if (shouldRenderMobileFlower.value && !mobileFlowerReady.value)
     return
   // verticalNav 模式（首页）不渲染 ShuimoXuanPaper，没有 contentPaperReady 信号
   if (!props.verticalNav && !contentPaperReady.value)
@@ -80,7 +77,7 @@ function tryOpenInitialCurtain() {
   openInitialCurtain()
 }
 
-watch([globalPaperReady, shouldRenderHeroLandscape, shouldRenderMobileFlower], tryOpenInitialCurtain, { immediate: true })
+watch([globalPaperReady, shouldRenderHeroLandscape, shouldRenderMobileFlower, mobileFlowerReady], tryOpenInitialCurtain, { immediate: true })
 
 function onHeroPaperReady() {
   heroPaperReady.value = true
@@ -89,11 +86,6 @@ function onHeroPaperReady() {
 
 function onLandscapeReady() {
   landscapeReady.value = true
-  tryOpenInitialCurtain()
-}
-
-function onFlowerReady() {
-  flowerReady.value = true
   tryOpenInitialCurtain()
 }
 
@@ -139,16 +131,11 @@ onUnmounted(() => {
       @seed-generated="onSeedGenerated"
     />
     <ClientOnly>
-      <ShuimoMobileFlower
-        v-if="shouldRenderMobileFlower"
-        @ready="onFlowerReady"
-        @seed-generated="onSeedGenerated"
-      />
       <ShuimoMobileInscription
         v-if="isMobile && verticalNav"
       />
     </ClientOnly>
-    <ShuimoSeedControl v-if="showSeedControl && currentSeed" :seed="currentSeed" />
+    <ShuimoSeedControl v-if="showSeedControl && mobileFlowerSeed" :seed="mobileFlowerSeed" />
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <!-- 移动端：主题切换 + 导航标题放在同一 flex 行，space-between 自然对齐 -->

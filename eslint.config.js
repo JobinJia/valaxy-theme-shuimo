@@ -12,4 +12,10 @@ export default antfu(
       'docs/**',
     ],
   },
+  {
+    files: ['demo/**/*.md'],
+    rules: {
+      'markdown/require-alt-text': 'off',
+    },
+  },
 )

@@ -1,4 +1,10 @@
+import { ref } from 'vue'
 import { getSeasonFlora } from './useShuimoSeed'
+
+/** 供跨组件通信：花 Canvas 是否已绘制完成（用于幕布 Gate） */
+export const mobileFlowerReady = ref(false)
+/** 供跨组件通信：当前花使用的 seed（用于 SeedControl 展示） */
+export const mobileFlowerSeed = ref(0)
 
 export interface MobileFlowerScene {
   canvas: HTMLCanvasElement

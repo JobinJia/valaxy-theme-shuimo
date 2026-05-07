@@ -3,7 +3,8 @@ import type { ThemeModeColor } from './types'
 import { useValaxyDark } from 'valaxy'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { generateXuanPaperTexture, useIsMobile, useThemeConfig } from './composables'
+import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
+import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
 import { curtainRevealed, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 
@@ -69,6 +70,14 @@ const curtainStampProps = computed(() => ({
 const curtainStampReady = ref(false)
 
 const isMobile = useIsMobile()
+
+const showMobileFlower = computed(() => isMobile.value && initialRoute?.path === '/')
+function onFlowerSeedGenerated(seed: number) {
+  mobileFlowerSeed.value = seed
+}
+function onFlowerReady() {
+  mobileFlowerReady.value = true
+}
 
 async function ensureCurtainStampFontReady() {
   if (typeof document === 'undefined' || !('fonts' in document)) {
@@ -204,6 +213,15 @@ watch(isDark, () => {
   </ClientOnly>
   <ClientOnly>
     <ShuimoDaySky v-if="!isDark && skyEnabled" />
+  </ClientOnly>
+
+  <!-- 移动端花卉背景：放在 App.vue 层保持跨路由存活，避免切页面重建 -->
+  <ClientOnly>
+    <ShuimoMobileFlower
+      v-show="showMobileFlower"
+      @ready="onFlowerReady"
+      @seed-generated="onFlowerSeedGenerated"
+    />
   </ClientOnly>
 
   <!-- 开屏幕布：桌面（左右） -->

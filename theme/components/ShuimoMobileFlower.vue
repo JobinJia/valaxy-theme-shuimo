@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, useTemplateRef } from 'vue'
-import { buildMobileFlower, getCachedMobileFlower, getSessionSeed, resolveFlowerType, scheduleShuimoTask, setCachedMobileFlower, useThemeConfig } from '../composables'
+import { buildMobileFlower, getCachedMobileFlower, getSessionSeed, mobileFlowerReady, mobileFlowerSeed, resolveFlowerType, scheduleShuimoTask, setCachedMobileFlower, useThemeConfig } from '../composables'
 
 const emit = defineEmits<{
   ready: []
@@ -44,6 +44,7 @@ function scheduleRegenerate() {
 async function regenerateFlower() {
   const { width, height } = getViewportSize()
   const seed = themeConfig.value?.hero?.mobileFlower?.seed ?? getSessionSeed()
+  mobileFlowerSeed.value = seed
   const type = resolveFlowerType(flowerType.value as 'woody' | 'herbal' | 'random' | 'season')
   const cachedFlower = getCachedMobileFlower()
   if (cachedFlower
@@ -87,6 +88,7 @@ function drawCurrentFlower() {
   ctx.clearRect(0, 0, source.width, source.height)
   ctx.drawImage(source, 0, 0)
   emit('ready')
+  mobileFlowerReady.value = true
 }
 
 function getViewportSize() {

@@ -72,7 +72,7 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
 function scheduleRegenerate(isDark: boolean, themeConfig: Record<string, unknown> | undefined) {
   if (debounceTimer)
     clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => regenerate(isDark, themeConfig), 100)
+  debounceTimer = setTimeout(regenerate, 100, isDark, themeConfig)
 }
 
 export function useGlobalXuanPaper() {
