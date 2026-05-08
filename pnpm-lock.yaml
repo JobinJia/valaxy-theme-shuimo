@@ -16,8 +16,8 @@ catalogs:
       specifier: ^1.2.61
       version: 1.2.77
     '@jobinjia/shuimo-core':
-      specifier: 1.2.1
-      version: 1.2.1
+      specifier: 1.2.2
+      version: 1.2.2
     '@jobinjia/vite-plugin-shuimo-font-subset':
       specifier: 1.0.1-beta.2
       version: 1.0.1-beta.2
@@ -91,7 +91,7 @@ importers:
     dependencies:
       '@jobinjia/shuimo-core':
         specifier: 'catalog:'
-        version: 1.2.1
+        version: 1.2.2
       '@jobinjia/vite-plugin-shuimo-font-subset':
         specifier: 'catalog:'
         version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.4))
@@ -111,8 +111,8 @@ importers:
         specifier: 'catalog:'
         version: 1.2.77
       '@jobinjia/shuimo-core':
-        specifier: '>=1.2.1'
-        version: 1.2.1
+        specifier: '>=1.2.2'
+        version: 1.2.2
       '@jobinjia/vite-plugin-shuimo-font-subset':
         specifier: '>=1.0.1-beta.2'
         version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.4))
@@ -986,8 +986,8 @@ packages:
       vue-i18n:
         optional: true
 
-  '@jobinjia/shuimo-core@1.2.1':
-    resolution: {integrity: sha512-yRna+V77FCOivW8FcmreUz9Q54cfVo4uQ56q4k6QLrWJu0KE3P9jPMdV88Tt2heI+4G+/+aDPRVK+q4W2rS6lQ==}
+  '@jobinjia/shuimo-core@1.2.2':
+    resolution: {integrity: sha512-7nu1Xy1Q41664940ZP7x/pFmulGtGRhea9Nw6kG/SLjkCes79HQ+vg1YIA7Ajwx9xqIiA4BgqmedCJmQ+6A43w==}
 
   '@jobinjia/vite-plugin-shuimo-font-subset@1.0.1-beta.2':
     resolution: {integrity: sha512-Ahau8Hasi4tzTdj8AXZObgmVtvpIWaL6FJ6nmb60OiedYqvd4/kUswj2mTT/Ljo4xnSUnsE50HKs893pvz7ZMA==}
@@ -6047,7 +6047,7 @@ snapshots:
       vue: 3.5.22(typescript@6.0.3)
       vue-i18n: 11.3.2(vue@3.5.22(typescript@6.0.3))
 
-  '@jobinjia/shuimo-core@1.2.1':
+  '@jobinjia/shuimo-core@1.2.2':
     dependencies:
       fontkit: 2.0.4
       uuid: 14.0.0
