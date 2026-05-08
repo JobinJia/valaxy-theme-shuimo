@@ -2,7 +2,14 @@ import { XUAN_PAPER_LIGHT_RGB } from './paperColor'
 import { generateCached } from './useShuimoCache'
 import { generateInXuanPaperWorker, generateTiledInWorkers } from './useXuanPaperWorker'
 
-const TILE_THRESHOLD = 512 * 512
+// 永远不走 tiled 路径：tiled 模式 worker 各生成一片 blob 后主线程要做
+// createImageBitmap × N + drawImage × N + canvas.toBlob，1800×850 的 PNG
+// 编码在主线程吃 500-1000ms，对 page + curtain 两份 paper 叠加 = 主线程
+// 卡 2s+。trace 实测 RunMicrotasks 2.44s 全在跑 V8 native 的 canvas/PNG
+// 编码。改走单 worker 全屏路径：worker 内部直接生成 blob，主线程仅
+// createObjectURL，零合成开销。代价：单 tile 工作量大（1.5M pixels）但
+// worker 内部跑无所谓，反正主线程不卡。
+const TILE_THRESHOLD = Number.POSITIVE_INFINITY
 
 // localStorage 持久缓存：xuan paper 生成是确定性的（给定所有参数结果完全一致），
 // 一次生成后所有后续访问（包括新 tab / 新会话）都零计算命中

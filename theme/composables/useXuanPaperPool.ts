@@ -112,3 +112,23 @@ export function submitXuanPaperTask(req: XuanPaperWorkerRequest): Promise<Blob> 
 export function xuanPaperPoolAvailable(): boolean {
   return canUseWorker() && !initFailed
 }
+
+/**
+ * 预先把 pool fill 到 MAX_SIZE 个 worker（仅 spawn 不发任务）。
+ * 同时跑 page paper（4 tile）+ curtain paper（4 tile）共 8 个 task，撞上
+ * pool 容量后必须冷 spawn 新 worker。dev 模式新 worker 走 vite ESM 串行
+ * transform 整条 shuimo-core 模块链耗时 1-3s（trace 实测最差 2.73s 的
+ * RunMicrotasks 内部全是 URLLoader::OnCompletedRequest + v8.compileModule）。
+ * 提前 fill 到上限把这部分 cold-start 推到 page load 早期分摊。
+ */
+export function preheatXuanPaperPool(count: number = MAX_SIZE): void {
+  if (!canUseWorker() || initFailed)
+    return
+  const target = Math.min(count, MAX_SIZE)
+  while (slots.length < target) {
+    const slot = createSlot()
+    if (!slot)
+      break
+    slots.push(slot)
+  }
+}

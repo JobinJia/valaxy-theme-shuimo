@@ -51,15 +51,13 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
       goldDensity: xuanPaper?.goldDensity as number | undefined,
     })
 
-    // 预解码 blob URL：确保图片已在浏览器内解码完成，
-    // 后面 ready=true 触发幕布打开时，中央宣纸保证已真正上屏，
-    // 不会出现幕布拉开 → 中央短暂空白 → 纹理才浮现的闪白
-    try {
-      const img = new Image()
-      img.src = url
-      await img.decode()
-    }
-    catch {}
+    // 异步预解码（不阻塞 ready）：原本 await img.decode() 在 prod 下对大 blob URL
+    // 永久 pending，加了 1s 超时兜底，但每次都吃满 1s（=1s 固定浪费）。改为
+    // 后台跑 —— ready 立即触发让幕布尽早开启，img 解码并行进行；最坏情况是幕布
+    // 拉开瞬间背景图正在 decode，中央有几十毫秒闪白，比每次多等 1s 划算。
+    const img = new Image()
+    img.src = url
+    img.decode().catch(() => {})
 
     const next = active.value === 'a' ? 'b' : 'a'
     if (next === 'a')
