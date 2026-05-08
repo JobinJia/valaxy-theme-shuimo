@@ -2,7 +2,7 @@
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, watch } from 'vue'
 import { mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
-import { curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
+import { curtainPaperReady, curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
 
@@ -49,8 +49,12 @@ function onSeedGenerated(seed: number) {
 
 // --- Initial curtain ---
 //
-// 幕布只等"宣纸 + 印章"两条信号到位就开。山水/花卉等慢资源不再阻塞幕布——
-// 它们在幕布拉开后继续在底下完成，用户先看到完整宣纸 + 印章，然后慢慢出层次。
+// 幕布等三条信号都到位才开：
+//   1. 页面全局宣纸 (globalPaperReady) — useGlobalXuanPaper 生成
+//   2. 印章 (curtainStampReady) — useCurtainStamp 生成
+//   3. 幕布自己的宣纸 (curtainPaperReady) — App.vue 单独生成，带 ×3 金屑
+// 这样幕布拉开瞬间洒金/纤维/印章一起出现，而不是看到纯纸色后涌现。
+// 总等待 ≈ max(三者)。
 
 let initialCurtainTriggered = false
 const { ready: globalPaperReady } = useGlobalXuanPaper()
@@ -62,11 +66,13 @@ function tryOpenInitialCurtain() {
     return
   if (!curtainStampReady.value)
     return
+  if (!curtainPaperReady.value)
+    return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
 
-watch([globalPaperReady, curtainStampReady], tryOpenInitialCurtain, { immediate: true })
+watch([globalPaperReady, curtainStampReady, curtainPaperReady], tryOpenInitialCurtain, { immediate: true })
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed

@@ -8,6 +8,11 @@ function prefersReducedMotion(): boolean {
 
 export const curtainRevealed = ref(true)
 export const curtainStampReady = ref(false)
+// curtain wrapper 自己的 paper（带×3金屑密度，独立于 useGlobalXuanPaper 的页面
+// 全局 paper）是否生成完成。由 App.vue 的 ensureCurtainPaperReady 完成时调用
+// markCurtainPaperReady 触发。ShuimoLayout 的 tryOpenInitialCurtain 等这个信号，
+// 防止 curtain 拉开时 wrapper 还显示纯色（洒金未出）。
+export const curtainPaperReady = ref(false)
 
 let initialCurtainActive = false
 
@@ -30,4 +35,8 @@ export function openInitialCurtain() {
 
 export function markCurtainStampReady() {
   curtainStampReady.value = true
+}
+
+export function markCurtainPaperReady() {
+  curtainPaperReady.value = true
 }

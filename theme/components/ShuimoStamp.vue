@@ -16,6 +16,7 @@
 import { onMounted, ref, watch } from 'vue'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.woff2?url'
 import { useThemeConfig } from '../composables'
+import { getStampFontWorker } from '../composables/useStampFontWorker'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 
 const props = withDefaults(defineProps<{
@@ -161,6 +162,10 @@ async function renderStamp() {
       regularShape: props.regularShape,
       seed: props.seed ?? 69706,
       fontUrl: yishanFontUrl,
+      // fontWorker offload 让 fontkit woff2 brotli 解压离开主线程（shuimo-core
+      // 1.2.x+）。所有 stamp 共享一个 worker，二次调用 (fontUrl, chars) 命中
+      // worker 内部缓存零成本。
+      fontWorker: getStampFontWorker() ?? undefined,
     }
     const result = await generateStampAsync(stampOptions)
 

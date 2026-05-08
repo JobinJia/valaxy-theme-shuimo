@@ -5,7 +5,8 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
 import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
-import { curtainRevealed, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
+import { useCurtainStamp } from './composables/useCurtainStamp'
+import { curtainRevealed, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 import { timedDebounce } from './composables/useTimedCallback'
 
@@ -63,6 +64,17 @@ const curtainStampProps = computed(() => ({
   fontFamily: curtainStampFont.value,
   size: curtainStampSize.value,
 }))
+
+// 4 个 stamp 挂载点（桌面 left/right + 移动 top/bottom）原本各自调用
+// generateStampAsync —— 主线程同步串行 4 次，加上字体首次 fontkit parse，
+// 是首屏幕布等 4-6s 的主因。改为共享一份 raw SVG，挂载点只做轻量 ID 重命名。
+const { svgRaw: curtainStampSvg, failed: curtainStampFailed, ready: curtainStampDone }
+  = useCurtainStamp(curtainStampProps)
+
+watch(curtainStampDone, (v) => {
+  if (v)
+    markCurtainStampReady()
+}, { immediate: true })
 
 const isMobile = useIsMobile()
 
@@ -128,8 +140,9 @@ async function ensureCurtainPaperReady() {
   const width = Math.max(320, Math.ceil(Math.min(window.innerWidth, 1920) / 50) * 50)
   const height = Math.max(320, Math.ceil(Math.min(window.innerHeight, 1080) / 50) * 50)
 
+  let url: string | null = null
   try {
-    setCurtainPaperUrl(await generateXuanPaperTexture({
+    url = await generateXuanPaperTexture({
       variant,
       width,
       height,
@@ -137,11 +150,29 @@ async function ensureCurtainPaperReady() {
       baseColor,
       isDark: isDark.value,
       goldDensity: curtainGold,
-    }))
+    })
   }
-  catch {
+  catch {}
+
+  if (url) {
+    // 等 image onload —— blob URL 数据已在浏览器内存，onload 几乎瞬间触发。
+    // decoding='async' 让 GPU 异步 decode，curtain 拉开的 0.7s transition 期间
+    // 浏览器后台完成 decode，首帧 paint 时纹理就绪。onload/onerror 必触发其一。
+    const preload = new Image()
+    preload.decoding = 'async'
+    await new Promise<void>((resolve) => {
+      preload.onload = () => resolve()
+      preload.onerror = () => resolve()
+      preload.src = url
+    })
+    setCurtainPaperUrl(url)
+  }
+  else {
     setCurtainPaperUrl(null)
   }
+  // 无论成功还是失败都标记 ready：失败时 wrapper 退化为纯色 backgroundColor，
+  // 但 curtain gate 必须解锁，否则永远等不到信号导致幕布永不打开
+  markCurtainPaperReady()
 }
 
 // trailing debounce 200ms：拖窗期间持续 reset 计时，停下后才真跑 worker。
@@ -192,7 +223,7 @@ watch(isDark, () => {
   <!-- 移动端花卉背景：放在 App.vue 层保持跨路由存活，避免切页面重建 -->
   <ClientOnly>
     <ShuimoMobileFlower
-      v-show="showMobileFlower"
+      v-if="showMobileFlower"
       @ready="onFlowerReady"
       @seed-generated="onFlowerSeedGenerated"
     />
@@ -201,24 +232,52 @@ watch(isDark, () => {
   <!-- 开屏幕布：桌面（左右） -->
   <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
-      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
+      <ShuimoCurtainStampSlot
+        :svg="curtainStampSvg"
+        uid="left"
+        :size="curtainStampSize"
+        :failed="curtainStampFailed"
+        :fallback-text="curtainStampText"
+        :fallback-type="curtainStampType"
+      />
     </div>
   </div>
   <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
-      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
+      <ShuimoCurtainStampSlot
+        :svg="curtainStampSvg"
+        uid="right"
+        :size="curtainStampSize"
+        :failed="curtainStampFailed"
+        :fallback-text="curtainStampText"
+        :fallback-type="curtainStampType"
+      />
     </div>
   </div>
 
   <!-- 开屏幕布：移动端（上下） -->
   <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--top" :class="{ revealed: curtainRevealed }" :style="curtainTopStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--top">
-      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
+      <ShuimoCurtainStampSlot
+        :svg="curtainStampSvg"
+        uid="top"
+        :size="curtainStampSize"
+        :failed="curtainStampFailed"
+        :fallback-text="curtainStampText"
+        :fallback-type="curtainStampType"
+      />
     </div>
   </div>
   <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--bottom" :class="{ revealed: curtainRevealed }" :style="curtainBottomStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--bottom">
-      <ShuimoStamp v-bind="curtainStampProps" @rendered="markCurtainStampReady" />
+      <ShuimoCurtainStampSlot
+        :svg="curtainStampSvg"
+        uid="bottom"
+        :size="curtainStampSize"
+        :failed="curtainStampFailed"
+        :fallback-text="curtainStampText"
+        :fallback-type="curtainStampType"
+      />
     </div>
   </div>
 </template>
