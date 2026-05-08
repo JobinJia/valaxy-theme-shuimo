@@ -74,9 +74,21 @@ export async function buildMobileFlower(
 }
 
 // 全屏移动端 canvas（如 1080×2400 = 260 万像素）一次性扫描需 100-300ms 阻塞主线程，
-// 直接卡首屏。改为分 chunk + rAF 让出：每帧只处理 64K 像素（~8ms），其它 UI 不被阻塞，
-// 总耗时不变但分摊到几帧；视觉上花卉略有渐显效果，移动端体感优于一次性 freeze
+// 直接卡首屏。改为分 chunk + 让出 event loop：每片只处理 64K 像素（~8ms），其它 UI 不被阻塞，
+// 视觉上花卉略有渐显效果，移动端体感优于一次性 freeze
 const PIXEL_CHUNK = 64 * 1024 * 4 // 64K 像素 × RGBA = 256KB
+
+// 用 rAF 让出会在以下场景死锁：tab 后台 / 失焦 / Chrome Energy Saver / occluded —— 这些状态下 rAF 被
+// throttle 到接近 0Hz，await 永不 resolve，整个 fallback 路径卡死 → mobileFlowerReady 永远 false →
+// 帷幕永远不退。MessageChannel postMessage 走 event loop tick，与 paint frame 解耦，任何 tab 状态都稳定
+// 在 ms 级 fire；浏览器仍会在 tick 间自由 paint，渐显视觉保留，总耗时反而比 rAF 节奏低（chunk 间隔 ~1ms vs 16ms）。
+function yieldToTick(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const ch = new MessageChannel()
+    ch.port1.onmessage = () => resolve()
+    ch.port2.postMessage(null)
+  })
+}
 
 async function removeFlowerPaperBackground(canvas: HTMLCanvasElement): Promise<void> {
   const ctx = canvas.getContext('2d')
@@ -106,7 +118,7 @@ async function removeFlowerPaperBackground(canvas: HTMLCanvasElement): Promise<v
       }
     }
     if (i < total)
-      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+      await yieldToTick()
   }
   ctx.putImageData(image, 0, 0)
 }

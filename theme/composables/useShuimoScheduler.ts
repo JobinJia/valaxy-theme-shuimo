@@ -31,12 +31,15 @@ async function processQueue() {
 
 function yieldToMain(): Promise<void> {
   return new Promise((resolve) => {
-    if (typeof requestIdleCallback !== 'undefined')
+    if (typeof requestIdleCallback !== 'undefined') {
       requestIdleCallback(() => resolve(), { timeout: 100 })
-    else if (typeof requestAnimationFrame !== 'undefined')
-      requestAnimationFrame(() => resolve())
-    else
-      queueMicrotask(() => resolve())
+      return
+    }
+    // Safari 无 rIC；rAF 在 throttled tab 状态下可能近乎 0Hz 死锁。MessageChannel postMessage
+    // 走 event loop tick，任何 tab 状态都稳定 ms 级 fire，是跨浏览器一致的让出主线程方案。
+    const ch = new MessageChannel()
+    ch.port1.onmessage = () => resolve()
+    ch.port2.postMessage(null)
   })
 }
 
