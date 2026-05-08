@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FlowerSource } from '../composables/useMobileFlower'
 import { computed, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { buildMobileFlower, getCachedMobileFlower, getSessionSeed, mobileFlowerReady, mobileFlowerSeed, resolveFlowerType, scheduleShuimoTask, setCachedMobileFlower, useThemeConfig } from '../composables'
 import { rafDebounce } from '../composables/useRafDebounce'
@@ -10,7 +11,7 @@ const emit = defineEmits<{
 
 const themeConfig = useThemeConfig()
 const canvasRef = useTemplateRef<HTMLCanvasElement>('flowerCanvas')
-let currentFlowerCanvas: HTMLCanvasElement | null = null
+let currentFlowerSource: FlowerSource | null = null
 let disposed = false
 
 const flowerType = computed(() =>
@@ -47,7 +48,7 @@ async function regenerateFlower() {
     && cachedFlower.height === height
     && cachedFlower.seed === seed
     && cachedFlower.type === type) {
-    currentFlowerCanvas = cachedFlower.canvas
+    currentFlowerSource = cachedFlower.source
     drawCurrentFlower()
     return
   }
@@ -56,8 +57,8 @@ async function regenerateFlower() {
     const scene = await scheduleShuimoTask(() => buildMobileFlower(width, height, seed, type))
     if (disposed)
       return
-    currentFlowerCanvas = scene.canvas
-    setCachedMobileFlower({ canvas: scene.canvas, seed, type, width: scene.width, height: scene.height })
+    currentFlowerSource = scene.source
+    setCachedMobileFlower({ source: scene.source, seed, type, width: scene.width, height: scene.height })
     emit('seedGenerated', seed)
     drawCurrentFlower()
   }
@@ -69,7 +70,7 @@ async function regenerateFlower() {
 
 function drawCurrentFlower() {
   const output = canvasRef.value
-  const source = currentFlowerCanvas
+  const source = currentFlowerSource
   if (!output || !source)
     return
 
@@ -104,9 +105,17 @@ function getViewportSize() {
 </template>
 
 <style lang="scss" scoped>
+// 容器高度锁定到 viewport（dvh 优先匹配地址栏动态收缩，回退 vh），
+// 否则父容器 .shuimo-app 是 min-height 100vh + flex 内容，全文档高度可达数千 px，
+// canvas 的 height:100% 会把按 viewport 大小生成的花卉在 Y 方向拉伸到全文档高度，
+// 视觉上花就远超手机可视范围。
 .shuimo-mobile-flower {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
   pointer-events: none;
   z-index: auto;
   overflow: hidden;

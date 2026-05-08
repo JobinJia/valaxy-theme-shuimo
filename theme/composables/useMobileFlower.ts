@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { buildMobileFlowerInWorker } from './useMobileFlowerWorker'
 import { getSeasonFlora } from './useShuimoSeed'
 
 /** 供跨组件通信：花 Canvas 是否已绘制完成（用于幕布 Gate） */
@@ -6,8 +7,14 @@ export const mobileFlowerReady = ref(false)
 /** 供跨组件通信：当前花使用的 seed（用于 SeedControl 展示） */
 export const mobileFlowerSeed = ref(0)
 
+/**
+ * 花卉绘制源：worker 路径下是 ImageBitmap，主线程 fallback 下是 HTMLCanvasElement。
+ * 两者都可作为 drawImage 的输入，且都暴露 width/height。
+ */
+export type FlowerSource = HTMLCanvasElement | ImageBitmap
+
 export interface MobileFlowerScene {
-  canvas: HTMLCanvasElement
+  source: FlowerSource
   seed: number
   width: number
   height: number
@@ -15,7 +22,7 @@ export interface MobileFlowerScene {
 
 export interface MobileFlowerCache {
   seed: number
-  canvas: HTMLCanvasElement
+  source: FlowerSource
   width: number
   height: number
   type: string
@@ -33,7 +40,8 @@ export function setCachedMobileFlower(cache: MobileFlowerCache) {
 
 /**
  * 生成移动端花卉 Canvas。
- * 最终输出 canvas 与当前屏幕 CSS 像素尺寸一致；宽高直接交给 shuimo-core 参与花卉绘制。
+ * 优先在 Web Worker 里跑（消除主线程 ~1.3s 长任务）；
+ * worker 不可用 / 出错时回退到主线程同步绘制，视觉等价。
  */
 export async function buildMobileFlower(
   width: number,
@@ -41,6 +49,18 @@ export async function buildMobileFlower(
   seed: number,
   type: 'woody' | 'herbal' | 'random',
 ): Promise<MobileFlowerScene> {
+  const workerPromise = buildMobileFlowerInWorker(width, height, seed, type)
+  if (workerPromise) {
+    try {
+      const { bitmap, width: w, height: h } = await workerPromise
+      return { source: bitmap, seed, width: w, height: h }
+    }
+    catch (err) {
+      // worker 失败：log 并 fallthrough 到同步路径，保证视觉始终落地
+      console.warn('[shuimo] mobile flower worker failed, falling back to main thread:', err)
+    }
+  }
+
   const { generateFlowerCanvas } = await import('@jobinjia/shuimo-core')
   const canvas = generateFlowerCanvas({
     seed,
@@ -50,7 +70,7 @@ export async function buildMobileFlower(
   })
 
   await removeFlowerPaperBackground(canvas)
-  return { canvas, seed, width, height }
+  return { source: canvas, seed, width, height }
 }
 
 // 全屏移动端 canvas（如 1080×2400 = 260 万像素）一次性扫描需 100-300ms 阻塞主线程，

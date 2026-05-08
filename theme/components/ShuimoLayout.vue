@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, watch } from 'vue'
-import { mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
+import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
 import { curtainPaperReady, curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
@@ -49,12 +49,15 @@ function onSeedGenerated(seed: number) {
 
 // --- Initial curtain ---
 //
-// 幕布等三条信号都到位才开：
+// 幕布等四条信号都到位才开：
 //   1. 页面全局宣纸 (globalPaperReady) — useGlobalXuanPaper 生成
 //   2. 印章 (curtainStampReady) — useCurtainStamp 生成
 //   3. 幕布自己的宣纸 (curtainPaperReady) — App.vue 单独生成，带 ×3 金屑
-// 这样幕布拉开瞬间洒金/纤维/印章一起出现，而不是看到纯纸色后涌现。
-// 总等待 ≈ max(三者)。
+//   4. 移动端花卉 (mobileFlowerReady) — 仅 isMobile + flower enabled 时生效
+// 这样幕布拉开瞬间洒金/纤维/印章/花一起出现，而不是看到纯纸色后涌现。
+// 注：花卉之前没纳入 gate，因为主线程同步生成时它顺带把其他三个 deferred 任务
+// 也压在后面，"碰巧"对齐；改为 worker 后主线程空闲，三个信号秒到，必须显式 gate
+// 才不会出现幕布拉开但花未到的视觉穿帮。
 
 let initialCurtainTriggered = false
 const { ready: globalPaperReady } = useGlobalXuanPaper()
@@ -68,11 +71,13 @@ function tryOpenInitialCurtain() {
     return
   if (!curtainPaperReady.value)
     return
+  if (shouldRenderMobileFlower.value && !mobileFlowerReady.value)
+    return
   initialCurtainTriggered = true
   openInitialCurtain()
 }
 
-watch([globalPaperReady, curtainStampReady, curtainPaperReady], tryOpenInitialCurtain, { immediate: true })
+watch([globalPaperReady, curtainStampReady, curtainPaperReady, mobileFlowerReady], tryOpenInitialCurtain, { immediate: true })
 
 onMounted(() => {
   const heroSeed = themeConfig.value?.hero?.seed
