@@ -87,7 +87,13 @@ function onFlowerReady() {
 }
 
 // --- Curtain paper texture ---
-
+//
+// 注：曾把 4 个 :style 改成 root setProperty + SCSS 静态 CSS var 来消除 worker
+// 完成时的 setStyle 风暴 (~225ms 主线程 / 1488 sample on vue setStyle)，但那
+// 225ms 阻塞恰好是用户看到带金屑 curtain 的视觉窗口期；消掉后 paper 出现就
+// 立刻进 transition，金屑一闪而过。在 shuimo-core 把 paper 生成压到主线程同步
+// (~50-100ms) 之前，这里保留 :style 路径以保住视觉。后续 shuimo-core 优化完成
+// 再切回 CSS var 方案。
 const curtainPaperUrl = ref<string | null>(null)
 
 function makeCurtainBgStyle(side: 'left' | 'right' | 'top' | 'bottom') {
