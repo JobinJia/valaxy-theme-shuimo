@@ -17,7 +17,7 @@
   "main": "client/index.ts",
   "types": "types/index.ts",
   "peerDependencies": {
-    "@jobinjia/shuimo-core": ">=1.2.1-beta.2",
+    "@jobinjia/shuimo-core": ">=1.2.1",
     "@jobinjia/vite-plugin-shuimo-font-subset": ">=1.0.1-beta.2"
   },
   "peerDependenciesMeta": {
