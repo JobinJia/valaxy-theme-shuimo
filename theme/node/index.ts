@@ -283,6 +283,16 @@ export function generateSafelist(themeConfig: ThemeConfig) {
 // the user's site root (valaxy's `userRoot`, which is more reliable than
 // vite's `config.root` because valaxy rewrites the latter to its own virtual
 // directory).
+//
+// Scanning strategy:
+//   篆体 only renders in stamps, the solar-term seal, the theme-toggle seal,
+//   the site title, and the 404 page seal. Article BODY is rendered in Noto
+//   Serif SC. Scanning every page body for the 篆体 subset over-collects by
+//   ~10× and leaves the woff2 at ~270KB. Instead, we compute the char set
+//   ourselves: post frontmatter `stamp.text`/`stamp.author`, the user's
+//   `valaxy.config.{ts,js,mjs}` (themeConfig stamps + site title), plus the
+//   theme's own hardcoded chars (defaults + 24 solar terms). Typical result:
+//   ~80–120 chars → ~20–30KB woff2.
 type FontSubsetFactory = (opts: {
   targetFonts: string[]
   scanCwd?: string
@@ -305,6 +315,102 @@ async function loadFontSubsetFactory(): Promise<FontSubsetFactory | null> {
 // eslint-disable-next-line antfu/no-top-level-await -- intentional: defineTheme requires sync callback, so the factory must be resolved at module load
 const fontSubsetFactory: FontSubsetFactory | null = await loadFontSubsetFactory()
 
+// CJK Unified Ideographs (U+4E00–U+9FFF) + CJK Extension A (U+3400–U+4DBF).
+// Matches what `@jobinjia/vite-plugin-shuimo-font-subset` includes by default.
+function isCjk(cp: number): boolean {
+  return (cp >= 0x4E00 && cp <= 0x9FFF) || (cp >= 0x3400 && cp <= 0x4DBF)
+}
+
+function addCjkChars(target: Set<string>, source: string): void {
+  for (const c of source) {
+    const cp = c.codePointAt(0)
+    if (cp !== undefined && isCjk(cp))
+      target.add(c)
+  }
+}
+
+function collectStampChars(userRoot: string): Set<string> {
+  const chars = new Set<string>()
+
+  // Theme-internal hardcoded chars:
+  //   受命于天既寿永昌 — ShuimoStamp default text
+  //   墨韵书斋        — default site title / stamp
+  //   日照月映        — ShuimoThemeToggle light/dark seals
+  //   迷             — 404 layout seal
+  addCjkChars(chars, '受命于天既寿永昌墨韵书斋日照月映迷')
+
+  // 24 solar terms — ShuimoSolarSeal swaps its text by the current term
+  // (see composables/useSolarTerm.ts).
+  addCjkChars(
+    chars,
+    '立春雨水惊蛰春分清明谷雨立夏小满芒种夏至小暑大暑立秋处暑白露秋分寒露霜降立冬小雪大雪冬至小寒大寒',
+  )
+
+  // Lunar calendar output (ShuimoMobileInscription renders the lunar date
+  // line in 篆体). These chars come from @shuimo-design/lunar at runtime so
+  // no static scan can catch them.
+  addCjkChars(
+    chars,
+    '甲乙丙丁戊己庚辛壬癸' // 天干 10
+    + '子丑寅卯辰巳午未申酉戌亥' // 地支 12
+    + '初十廿正闰冬腊' // 农历日月前缀
+    + '一二三四五六七八九零百' // 数字
+    + '年月日时刻分秒半', // 时间单位
+  )
+
+  // Post frontmatter: only stamp.text / stamp.author / author fields, never
+  // the article body. Walks pages/** for *.md files and reads the YAML
+  // frontmatter block between leading `---` fences.
+  const FRONTMATTER_FIELDS = /^[ \t]*(text|author):[ \t]*(\S.*)$/
+  const walk = (dir: string): void => {
+    let entries
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true })
+    }
+    catch {
+      return
+    }
+    for (const e of entries) {
+      const p = path.join(dir, e.name)
+      if (e.isDirectory()) {
+        walk(p)
+        continue
+      }
+      if (!e.name.endsWith('.md'))
+        continue
+      let content: string
+      try {
+        content = fs.readFileSync(p, 'utf8')
+      }
+      catch {
+        continue
+      }
+      const fm = content.match(/^---\n([\s\S]*?)\n---/)
+      if (!fm)
+        continue
+      for (const line of fm[1].split('\n')) {
+        const m = line.match(FRONTMATTER_FIELDS)
+        if (m)
+          addCjkChars(chars, m[2])
+      }
+    }
+  }
+  walk(path.join(userRoot, 'pages'))
+
+  // User's valaxy.config — picks up themeConfig stamp.author / .curtain /
+  // header.title / sidebar.author etc. Read as raw text so we don't care
+  // whether it's TS / JS / MJS.
+  for (const ext of ['ts', 'js', 'mjs']) {
+    try {
+      const content = fs.readFileSync(path.join(userRoot, `valaxy.config.${ext}`), 'utf8')
+      addCjkChars(chars, content)
+    }
+    catch {}
+  }
+
+  return chars
+}
+
 export function buildShuimoFontSubsetPlugin(
   options: ResolvedValaxyOptions<ThemeConfig>,
 ): Plugin | null {
@@ -312,19 +418,15 @@ export function buildShuimoFontSubsetPlugin(
     return null
 
   const fontFile = fileURLToPath(new URL('../assets/fonts/yishanbeizhuanti.woff2', import.meta.url))
+  const chars = collectStampChars(options.userRoot)
+
   return fontSubsetFactory({
     targetFonts: [fontFile],
     scanCwd: options.userRoot,
-    scanFiles: [
-      'pages/**/*.{md,mdx,vue}',
-      'valaxy.config.{ts,js,mjs}',
-    ],
+    // Empty: we deliberately do NOT scan article bodies. The narrow char set
+    // is precomputed by `collectStampChars` and passed via `extraChars`.
+    scanFiles: [],
     format: 'woff2',
-    // 兜底字符：默认配置里写死的印章/标题字，扫描覆盖不到的运行时字符
-    // - 受命于天既寿永昌：ShuimoStamp 默认 text
-    // - 墨韵书斋：默认站点标题/印章
-    // - 日照月映：ShuimoThemeToggle 亮/暗模式印章
-    // - 迷：404 layout 印章
-    extraChars: '受命于天既寿永昌墨韵书斋日照月映迷',
+    extraChars: [...chars].join(''),
   })
 }
