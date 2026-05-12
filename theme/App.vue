@@ -156,6 +156,9 @@ async function ensureCurtainPaperReady() {
       baseColor,
       isDark: isDark.value,
       goldDensity: curtainGold,
+      // curtain 只在首页瞬时显示，不该占用 ~2.5MB LS 配额，否则会把
+      // global paper 挤出 LS，导致下次刷新的 bootstrap pointer 找不到 dataURL
+      persistToLocalStorage: false,
     })
   }
   catch {}

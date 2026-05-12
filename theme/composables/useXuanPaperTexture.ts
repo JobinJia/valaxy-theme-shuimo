@@ -92,7 +92,7 @@ function hexToRgb(hex: string): [number, number, number] | null {
   ]
 }
 
-export async function generateXuanPaperTexture(options?: {
+export interface XuanPaperOptions {
   variant?: XuanPaperVariant
   width?: number
   height?: number
@@ -104,7 +104,37 @@ export async function generateXuanPaperTexture(options?: {
   fiberDensity?: number
   textureIntensity?: number
   grainDensity?: number
-}) {
+  // 是否把生成结果持久化到 localStorage。LS 配额紧张（≈5MB）且单条纹理
+  // dataURL ≈2-3MB，多个调用方都写会互相挤掉；curtain paper 仅首页瞬时
+  // 显示，不值得占配额。默认 true（global paper 等都需要）；curtain
+  // 调用侧传 false。
+  persistToLocalStorage?: boolean
+}
+
+// 与 generateXuanPaperTexture 内部 cacheKey 计算一致——抽成纯函数让上层
+// （useGlobalXuanPaper 写引导快照指针时）能用同一份 key 反向定位 LS 缓存
+function buildCacheKey(options: XuanPaperOptions | undefined): string {
+  const variant = options?.variant || 'processed'
+  const width = options?.width || 256
+  const height = options?.height || 256
+  const seed = options?.seed || 42
+  const isDark = options?.isDark === true
+  const goldDensity = clampGoldDensity(options?.goldDensity)
+  const fiberDensity = options?.fiberDensity ?? (isDark ? 0 : 0.4)
+  const textureIntensity = options?.textureIntensity ?? (isDark ? 0 : 0.15)
+  const grainDensity = options?.grainDensity ?? (isDark ? 0.3 : 0.2)
+  const goldKey = variant === 'gold' ? goldDensity.toFixed(3) : ''
+  const densityKey = `${fiberDensity.toFixed(2)}-${textureIntensity.toFixed(2)}-${grainDensity.toFixed(2)}`
+  return `xuan-paper-${variant}-${width}-${height}-${seed}-${isDark ? 'dark' : 'light'}-${options?.baseColor || ''}-${goldKey}-${densityKey}`
+}
+
+// 上层（useGlobalXuanPaper）用这个返回值作为 LS 指针；head inline script
+// 拿到指针后再 getItem 一次拿真正的 dataURL，避免重复占用 quota
+export function buildXuanPaperLocalStorageKey(options: XuanPaperOptions | undefined): string {
+  return `${LS_PREFIX}-${buildCacheKey(options)}`
+}
+
+export async function generateXuanPaperTexture(options?: XuanPaperOptions) {
   const variant = options?.variant || 'processed'
   const width = options?.width || 256
   const height = options?.height || 256
@@ -118,9 +148,7 @@ export async function generateXuanPaperTexture(options?: {
   const textureIntensity = options?.textureIntensity ?? (isDark ? 0 : 0.15)
   const grainDensity = options?.grainDensity ?? (isDark ? 0.3 : 0.2)
   const presets = isDark ? darkColorPresets : lightColorPresets
-  const goldKey = variant === 'gold' ? goldDensity.toFixed(3) : ''
-  const densityKey = `${fiberDensity.toFixed(2)}-${textureIntensity.toFixed(2)}-${grainDensity.toFixed(2)}`
-  const cacheKey = `xuan-paper-${variant}-${width}-${height}-${seed}-${isDark ? 'dark' : 'light'}-${options?.baseColor || ''}-${goldKey}-${densityKey}`
+  const cacheKey = buildCacheKey(options)
 
   return generateCached(cacheKey, async () => {
     // localStorage 持久缓存（跨会话复用）—— 二次访问零计算返回 dataURL
@@ -178,7 +206,9 @@ export async function generateXuanPaperTexture(options?: {
     }
 
     // 异步写 localStorage，不阻塞返回；下次访问秒出
-    blobUrlToDataURL(url).then(dataUrl => saveToLocalStorage(cacheKey, dataUrl)).catch(() => {})
+    // 当 persistToLocalStorage===false（curtain）时跳过，避免挤掉 global 的缓存
+    if (options?.persistToLocalStorage !== false)
+      blobUrlToDataURL(url).then(dataUrl => saveToLocalStorage(cacheKey, dataUrl)).catch(() => {})
 
     return url
   })

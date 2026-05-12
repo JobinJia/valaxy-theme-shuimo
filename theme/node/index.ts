@@ -199,6 +199,22 @@ function resolveShuimoCoreRealDir(): string | null {
   }
 }
 
+// 启动期"刷新即出真版宣纸"的三段：
+// 1) head-prepend script: 同步读 bootstrap pointer 拿到 v2 key 名，再用它
+//    读出 dataURL；不能写到 CSS variable —— `setProperty` 对 ~3MB 字符串
+//    会静默失败 —— 而是 createElement('style') 在 head 里多挂一条
+//    `#shuimo-paper-boot{background-image:url(...)}` 让浏览器解析到 body
+//    的 boot div 时 CSS 已就位。两层间接 = 零额外 quota（之前直接复制
+//    dataURL 在大尺寸 viewport 下 QuotaExceededError 被静默吞）。
+// 2) head base style: boot div 的 fixed 定位等版式
+// 3) body-prepend div: HTML 解析即在 DOM 中，独立于 Vue mount。Vue 起
+//    来后 App.vue 的 .shuimo-paper-bg 后挂入 DOM，相同 z-index 下后入者绘
+//    在上层，自然替换静态层。写入侧见 useGlobalXuanPaper.ts 的
+//    persistBootstrapPointer。
+const PAPER_BOOTSTRAP_INLINE_SCRIPT = `(function(){try{var s=localStorage.getItem('vueuse-color-scheme')||'auto';var d=s==='dark'||(s==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);var p=localStorage.getItem('shuimo-paper-bootstrap-'+(d?'dark':'light'));if(!p)return;var v=localStorage.getItem(p);if(!(v&&v.lastIndexOf('data:image/',0)===0))return;var st=document.createElement('style');st.textContent='#shuimo-paper-boot{background-image:url("'+v+'")}';document.head.appendChild(st);}catch(_){}})();`
+
+const PAPER_BOOTSTRAP_STYLE = `#shuimo-paper-boot{position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;}`
+
 export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
   const shuimoCoreDir = resolveShuimoCoreRealDir()
 
@@ -218,6 +234,29 @@ export function themePlugin(_options: ResolvedValaxyOptions<ThemeConfig>): Plugi
             }
           : undefined,
       }
+    },
+
+    transformIndexHtml: {
+      order: 'pre',
+      handler() {
+        return [
+          {
+            tag: 'script',
+            injectTo: 'head-prepend',
+            children: PAPER_BOOTSTRAP_INLINE_SCRIPT,
+          },
+          {
+            tag: 'style',
+            injectTo: 'head',
+            children: PAPER_BOOTSTRAP_STYLE,
+          },
+          {
+            tag: 'div',
+            injectTo: 'body-prepend',
+            attrs: { id: 'shuimo-paper-boot' },
+          },
+        ]
+      },
     },
   }
 }

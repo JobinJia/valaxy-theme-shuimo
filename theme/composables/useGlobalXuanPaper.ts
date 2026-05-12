@@ -1,8 +1,28 @@
+import type { XuanPaperOptions } from './useXuanPaperTexture'
 import { useValaxyDark } from 'valaxy'
 import { nextTick, ref, watch } from 'vue'
 import { useThemeConfig } from './config'
 import { timedDebounce } from './useTimedCallback'
-import { generateXuanPaperTexture } from './useXuanPaperTexture'
+import { buildXuanPaperLocalStorageKey, generateXuanPaperTexture } from './useXuanPaperTexture'
+
+// "下次刷新即出真版"的指针：值是 useXuanPaperTexture 内部那条
+// dataURL 的 LS key 名（~120 字节），head inline script 两层读取
+// 解出 dataURL。**关键**：不复制 dataURL，避免 quota 溢出 ——
+// 之前直接存 dataURL 在大尺寸 viewport 下 QuotaExceededError 被静默吞掉。
+const BOOTSTRAP_POINTER_PREFIX = 'shuimo-paper-bootstrap'
+
+function persistBootstrapPointer(options: XuanPaperOptions): void {
+  if (typeof window === 'undefined')
+    return
+  try {
+    const lsKey = buildXuanPaperLocalStorageKey(options)
+    const slot = options.isDark ? 'dark' : 'light'
+    localStorage.setItem(`${BOOTSTRAP_POINTER_PREFIX}-${slot}`, lsKey)
+  }
+  catch {
+    // 即使 80 字节也写不进 = 配额满了别的东西。无 graceful fallback，下次刷新继续等 worker
+  }
+}
 
 const urlA = ref<string | null>(null)
 const urlB = ref<string | null>(null)
@@ -27,8 +47,13 @@ function setTextureUrl(slot: typeof urlA, url: string) {
 }
 
 async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> | undefined) {
-  const w = Math.max(320, Math.ceil(window.innerWidth / 50) * 50)
-  const h = Math.max(320, Math.ceil(window.innerHeight / 50) * 50)
+  // cap 在 1920×1080：高 DPI 屏 (4K retina innerWidth 2600+) 下 raw viewport
+  // 会让 PNG dataURL 超过 LS_MAX_ENTRY_SIZE(3MB) 而被静默丢弃，导致 bootstrap
+  // pointer 指向不存在的 key —— 下次刷新拿不到 dataURL，"刷新即出"失效。
+  // 与 App.vue ensureCurtainPaperReady 的 cap 保持一致；CSS cover 拉伸的视觉
+  // 损失对噪点/纤维/金屑类纹理几乎不可见。
+  const w = Math.max(320, Math.ceil(Math.min(window.innerWidth, 1920) / 50) * 50)
+  const h = Math.max(320, Math.ceil(Math.min(window.innerHeight, 1080) / 50) * 50)
   if (w === lastW && h === lastH && (urlA.value || urlB.value))
     return
   lastW = w
@@ -41,15 +66,16 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
     ready.value = true
     return
   }
+  const generateOptions: XuanPaperOptions = {
+    variant: (xuanPaper?.variant as 'processed' | 'aged' | 'gold') || 'processed',
+    width: w,
+    height: h,
+    seed: 42,
+    isDark,
+    goldDensity: xuanPaper?.goldDensity as number | undefined,
+  }
   try {
-    const url = await generateXuanPaperTexture({
-      variant: (xuanPaper?.variant as 'processed' | 'aged' | 'gold') || 'processed',
-      width: w,
-      height: h,
-      seed: 42,
-      isDark,
-      goldDensity: xuanPaper?.goldDensity as number | undefined,
-    })
+    const url = await generateXuanPaperTexture(generateOptions)
 
     // 异步预解码（不阻塞 ready）：原本 await img.decode() 在 prod 下对大 blob URL
     // 永久 pending，加了 1s 超时兜底，但每次都吃满 1s（=1s 固定浪费）。改为
@@ -67,6 +93,10 @@ async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> 
     await nextTick()
     active.value = next
     ready.value = true
+
+    // 写下次刷新的"指向真版 dataURL 的指针"。useXuanPaperTexture 内部
+    // 已经把 dataURL 写到 LS_PREFIX+cacheKey，这里只记下 key 名，零额外配额
+    persistBootstrapPointer(generateOptions)
   }
   catch {
     // worker 抛错也必须解锁，否则下游 gate 等不到 ready 永远关着幕布
