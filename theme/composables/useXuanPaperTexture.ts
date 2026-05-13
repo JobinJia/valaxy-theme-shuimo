@@ -1,5 +1,4 @@
 import { XUAN_PAPER_LIGHT_RGB } from './paperColor'
-import { generateCached } from './useShuimoCache'
 import { generateInXuanPaperWorker, generateTiledInWorkers } from './useXuanPaperWorker'
 
 // 永远不走 tiled 路径：tiled 模式 worker 各生成一片 blob 后主线程要做
@@ -150,68 +149,70 @@ export async function generateXuanPaperTexture(options?: XuanPaperOptions) {
   const presets = isDark ? darkColorPresets : lightColorPresets
   const cacheKey = buildCacheKey(options)
 
-  return generateCached(cacheKey, async () => {
-    // localStorage 持久缓存（跨会话复用）—— 二次访问零计算返回 dataURL
-    const persisted = loadFromLocalStorage(cacheKey)
-    if (persisted)
-      return persisted
+  // 不走内存 LRU 缓存：worker 输出的是 blob URL，consumer (urlA/urlB/curtainPaperUrl)
+  // 拿到后会在被替换时 deferred revoke 释放。若同一 URL 被 LRU 缓存，二次命中会
+  // 返回已 revoke 的死 URL → 4 个 curtain 元素同时 fetch 失败 (ERR_FILE_NOT_FOUND)。
+  // 跨会话复用走 localStorage dataURL（字符串，无 revoke 生命周期），LS 命中也是
+  // 同步 1ms 量级，几乎覆盖原 in-memory cache 的所有收益。
+  const persisted = loadFromLocalStorage(cacheKey)
+  if (persisted)
+    return persisted
 
-    const customBaseColor = options?.baseColor ? hexToRgb(options.baseColor) : null
+  const customBaseColor = options?.baseColor ? hexToRgb(options.baseColor) : null
 
-    const textureOptions: Record<string, any> = {
-      width,
-      height,
-      baseColor: customBaseColor || presets[variant] || presets.processed,
-      fiberDensity,
-      textureIntensity,
-      grainDensity,
-      seed,
+  const textureOptions: Record<string, any> = {
+    width,
+    height,
+    baseColor: customBaseColor || presets[variant] || presets.processed,
+    fiberDensity,
+    textureIntensity,
+    grainDensity,
+    seed,
+  }
+
+  if (variant === 'aged')
+    textureOptions.age = 0.4
+
+  if (variant === 'gold') {
+    textureOptions.goldFlecks = true
+    textureOptions.goldDensity = goldDensity
+  }
+
+  let url: string | null = null
+  const pixels = width * height
+
+  if (pixels > TILE_THRESHOLD) {
+    try {
+      url = await generateTiledInWorkers(textureOptions)
     }
-
-    if (variant === 'aged')
-      textureOptions.age = 0.4
-
-    if (variant === 'gold') {
-      textureOptions.goldFlecks = true
-      textureOptions.goldDensity = goldDensity
+    catch (err) {
+      console.warn('[shuimo] tiled worker failed, trying single worker:', err)
     }
+  }
 
-    let url: string | null = null
-    const pixels = width * height
-
-    if (pixels > TILE_THRESHOLD) {
+  if (!url) {
+    const workerPromise = generateInXuanPaperWorker(textureOptions)
+    if (workerPromise) {
       try {
-        url = await generateTiledInWorkers(textureOptions)
+        url = await workerPromise
       }
       catch (err) {
-        console.warn('[shuimo] tiled worker failed, trying single worker:', err)
+        console.warn('[shuimo] single worker failed, falling back to sync:', err)
       }
     }
+  }
 
-    if (!url) {
-      const workerPromise = generateInXuanPaperWorker(textureOptions)
-      if (workerPromise) {
-        try {
-          url = await workerPromise
-        }
-        catch (err) {
-          console.warn('[shuimo] single worker failed, falling back to sync:', err)
-        }
-      }
-    }
+  if (!url) {
+    const { XuanPaper } = await import('@jobinjia/shuimo-core/elements')
+    url = XuanPaper.generateDataURL(textureOptions)
+  }
 
-    if (!url) {
-      const { XuanPaper } = await import('@jobinjia/shuimo-core/elements')
-      url = XuanPaper.generateDataURL(textureOptions)
-    }
+  // 异步写 localStorage，不阻塞返回；下次访问秒出
+  // 当 persistToLocalStorage===false（curtain）时跳过，避免挤掉 global 的缓存
+  if (options?.persistToLocalStorage !== false)
+    blobUrlToDataURL(url).then(dataUrl => saveToLocalStorage(cacheKey, dataUrl)).catch(() => {})
 
-    // 异步写 localStorage，不阻塞返回；下次访问秒出
-    // 当 persistToLocalStorage===false（curtain）时跳过，避免挤掉 global 的缓存
-    if (options?.persistToLocalStorage !== false)
-      blobUrlToDataURL(url).then(dataUrl => saveToLocalStorage(cacheKey, dataUrl)).catch(() => {})
-
-    return url
-  })
+  return url
 }
 
 function clampGoldDensity(value: number | undefined): number {

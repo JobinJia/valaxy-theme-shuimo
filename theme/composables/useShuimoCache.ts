@@ -1,18 +1,12 @@
-// LRU：缓存的是大尺寸 PNG dataURL/blob URL（单条可达数 MB），无上限的话
-// resize 循环几次就会塞进数十 MB。Map 自带插入序，淘汰最早的项即可
+// LRU：缓存可复用的字符串值（SVG / dataURL）。blob URL 禁止入此 cache ——
+// 它跟 consumer 的 Vue ref 共享生命周期，consumer deferred revoke 后 cache 命中
+// 会返回已死 URL，引发 4 个 curtain 元素的 ERR_FILE_NOT_FOUND × 2。
 const MAX_ENTRIES = 32
 const cache = new Map<string, string>()
 
-function evict(key: string) {
-  const value = cache.get(key)
-  if (value && value.startsWith('blob:'))
-    URL.revokeObjectURL(value)
-  cache.delete(key)
-}
-
 /**
- * 获取或生成缓存的 SVG/DataURL
- * 同一次页面会话内缓存，刷新后重新生成（新画面）
+ * 获取或生成缓存的字符串（SVG / dataURL）
+ * 同一次页面会话内缓存，刷新后重新生成。**禁止缓存 blob URL**。
  */
 export async function generateCached(
   key: string,
@@ -28,20 +22,17 @@ export async function generateCached(
 
   const result = await generatorFn()
   if (cache.size >= MAX_ENTRIES) {
-    // 淘汰最早插入的项；blob URL 顺手 revoke 释放底层 Blob 内存
     const oldest = cache.keys().next().value
     if (oldest !== undefined)
-      evict(oldest)
+      cache.delete(oldest)
   }
   cache.set(key, result)
   return result
 }
 
 /**
- * 清除所有缓存（含 revoke 所有 blob URL）
+ * 清除所有缓存
  */
 export function clearShuimoCache() {
-  for (const key of cache.keys())
-    evict(key)
   cache.clear()
 }
