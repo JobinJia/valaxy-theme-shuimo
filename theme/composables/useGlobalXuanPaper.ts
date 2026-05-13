@@ -34,16 +34,25 @@ let lastH = 0
 let initialized = false
 let resizeListener: (() => void) | null = null
 
-function revokeTextureUrl(url: string | null) {
-  if (url?.startsWith('blob:'))
-    URL.revokeObjectURL(url)
-}
-
 function setTextureUrl(slot: typeof urlA, url: string) {
   if (slot.value === url)
     return
-  revokeTextureUrl(slot.value)
+  const prev = slot.value
   slot.value = url
+  // 同 App.vue::setCurtainPaperUrl：必须等 Vue 把新 url 落进 DOM + 浏览器
+  // 完成一帧 paint 后再 revoke。当前两层 paper-bg 永远 display:block，浏览器
+  // 不会因 URL 失效重新 fetch 所以现在踩不到；但这条安全性寄生在"层永远
+  // visible"的隐式契约上，预防未来改成 v-if/display 切换时炸成 ERR_FILE_NOT_FOUND
+  if (prev?.startsWith('blob:')) {
+    const stale = prev
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          URL.revokeObjectURL(stale)
+        })
+      })
+    })
+  }
 }
 
 async function regenerate(isDark: boolean, themeConfig: Record<string, unknown> | undefined) {

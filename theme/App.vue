@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ThemeModeColor } from './types'
 import { useValaxyDark } from 'valaxy'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
 import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
@@ -124,9 +124,21 @@ const curtainBottomStyle = makeCurtainBgStyle('bottom')
 function setCurtainPaperUrl(url: string | null) {
   if (curtainPaperUrl.value === url)
     return
-  if (curtainPaperUrl.value?.startsWith('blob:'))
-    URL.revokeObjectURL(curtainPaperUrl.value)
+  const prev = curtainPaperUrl.value
   curtainPaperUrl.value = url
+  // 4 个 curtain 元素的 :style 当前还指向 prev；Vue 要等 nextTick 才把新 url
+  // 写进 DOM。立即 revoke 会导致 isDark / resize 触发的重绘拿不到 blob →
+  // net::ERR_FILE_NOT_FOUND（可见的两片同时报错）。等一次 paint 再 revoke。
+  if (prev?.startsWith('blob:')) {
+    const stale = prev
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          URL.revokeObjectURL(stale)
+        })
+      })
+    })
+  }
 }
 
 async function ensureCurtainPaperReady() {
