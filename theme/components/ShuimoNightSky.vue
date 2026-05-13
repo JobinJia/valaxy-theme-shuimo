@@ -15,49 +15,15 @@ const { state } = useAstronomy({
 })
 
 const moonSize = computed(() => astronomy.value.moon?.size ?? 70)
-const starsCount = computed(() => astronomy.value.stars?.count ?? 16)
-const starsLinked = computed(() => astronomy.value.stars?.moonLinked ?? true)
 const mistOpacity = computed(() => astronomy.value.mist?.opacity ?? 0.12)
 const mistDuration = computed(() => astronomy.value.mist?.driftDuration ?? 120)
 
 const showMoon = computed(() => layers.value.moon !== false)
-const showStars = computed(() => layers.value.stars !== false)
 const showMist = computed(() => layers.value.mist !== false)
 const showVignette = computed(() => layers.value.vignette !== false)
 
 /* Background tint: full-moon nights microscopically lighter. */
 const bgOverlayOpacity = computed(() => 0.04 * state.value.moon.illumination)
-
-/* Stars: deterministic positions from seed; opacity = 0.6 - 0.4·illumination. */
-function mulberry32(s: number) {
-  let a = s
-  return () => {
-    a |= 0
-    a = (a + 0x6D2B79F5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-interface Star { cx: number, cy: number, r: number }
-
-const stars = computed<Star[]>(() => {
-  const rand = mulberry32(seed.value)
-  const out: Star[] = []
-  for (let i = 0; i < starsCount.value; i++) {
-    const roll = rand()
-    const r = roll < 0.6 ? 1 : roll < 0.9 ? 2 : 3
-    out.push({
-      cx: rand() * 100, // %
-      cy: rand() * 55, // % (top 55% of sky band)
-      r,
-    })
-  }
-  return out
-})
-
-const starsOpacity = computed(() => starsLinked.value ? 0.6 - 0.4 * state.value.moon.illumination : 0.5)
 
 /* Mist drift direction from seed — left or right */
 const mistDir = computed(() => seed.value % 2 === 0 ? 1 : -1)
@@ -94,19 +60,7 @@ const mistAnimStyle = computed(() => ({
       </svg>
     </div>
 
-    <!-- 4. stars -->
-    <svg v-if="showStars" class="shuimo-night-sky__stars" :style="{ opacity: starsOpacity }" preserveAspectRatio="none" viewBox="0 0 100 100">
-      <circle
-        v-for="(s, i) in stars"
-        :key="i"
-        :cx="s.cx"
-        :cy="s.cy"
-        :r="s.r * 0.15"
-        fill="rgba(240, 235, 215, 0.9)"
-      />
-    </svg>
-
-    <!-- 5. moon -->
+    <!-- 4. moon -->
     <ShuimoMoon v-if="showMoon" :size="moonSize" />
   </div>
 </template>
@@ -161,19 +115,9 @@ const mistAnimStyle = computed(() => ({
   .shuimo-night-sky__mist {
     animation: none;
   }
-  .shuimo-night-sky__bg,
-  .shuimo-night-sky__stars {
+  .shuimo-night-sky__bg {
     transition: none;
   }
-}
-
-.shuimo-night-sky__stars {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  transition: opacity 1s ease;
 }
 
 @media (max-width: 767px) {

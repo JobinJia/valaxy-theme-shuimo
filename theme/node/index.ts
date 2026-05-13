@@ -156,7 +156,6 @@ export const defaultThemeConfig: ThemeConfig = {
     allowVisitorOverride: true,
     layers: {
       moon: true,
-      stars: true,
       mist: true,
       vignette: true,
       sun: true,
@@ -166,7 +165,6 @@ export const defaultThemeConfig: ThemeConfig = {
     },
     moon: { size: 70, tiltByLatitude: true },
     sun: { size: 60, color: '#D9362E' },
-    stars: { count: 16, moonLinked: true },
     mist: { opacity: 0.12, driftDuration: 120 },
   },
 

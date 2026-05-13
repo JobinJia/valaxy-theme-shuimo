@@ -341,10 +341,9 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 是否允许访客切换到自己的位置 @default true */
     allowVisitorOverride: boolean
 
-    /** 各视觉层独立开关（moon/stars/mist 为夜空；sun/glowMorning/glowDusk/skyTint 为白昼；vignette 共享） */
+    /** 各视觉层独立开关（moon/mist 为夜空；sun/glowMorning/glowDusk/skyTint 为白昼；vignette 共享） */
     layers: Partial<{
       moon: boolean
-      stars: boolean
       mist: boolean
       vignette: boolean
       sun: boolean
@@ -359,14 +358,6 @@ export interface ThemeConfig extends DefaultTheme.Config {
       size: number
       /** 月相是否随纬度倾斜 @default true */
       tiltByLatitude: boolean
-    }>
-
-    /** 星点调节 */
-    stars: Partial<{
-      /** 星点数量 @default 16 */
-      count: number
-      /** 是否随月相联动（月明星稀） @default true */
-      moonLinked: boolean
     }>
 
     /** 太阳调节 */
