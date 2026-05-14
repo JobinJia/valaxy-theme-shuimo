@@ -1,36 +1,24 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { useGoBack, useThemeConfig, useThemeCssVars } from '../composables'
-import { INITIAL_ROUTE_PATH_KEY } from '../composables/useCurtainTransition'
+import { CURRENT_ROUTE_PATH_KEY } from '../composables/useCurtainTransition'
 
 const { t } = useI18n()
 const { goBack } = useGoBack()
 const themeCssVars = useThemeCssVars()
 const themeConfig = useThemeConfig()
 
-// useRoute() returns undefined here during SSG/hydration setup (valaxy bootstraps
-// vue-router after layout setup runs under vite-ssg's concurrent renders),
-// which locks pageType to 'home' for every route and prevents SPA nav from
-// swapping the branch. Read the SSG path via injected INITIAL_ROUTE_PATH_KEY
-// for initial render, then switch to router.currentRoute once mounted so
-// subsequent navigations reactively flip the v-if chain.
-const initialRoutePath = inject(INITIAL_ROUTE_PATH_KEY, '/')
-const router = useRouter()
-const isHydrated = ref(false)
-onMounted(() => {
-  isHydrated.value = true
-})
-
-const currentPath = computed(() => {
-  if (!isHydrated.value)
-    return initialRoutePath
-  return router?.currentRoute?.value?.path ?? initialRoutePath
-})
+// useRoute()/useRouter() return undefined in this scope when the consumer
+// resolves a different physical vue-router copy than the theme (monorepo/link
+// installs ship duplicate vue-router under distinct routerKey symbols), so
+// useRoute()/useRouter()'s inject misses and pageType would lock to 'home'
+// for every SPA navigation. theme/setup/main.ts provides this reactive ref
+// from ctx.router.afterEach — same source of truth as the real router.
+const routePathRef = inject(CURRENT_ROUTE_PATH_KEY, ref('/'))
 
 const pageType = computed(() => {
-  const path = currentPath.value.replace(/\/$/, '') || '/'
+  const path = routePathRef.value.replace(/\/$/, '') || '/'
   if (path === '/')
     return 'home'
   if (path === '/about')

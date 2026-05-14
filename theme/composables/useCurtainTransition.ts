@@ -1,4 +1,5 @@
-import type { InjectionKey } from 'vue'
+import type { InjectionKey, Ref } from 'vue'
+import type { Router } from 'vue-router'
 import { ref } from 'vue'
 
 function prefersReducedMotion(): boolean {
@@ -15,9 +16,17 @@ export const curtainStampReady = ref(false)
 // 防止 curtain 拉开时 wrapper 还显示纯色（洒金未出）。
 export const curtainPaperReady = ref(false)
 
-// Initial route path provided by theme/setup/main.ts; App.vue reads it via
-// inject() instead of useRoute() to survive duplicate vue-router instances.
-export const INITIAL_ROUTE_PATH_KEY: InjectionKey<string> = Symbol('shuimo-initial-route-path')
+// Reactive route path provided by theme/setup/main.ts; theme layouts read it
+// via inject() instead of useRoute()/useRouter() because under monorepo/link
+// installs the consumer ships its own vue-router copy and the theme's symbol
+// keys don't match the app-installed router's keys. Initial value equals the
+// SSG ctx.routePath, and ctx.router.afterEach keeps it in sync on SPA nav.
+export const CURRENT_ROUTE_PATH_KEY: InjectionKey<Ref<string>> = Symbol('shuimo-current-route-path')
+
+// Same rationale as CURRENT_ROUTE_PATH_KEY: theme code that needs to imperatively
+// navigate (back / push) can inject the actual ctx.router instead of calling
+// useRouter() which returns undefined under duplicate vue-router instances.
+export const ROUTER_KEY: InjectionKey<Router> = Symbol('shuimo-router')
 
 let initialCurtainActive = false
 

@@ -5,14 +5,17 @@ import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from '
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
 import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
 import { useCurtainStamp } from './composables/useCurtainStamp'
-import { curtainRevealed, INITIAL_ROUTE_PATH_KEY, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
+import { CURRENT_ROUTE_PATH_KEY, curtainRevealed, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 import { timedDebounce } from './composables/useTimedCallback'
 
 // Initial path comes from theme/setup/main.ts (ctx.routePath under SSG, else
-// window.location.pathname). Keep this call inside App.vue setup so vite-ssg's
-// concurrent renders don't race on the module-scope curtainRevealed ref.
-const initialRoutePath = inject(INITIAL_ROUTE_PATH_KEY, '/')
+// window.location.pathname). Reading the provided ref's current value at
+// setup time captures the SSG path before any client navigation, which is
+// exactly what setupInitialCurtain wants. Keep this read synchronous so
+// vite-ssg's concurrent renders don't race on module-scope curtainRevealed.
+const routePathRef = inject(CURRENT_ROUTE_PATH_KEY, ref('/'))
+const initialRoutePath = routePathRef.value
 setupInitialCurtain(initialRoutePath)
 
 const { urlA, urlB, active } = useGlobalXuanPaper()

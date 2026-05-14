@@ -1,9 +1,20 @@
 <script lang="ts" setup>
+import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { ROUTER_KEY } from '../composables/useCurtainTransition'
 
 const { t } = useI18n()
-const router = useRouter()
+// useRouter() can return undefined here under duplicate vue-router instances
+// (consumer's copy vs. theme's copy → routerKey symbol mismatch). Prefer the
+// router provided by theme/setup/main.ts.
+const router = inject(ROUTER_KEY, null) ?? useRouter()
+function goBack() {
+  if (router)
+    router.back()
+  else
+    window.history.back()
+}
 </script>
 
 <template>
@@ -29,7 +40,7 @@ const router = useRouter()
         此路不通，山水之间，尚需寻觅。
       </p>
       <RouterView />
-      <button class="shuimo-404__btn" @click="router.back()">
+      <button class="shuimo-404__btn" @click="goBack">
         {{ t('shuimo.back') }} ←
       </button>
     </div>

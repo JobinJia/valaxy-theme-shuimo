@@ -7,17 +7,22 @@
  * reinitialize correctly for each post.
  */
 import { usePrevNext } from 'valaxy'
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useImageCaption, useThemeConfig } from '../composables'
+import { ROUTER_KEY } from '../composables/useCurtainTransition'
 
 const { t } = useI18n()
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
 const stampConfig = computed(() => themeConfig.value?.stamp)
 const route = useRoute() as ReturnType<typeof useRoute> | undefined
-const router = useRouter()
+// useRouter() can return undefined here under duplicate vue-router instances
+// (consumer's copy vs. theme's copy → routerKey symbol mismatch). Prefer the
+// router provided by theme/setup/main.ts, fall back to useRouter() when the
+// theme is consumed outside the standard provide wiring.
+const router = inject(ROUTER_KEY, null) ?? useRouter()
 const frontmatter = computed(() => (route?.meta?.frontmatter || {}) as any)
 const [prev, next] = usePrevNext()
 
@@ -66,10 +71,18 @@ const postStamp = computed(() => {
 useImageCaption(articleRef, imageCaptionConfig)
 
 function goBack() {
-  if (window.history.length > 1)
-    router.back()
-  else
+  if (window.history.length > 1) {
+    if (router)
+      router.back()
+    else
+      window.history.back()
+  }
+  else if (router) {
     router.push('/')
+  }
+  else {
+    window.location.assign('/')
+  }
 }
 </script>
 
