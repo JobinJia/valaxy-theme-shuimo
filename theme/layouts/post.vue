@@ -6,12 +6,13 @@
  * navigation, ensuring all client-side features (TOC, word count, stamp)
  * reinitialize correctly for each post.
  */
-import { usePrevNext } from 'valaxy'
+import { useSiteStore } from 'valaxy'
 import { computed, inject, ref } from 'vue'
+import type { Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useImageCaption, useThemeConfig } from '../composables'
-import { ROUTER_KEY } from '../composables/useCurtainTransition'
+import { CURRENT_ROUTE_PATH_KEY, ROUTER_KEY } from '../composables/useCurtainTransition'
 
 const { t } = useI18n()
 const themeConfig = useThemeConfig()
@@ -24,7 +25,31 @@ const route = useRoute() as ReturnType<typeof useRoute> | undefined
 // theme is consumed outside the standard provide wiring.
 const router = inject(ROUTER_KEY, null) ?? useRouter()
 const frontmatter = computed(() => (route?.meta?.frontmatter || {}) as any)
-const [prev, next] = usePrevNext()
+
+// Inline prev/next: Valaxy's usePrevNext compares route.path === post.path,
+// but SSR's ctx.routePath omits the trailing slash while client history mode
+// keeps it ("/posts/x" vs "/posts/x/"), so SSR finds index=N+1 and client
+// finds -1 — different prev/next, hydration mismatch. Strip slashes both sides.
+const site = useSiteStore()
+const routePathRef = inject(CURRENT_ROUTE_PATH_KEY, ref('/')) as Ref<string>
+function stripSlash(p: string | undefined): string {
+  if (!p)
+    return '/'
+  return p.replace(/\/$/, '') || '/'
+}
+const currentPostIndex = computed(() => {
+  const current = stripSlash(routePathRef.value)
+  return (site.postList || []).findIndex((p: any) => stripSlash(p.path) === current)
+})
+const prev = computed(() => {
+  const i = currentPostIndex.value
+  return i - 1 >= 0 ? (site.postList || [])[i - 1] : null
+})
+const next = computed(() => {
+  const i = currentPostIndex.value
+  const list = site.postList || []
+  return i >= 0 && i + 1 < list.length ? list[i + 1] : null
+})
 
 const articleRef = ref<HTMLElement>()
 const imageCaptionConfig = computed(() => themeConfig.value?.imageCaption || {})

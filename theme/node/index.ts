@@ -337,6 +337,19 @@ function collectStampChars(userRoot: string): Set<string> {
   //   迷             — 404 layout seal
   addCjkChars(chars, '受命于天既寿永昌墨韵书斋日照月映迷')
 
+  // Hardcoded static text rendered with title font in theme templates.
+  // Sources: Shuimo{AboutPage,ArchivesPage,CategoryTagPage,ArticleCard,
+  //   PostList,SeriesNav}.vue + layouts/404.vue + pages/index.vue.
+  // 栖 in particular comes from "栖墨斋" (about/archives title) and was the
+  // original miss that motivated this list. Re-audit whenever a new
+  // hardcoded CJK string lands in any theme <template>.
+  addCjkChars(chars, '不之全兮卷去寻尚山归录文无暂本来标栖此目章签篇类觅读路途通间阅需')
+
+  // Locale message strings (theme/locales/*.yml) used via {{ t('shuimo.*') }}
+  // bindings. These are interpolated at runtime so the static template scan
+  // above can't see them.
+  addCjkChars(chars, '上下主亏位作保凸切创到动博原取图在地字已弦我所换新更朔望档残气法渐由留盈相眉约置节获蛾视角近还钟题驱')
+
   // 24 solar terms — ShuimoSolarSeal swaps its text by the current term
   // (see composables/useSolarTerm.ts).
   addCjkChars(

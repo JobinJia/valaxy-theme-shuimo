@@ -2,6 +2,12 @@ import { useSiteStore } from 'valaxy'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+function stripSlash(p: string | undefined): string {
+  if (!p)
+    return '/'
+  return p.replace(/\/$/, '') || '/'
+}
+
 export function useSeriesPosts() {
   const route = useRoute() as ReturnType<typeof useRoute> | undefined
   const site = useSiteStore()
@@ -22,10 +28,12 @@ export function useSeriesPosts() {
       })
   })
 
+  // Normalize trailing slash: SSR ctx.routePath omits it but client history mode keeps it.
   const currentIndex = computed(() => {
     if (!seriesName.value)
       return -1
-    return seriesPosts.value.findIndex((p: any) => p.path === route?.path)
+    const current = stripSlash(route?.path)
+    return seriesPosts.value.findIndex((p: any) => stripSlash(p.path) === current)
   })
 
   return {

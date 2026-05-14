@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { lunar } from '@shuimo-design/lunar'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useInterval } from '../composables/useTimedCallback'
-
-const now = ref(new Date())
 
 function formatDate(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -21,11 +19,16 @@ function getLunarDisplay(d: Date) {
   }
 }
 
-const lunarInfo = ref(getLunarDisplay(now.value))
+// Empty until mount so SSR and first client render produce identical blank text,
+// avoiding new-Date()-at-build-vs-runtime hydration mismatch.
+const lunarInfo = ref({ main: '', time: '', term: '', western: '' })
+
+onMounted(() => {
+  lunarInfo.value = getLunarDisplay(new Date())
+})
 
 useInterval(1000, () => {
-  now.value = new Date()
-  lunarInfo.value = getLunarDisplay(now.value)
+  lunarInfo.value = getLunarDisplay(new Date())
 })
 </script>
 
