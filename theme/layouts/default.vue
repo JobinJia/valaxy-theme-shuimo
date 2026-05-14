@@ -1,18 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useGoBack, useThemeConfig, useThemeCssVars } from '../composables'
+import { INITIAL_ROUTE_PATH_KEY } from '../composables/useCurtainTransition'
 
 const { t } = useI18n()
 const { goBack } = useGoBack()
 const themeCssVars = useThemeCssVars()
 const themeConfig = useThemeConfig()
 
-const route = useRoute() as ReturnType<typeof useRoute> | undefined
+// useRoute() returns undefined here during SSG/hydration setup (valaxy bootstraps
+// vue-router after layout setup runs under vite-ssg's concurrent renders),
+// which locks pageType to 'home' for every route and prevents SPA nav from
+// swapping the branch. Read the SSG path via injected INITIAL_ROUTE_PATH_KEY
+// for initial render, then switch to router.currentRoute once mounted so
+// subsequent navigations reactively flip the v-if chain.
+const initialRoutePath = inject(INITIAL_ROUTE_PATH_KEY, '/')
+const router = useRouter()
+const isHydrated = ref(false)
+onMounted(() => {
+  isHydrated.value = true
+})
+
+const currentPath = computed(() => {
+  if (!isHydrated.value)
+    return initialRoutePath
+  return router?.currentRoute?.value?.path ?? initialRoutePath
+})
 
 const pageType = computed(() => {
-  const path = (route?.path ?? '/').replace(/\/$/, '') || '/'
+  const path = currentPath.value.replace(/\/$/, '') || '/'
   if (path === '/')
     return 'home'
   if (path === '/about')
