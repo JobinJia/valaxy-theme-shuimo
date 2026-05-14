@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import type { ThemeModeColor } from './types'
 import { useValaxyDark } from 'valaxy'
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
 import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
 import { useCurtainStamp } from './composables/useCurtainStamp'
-import { curtainRevealed, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
+import { curtainRevealed, INITIAL_ROUTE_PATH_KEY, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
 import { timedDebounce } from './composables/useTimedCallback'
 
-// useRoute() can be undefined during SSG app init or under duplicate vue-router
-// instances (e.g. when this theme is consumed via `link:` workspaces).
-const initialRoute = useRoute() as ReturnType<typeof useRoute> | undefined
-setupInitialCurtain(initialRoute?.path ?? '/')
+// Initial path comes from theme/setup/main.ts (ctx.routePath under SSG, else
+// window.location.pathname). Keep this call inside App.vue setup so vite-ssg's
+// concurrent renders don't race on the module-scope curtainRevealed ref.
+const initialRoutePath = inject(INITIAL_ROUTE_PATH_KEY, '/')
+setupInitialCurtain(initialRoutePath)
 
 const { urlA, urlB, active } = useGlobalXuanPaper()
 const themeConfig = useThemeConfig()
@@ -78,7 +78,7 @@ watch(curtainStampDone, (v) => {
 
 const isMobile = useIsMobile()
 
-const showMobileFlower = computed(() => isMobile.value && initialRoute?.path === '/')
+const showMobileFlower = computed(() => isMobile.value && initialRoutePath === '/')
 function onFlowerSeedGenerated(seed: number) {
   mobileFlowerSeed.value = seed
 }

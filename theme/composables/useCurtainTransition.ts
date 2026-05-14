@@ -1,3 +1,4 @@
+import type { InjectionKey } from 'vue'
 import { ref } from 'vue'
 
 function prefersReducedMotion(): boolean {
@@ -14,11 +15,14 @@ export const curtainStampReady = ref(false)
 // 防止 curtain 拉开时 wrapper 还显示纯色（洒金未出）。
 export const curtainPaperReady = ref(false)
 
+// Initial route path provided by theme/setup/main.ts; App.vue reads it via
+// inject() instead of useRoute() to survive duplicate vue-router instances.
+export const INITIAL_ROUTE_PATH_KEY: InjectionKey<string> = Symbol('shuimo-initial-route-path')
+
 let initialCurtainActive = false
 
-// Call synchronously from the root component's setup so each SSG-prerendered
-// route captures the correct curtain state (closed on home, open elsewhere);
-// SSR has no window, so the old module-top approach always produced "open".
+// Call synchronously from App.vue's setup so each vite-ssg concurrent render
+// captures its own curtainRevealed value before the template emits.
 export function setupInitialCurtain(pathname: string) {
   const normalized = pathname.replace(/\/$/, '') || '/'
   const needsCurtain = normalized === '/' && !prefersReducedMotion()
