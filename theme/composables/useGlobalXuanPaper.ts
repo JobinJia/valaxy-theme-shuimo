@@ -1,6 +1,6 @@
 import type { XuanPaperOptions } from './useXuanPaperTexture'
 import { useValaxyDark } from 'valaxy'
-import { nextTick, ref, watch } from 'vue'
+import { getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue'
 import { useThemeConfig } from './config'
 import { timedDebounce } from './useTimedCallback'
 import { buildXuanPaperLocalStorageKey, generateXuanPaperTexture } from './useXuanPaperTexture'
@@ -140,14 +140,27 @@ export function useGlobalXuanPaper() {
       scheduleRegenerate.schedule(isDark.value, getCfg())
     }
 
-    runImmediate()
-    watch(isDark, () => {
-      lastW = 0
-      lastH = 0
+    // Must run after hydration — synchronous first paint flipped `active`/`urlB` mid-walk and broke SSR diff.
+    function deferredInit() {
       runImmediate()
-    })
-    resizeListener = runDebounced
-    window.addEventListener('resize', runDebounced)
+      watch(isDark, () => {
+        lastW = 0
+        lastH = 0
+        runImmediate()
+      })
+      resizeListener = runDebounced
+      window.addEventListener('resize', runDebounced)
+    }
+
+    if (getCurrentInstance()) {
+      onMounted(async () => {
+        await nextTick()
+        deferredInit()
+      })
+    }
+    else {
+      Promise.resolve().then(deferredInit)
+    }
   }
 
   return { urlA, urlB, active, ready }
