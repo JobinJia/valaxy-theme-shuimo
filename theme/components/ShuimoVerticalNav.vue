@@ -65,7 +65,7 @@ const subtitleParts = computed(() => {
         class="shuimo-vnav__title"
         :style="titleFont ? { fontFamily: titleFont } : undefined"
       >
-        {{ themeConfig?.header?.title || siteConfig.title || '落梅听雪阁' }}
+        {{ themeConfig?.header?.title || siteConfig.title }}
       </router-link>
 
       <span

@@ -10,7 +10,7 @@ const themeConfig = useThemeConfig()
   <header class="shuimo-header">
     <div class="shuimo-header__title">
       <router-link to="/" class="shuimo-header__home">
-        {{ themeConfig?.header?.title || siteConfig.title || '墨韵书斋' }}
+        {{ themeConfig?.header?.title || siteConfig.title }}
       </router-link>
     </div>
 
