@@ -8,17 +8,21 @@ const here = dirname(fileURLToPath(import.meta.url))
 function extractKeyPaths(yamlSource: string): Set<string> {
   // 简易缩进式 YAML 扫描：只识别 `key:` 与 `key: value`，足以覆盖本仓 locale 形态。
   // 不处理数组、不处理多行字符串——若未来引入这些形态需切到 js-yaml。
+  // 用字符串操作而非 regex，避免 eslint regexp/no-super-linear-backtracking 警告。
   const stack: { indent: number, key: string }[] = []
   const leaves = new Set<string>()
   for (const raw of yamlSource.split('\n')) {
-    if (!raw.trim() || raw.trim().startsWith('#'))
+    const trimmed = raw.trim()
+    if (!trimmed || trimmed.startsWith('#'))
       continue
-    const indent = raw.match(/^( *)/)?.[1].length ?? 0
-    const m = raw.match(/^ *([^:#\s][^:#]*?):\s*(.*?)\s*$/)
-    if (!m)
+    const colonIdx = trimmed.indexOf(':')
+    if (colonIdx <= 0)
       continue
-    const key = m[1]
-    const value = m[2]
+    const key = trimmed.slice(0, colonIdx).trim()
+    if (!key || key.includes('#'))
+      continue
+    const indent = raw.length - raw.trimStart().length
+    const value = trimmed.slice(colonIdx + 1).trim()
     while (stack.length && stack[stack.length - 1].indent >= indent)
       stack.pop()
     stack.push({ indent, key })

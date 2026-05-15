@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
 /**
  * Post layout — Article page with TOC, reading info, image captions, and stamp.
  *
@@ -8,7 +9,6 @@
  */
 import { useSiteStore } from 'valaxy'
 import { computed, inject, ref } from 'vue'
-import type { Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useImageCaption, useThemeConfig } from '../composables'
