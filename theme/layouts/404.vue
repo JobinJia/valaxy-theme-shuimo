@@ -34,10 +34,10 @@ function goBack() {
         <ShuimoStamp text="迷" type="yin" :size="80" />
       </div>
       <h1 class="shuimo-404__title">
-        迷途
+        {{ t('shuimo.not_found.title') }}
       </h1>
       <p class="shuimo-404__desc">
-        此路不通，山水之间，尚需寻觅。
+        {{ t('shuimo.not_found.desc') }}
       </p>
       <RouterView />
       <button class="shuimo-404__btn" @click="goBack">
