@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { usePostList } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   type?: string
 }>()
 
+const { t } = useI18n()
 const postList = usePostList()
 
 const posts = computed(() => {
@@ -27,7 +29,7 @@ const posts = computed(() => {
     </TransitionGroup>
 
     <div v-if="!posts.length" class="shuimo-post-list__empty">
-      暂无文章
+      {{ t('shuimo.empty') }}
     </div>
   </div>
 </template>
