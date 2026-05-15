@@ -86,9 +86,9 @@ const postsByYear = computed(() => {
     </div>
 
     <!-- 返回 -->
-    <a href="#" class="shuimo-archives-page__back" @click.prevent="goBack">
+    <button type="button" class="shuimo-archives-page__back" @click="goBack">
       {{ t('shuimo.back') }} ←
-    </a>
+    </button>
   </div>
 </template>
 
@@ -200,6 +200,10 @@ const postsByYear = computed(() => {
   }
 
   &__back {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
     margin-top: 40px;
     font-size: 13px;
     color: var(--sm-ink-light);
