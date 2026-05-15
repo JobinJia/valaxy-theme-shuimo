@@ -35,17 +35,21 @@ function regenerate() {
     <span class="shuimo-seed-control__label">{{ t('shuimo.seed.label') }}</span>
     <span class="shuimo-seed-control__value">{{ seed }}</span>
     <button
+      type="button"
       class="shuimo-seed-control__btn"
       :class="{ 'shuimo-seed-control__btn--copied': copied }"
       :title="t(copied ? 'shuimo.seed.copied' : 'shuimo.seed.copy')"
+      :aria-label="t(copied ? 'shuimo.seed.copied' : 'shuimo.seed.copy')"
       @click="copySeed(seed)"
       @animationend="copied = false"
     >
       {{ copied ? '✓' : '⎘' }}
     </button>
     <button
+      type="button"
       class="shuimo-seed-control__btn"
       :title="t('shuimo.seed.refresh')"
+      :aria-label="t('shuimo.seed.refresh')"
       @click="regenerate"
     >
       ↻
