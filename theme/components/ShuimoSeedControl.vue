@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { refreshSeed } from '../composables'
 
 defineProps<{
@@ -11,6 +12,8 @@ const emit = defineEmits<{
 }>()
 
 const copied = ref(false)
+
+const { t } = useI18n()
 
 async function copySeed(seed: number) {
   try {
@@ -29,12 +32,12 @@ function regenerate() {
 
 <template>
   <div class="shuimo-seed-control">
-    <span class="shuimo-seed-control__label">seed</span>
+    <span class="shuimo-seed-control__label">{{ t('shuimo.seed.label') }}</span>
     <span class="shuimo-seed-control__value">{{ seed }}</span>
     <button
       class="shuimo-seed-control__btn"
       :class="{ 'shuimo-seed-control__btn--copied': copied }"
-      :title="copied ? '已复制' : '复制 seed'"
+      :title="t(copied ? 'shuimo.seed.copied' : 'shuimo.seed.copy')"
       @click="copySeed(seed)"
       @animationend="copied = false"
     >
@@ -42,7 +45,7 @@ function regenerate() {
     </button>
     <button
       class="shuimo-seed-control__btn"
-      title="随机重生"
+      :title="t('shuimo.seed.refresh')"
       @click="regenerate"
     >
       ↻
