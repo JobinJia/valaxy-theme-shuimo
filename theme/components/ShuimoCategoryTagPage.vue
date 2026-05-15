@@ -58,9 +58,9 @@ function formatDate(date: string | number | Date | undefined) {
     </div>
 
     <!-- 返回 -->
-    <a href="#" class="shuimo-cat-tag-page__back" @click.prevent="goBack">
+    <button type="button" class="shuimo-cat-tag-page__back" @click="goBack">
       {{ t('shuimo.back') }} ←
-    </a>
+    </button>
   </div>
 </template>
 
@@ -152,6 +152,10 @@ function formatDate(date: string | number | Date | undefined) {
   }
 
   &__back {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
     margin-top: 40px;
     font-size: 13px;
     color: var(--sm-ink-light);
