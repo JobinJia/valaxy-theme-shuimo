@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, watch } from 'vue'
+import { computed, inject, onMounted, ref, watch } from 'vue'
 import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
-import { curtainPaperReady, curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
+import { CURRENT_ROUTE_PATH_KEY, curtainPaperReady, curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
 
@@ -26,11 +26,16 @@ const heroLandscapeEnabled = computed(() =>
 const mobileFlowerEnabled = computed(() =>
   themeConfig.value?.hero?.mobileFlower?.enable !== false,
 )
+// 与 App.vue 的 showMobileFlower 判断对齐：移动端花卉只在首页渲染。
+// 之前 curtain gate 只看 isMobile + enabled，不看路由，导致直接打开非首页
+// （post / 404 / "other"）时幕布等永远不会触发的 mobileFlowerReady，幕布永远拉不开。
+const routePathRef = inject(CURRENT_ROUTE_PATH_KEY, ref('/'))
+const isHomeRoute = computed(() => (routePathRef.value.replace(/\/$/, '') || '/') === '/')
 const shouldRenderHeroLandscape = computed(() =>
   !isMobile.value && heroLandscapeEnabled.value,
 )
 const shouldRenderMobileFlower = computed(() =>
-  isMobile.value && mobileFlowerEnabled.value,
+  isMobile.value && mobileFlowerEnabled.value && isHomeRoute.value,
 )
 const showSeedControl = computed(() =>
   (shouldRenderHeroLandscape.value || shouldRenderMobileFlower.value) && themeConfig.value?.hero?.showSeedControl === true,

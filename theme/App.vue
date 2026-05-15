@@ -81,7 +81,18 @@ watch(curtainStampDone, (v) => {
 
 const isMobile = useIsMobile()
 
-const showMobileFlower = computed(() => isMobile.value && initialRoutePath === '/')
+// 路由切换时 routePathRef 由 ctx.router.afterEach 更新（见 setup/main.ts）。
+// 之前用 initialRoutePath snapshot 判断会导致：从首页 SPA 切走后花卉仍残留，
+// 直接打开非首页的部分场景（hash/redirect）也会漏判。改为响应式 normalized path。
+const isHomeRoute = computed(() => (routePathRef.value.replace(/\/$/, '') || '/') === '/')
+const showMobileFlower = computed(() => isMobile.value && isHomeRoute.value)
+// 一次性 latch：首次需要显示后保留挂载，路由来回切只用 v-show 切换可见性，
+// canvas 数据不重建。首屏直接进非首页时仍不挂载，避免无意义生成。
+const flowerMounted = ref(false)
+watch(showMobileFlower, (v) => {
+  if (v)
+    flowerMounted.value = true
+}, { immediate: true })
 function onFlowerSeedGenerated(seed: number) {
   mobileFlowerSeed.value = seed
 }
@@ -244,10 +255,12 @@ watch(isDark, () => {
     <ShuimoDaySky v-if="!isDark && skyEnabled" />
   </ClientOnly>
 
-  <!-- 移动端花卉背景：放在 App.vue 层保持跨路由存活，避免切页面重建 -->
+  <!-- 移动端花卉背景：放在 App.vue 层保持跨路由存活，避免切页面重建。
+       v-if 走 lazy mount latch，v-show 按当前是否首页控制可见性。 -->
   <ClientOnly>
     <ShuimoMobileFlower
-      v-if="showMobileFlower"
+      v-if="flowerMounted"
+      v-show="showMobileFlower"
       @ready="onFlowerReady"
       @seed-generated="onFlowerSeedGenerated"
     />
