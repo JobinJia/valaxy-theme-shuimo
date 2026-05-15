@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useSeriesPosts } from '../composables/useSeriesPosts'
 
+const { t } = useI18n()
 const { seriesName, seriesPosts, currentIndex } = useSeriesPosts()
 </script>
 
 <template>
   <nav v-if="seriesName && seriesPosts.length > 1" class="shuimo-series-nav">
     <div class="shuimo-series-nav__header">
-      <span class="shuimo-series-nav__label">本卷目录</span>
+      <span class="shuimo-series-nav__label">{{ t('shuimo.series.nav_title') }}</span>
       <span class="shuimo-series-nav__name">{{ seriesName }}</span>
     </div>
 
@@ -24,10 +26,10 @@ const { seriesName, seriesPosts, currentIndex } = useSeriesPosts()
           :to="post.path || ''"
           class="shuimo-series-nav__link"
         >
-          {{ post.title || '无题' }}
+          {{ post.title || t('shuimo.untitled') }}
         </router-link>
         <span v-else class="shuimo-series-nav__current">
-          {{ post.title || '无题' }}
+          {{ post.title || t('shuimo.untitled') }}
         </span>
       </li>
     </ol>
