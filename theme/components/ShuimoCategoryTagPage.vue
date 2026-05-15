@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGoBack, useThemeConfig } from '../composables'
 
 defineProps<{
@@ -10,6 +11,7 @@ defineProps<{
 }>()
 
 const { goBack } = useGoBack()
+const { t } = useI18n()
 
 const themeConfig = useThemeConfig()
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
@@ -34,7 +36,7 @@ function formatDate(date: string | number | Date | undefined) {
     </h1>
 
     <p class="shuimo-cat-tag-page__count">
-      {{ posts.length }} 篇
+      {{ t('shuimo.post_count', { count: posts.length }) }}
     </p>
 
     <!-- 文章列表 -->
@@ -46,18 +48,18 @@ function formatDate(date: string | number | Date | undefined) {
         class="shuimo-cat-tag-page__item"
       >
         <span class="shuimo-cat-tag-page__dot" />
-        <span class="shuimo-cat-tag-page__post-title">{{ post.title || '无题' }}</span>
+        <span class="shuimo-cat-tag-page__post-title">{{ post.title || t('shuimo.untitled') }}</span>
         <span class="shuimo-cat-tag-page__post-date">{{ formatDate(post.date) }}</span>
       </router-link>
 
       <p v-if="!posts.length" class="shuimo-cat-tag-page__empty">
-        暂无文章
+        {{ t('shuimo.empty') }}
       </p>
     </div>
 
     <!-- 返回 -->
     <a href="#" class="shuimo-cat-tag-page__back" @click.prevent="goBack">
-      归去来兮 ←
+      {{ t('shuimo.back') }} ←
     </a>
   </div>
 </template>
