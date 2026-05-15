@@ -42,7 +42,7 @@ const categoryList = computed(() => {
     </div>
 
     <a href="#" class="shuimo-categories-index__back" @click.prevent="goBack">
-      归去来兮 ←
+      {{ t('shuimo.back') }} ←
     </a>
   </div>
 </template>
