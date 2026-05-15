@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { rafDebounce } from '../composables/useRafDebounce'
 
+const { t } = useI18n()
 const visible = ref(false)
 const scrollContainer = inject<Ref<HTMLElement | null>>('scrollContainer', ref(null))
 
@@ -44,8 +46,10 @@ onBeforeUnmount(() => {
   <Transition name="fade">
     <button
       v-if="visible"
+      type="button"
       class="shuimo-helper"
-      title="回到顶部"
+      :title="t('shuimo.back_to_top')"
+      :aria-label="t('shuimo.back_to_top')"
       @click="scrollToTop"
     >
       <span class="shuimo-helper__icon">↑</span>
