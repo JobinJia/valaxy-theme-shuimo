@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useIsMobile, useThemeConfig } from '../composables'
 
 const { isDark, toggleDark } = useValaxyDark()
+const { t } = useI18n()
 const themeConfig = useThemeConfig()
 const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
 const isMobile = useIsMobile()
@@ -17,7 +19,7 @@ const toggleStyle = computed(() => ({
 <template>
   <button
     class="shuimo-theme-toggle"
-    :title="isDark ? '切换亮色' : '切换暗色'"
+    :title="t(isDark ? 'shuimo.theme.toggle_to_light' : 'shuimo.theme.toggle_to_dark')"
     :style="toggleStyle"
     @click="toggleDark()"
   >
