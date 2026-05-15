@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{
   post: Post
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -32,7 +35,7 @@ defineProps<{
 
     <div class="shuimo-card__read-more">
       <router-link :to="post.path || ''">
-        阅读全文 →
+        {{ t('shuimo.read_more') }} →
       </router-link>
     </div>
   </article>
