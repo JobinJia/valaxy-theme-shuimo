@@ -116,9 +116,9 @@ function goBack() {
   <ShuimoLayout>
     <div :key="route?.path" class="shuimo-post-page">
       <!-- 顶部返回 -->
-      <a href="#" class="shuimo-post-page__back shuimo-post-page__back--top" @click.prevent="goBack">
+      <button type="button" class="shuimo-post-page__back shuimo-post-page__back--top" @click="goBack">
         ← {{ t('shuimo.back') }}
-      </a>
+      </button>
 
       <!-- 头像回首页 -->
       <router-link v-if="author?.avatar" to="/" class="shuimo-post-page__avatar-link">
@@ -208,9 +208,9 @@ function goBack() {
       </nav>
 
       <!-- 返回上一页 -->
-      <a href="#" class="shuimo-post-page__back" @click.prevent="goBack">
+      <button type="button" class="shuimo-post-page__back" @click="goBack">
         {{ t('shuimo.back') }} ←
-      </a>
+      </button>
     </div>
   </ShuimoLayout>
 </template>
@@ -387,6 +387,10 @@ function goBack() {
   }
 
   &__back {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
     font-size: 13px;
     color: var(--sm-ink-light);
     text-decoration: none;
