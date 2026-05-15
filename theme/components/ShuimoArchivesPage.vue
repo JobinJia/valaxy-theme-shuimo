@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { usePostList } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGoBack, useThemeConfig } from '../composables'
 
 const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
 const author = computed(() => themeConfig.value?.sidebar?.author)
+const { t } = useI18n()
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const postList = usePostList()
 
@@ -53,7 +55,7 @@ const postsByYear = computed(() => {
 
     <!-- 标题 -->
     <h1 class="shuimo-archives-page__title" :style="titleFont ? { fontFamily: titleFont } : undefined">
-      栖墨斋
+      {{ t('shuimo.archives_studio') }}
     </h1>
 
     <!-- 分隔线已移除 -->
@@ -71,7 +73,7 @@ const postsByYear = computed(() => {
           <li v-for="post in group.posts" :key="post.path" class="shuimo-archives-page__item">
             <span class="shuimo-archives-page__dot" />
             <router-link :to="post.path || '/'" class="shuimo-archives-page__post-link">
-              <span class="shuimo-archives-page__post-title">{{ post.title || '无题' }}</span>
+              <span class="shuimo-archives-page__post-title">{{ post.title || t('shuimo.untitled') }}</span>
               <span class="shuimo-archives-page__post-date">{{ post.formattedDate }}</span>
             </router-link>
           </li>
@@ -79,13 +81,13 @@ const postsByYear = computed(() => {
       </div>
 
       <p v-if="!postsByYear.length" class="shuimo-archives-page__empty">
-        暂无文章
+        {{ t('shuimo.empty') }}
       </p>
     </div>
 
     <!-- 返回 -->
     <a href="#" class="shuimo-archives-page__back" @click.prevent="goBack">
-      归去来兮 ←
+      {{ t('shuimo.back') }} ←
     </a>
   </div>
 </template>
