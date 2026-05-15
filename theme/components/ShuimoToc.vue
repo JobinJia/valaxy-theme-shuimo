@@ -206,12 +206,18 @@ useArticleContentObserver(articleRef, refreshToc)
 
     <!-- Mobile: collapsible toggle button + sliding panel -->
     <div class="shuimo-toc shuimo-toc--mobile">
-      <button class="shuimo-toc__toggle" @click="mobileOpen = !mobileOpen">
+      <button
+        type="button"
+        class="shuimo-toc__toggle"
+        :aria-expanded="mobileOpen"
+        aria-controls="shuimo-toc-mobile-panel"
+        @click="mobileOpen = !mobileOpen"
+      >
         {{ t('shuimo.toc_title') }}
         <span class="shuimo-toc__arrow" :class="{ 'shuimo-toc__arrow--open': mobileOpen }">▾</span>
       </button>
       <Transition name="shuimo-toc-slide">
-        <ul v-if="mobileOpen" class="shuimo-toc__list">
+        <ul v-if="mobileOpen" id="shuimo-toc-mobile-panel" class="shuimo-toc__list">
           <li
             v-for="h in headings"
             :key="h.id"
