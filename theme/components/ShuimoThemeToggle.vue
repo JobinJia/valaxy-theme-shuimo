@@ -18,8 +18,10 @@ const toggleStyle = computed(() => ({
 
 <template>
   <button
+    type="button"
     class="shuimo-theme-toggle"
     :title="t(isDark ? 'shuimo.theme.toggle_to_light' : 'shuimo.theme.toggle_to_dark')"
+    :aria-label="t(isDark ? 'shuimo.theme.toggle_to_light' : 'shuimo.theme.toggle_to_dark')"
     :style="toggleStyle"
     @click="toggleDark()"
   >
