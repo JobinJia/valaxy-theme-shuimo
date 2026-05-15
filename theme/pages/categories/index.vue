@@ -41,9 +41,9 @@ const categoryList = computed(() => {
       </router-link>
     </div>
 
-    <a href="#" class="shuimo-categories-index__back" @click.prevent="goBack">
+    <button type="button" class="shuimo-categories-index__back" @click="goBack">
       {{ t('shuimo.back') }} ←
-    </a>
+    </button>
   </div>
 </template>
 
@@ -119,6 +119,10 @@ meta:
   }
 
   &__back {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
     margin-top: 40px;
     font-size: 13px;
     color: var(--sm-ink-light);
