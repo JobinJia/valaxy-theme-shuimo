@@ -53,3 +53,5 @@ shuimo:
     copy: 复制 seed
     copied: 已复制
     refresh: 随机重生
+  nav:
+    label: 站内导航

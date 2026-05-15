@@ -53,3 +53,5 @@ shuimo:
     copy: Copy seed
     copied: Copied
     refresh: Regenerate
+  nav:
+    label: Site navigation
