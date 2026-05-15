@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useCategories, usePostList, useTags } from 'valaxy'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGoBack, useThemeConfig } from '../composables'
 
 const { goBack } = useGoBack()
 
 const themeConfig = useThemeConfig()
+const { t } = useI18n()
 const author = computed(() => themeConfig.value?.sidebar?.author)
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const stampProps = computed(() => ({
@@ -35,7 +37,7 @@ const tagCount = computed(() => tags.value?.size || 0)
 
     <!-- 名字 -->
     <h1 class="shuimo-about-page__name" :style="titleFont ? { fontFamily: titleFont } : undefined">
-      {{ author?.name || '佚名' }}
+      {{ author?.name || t('shuimo.author.anonymous') }}
     </h1>
 
     <!-- 座右铭 -->
@@ -46,15 +48,15 @@ const tagCount = computed(() => tags.value?.size || 0)
     <!-- 统计卡片：归档 / 分类 / 标签 -->
     <div class="shuimo-about-page__stats">
       <router-link to="/archives" class="shuimo-about-page__stat-card">
-        <span class="shuimo-about-page__stat-label">栖墨斋</span>
+        <span class="shuimo-about-page__stat-label">{{ t('shuimo.archives_studio') }}</span>
         <span class="shuimo-about-page__stat-count">{{ postCount }}</span>
       </router-link>
       <router-link to="/categories" class="shuimo-about-page__stat-card">
-        <span class="shuimo-about-page__stat-label">分类</span>
+        <span class="shuimo-about-page__stat-label">{{ t('shuimo.categories') }}</span>
         <span class="shuimo-about-page__stat-count">{{ categoryCount }}</span>
       </router-link>
       <router-link to="/tags" class="shuimo-about-page__stat-card">
-        <span class="shuimo-about-page__stat-label">标签</span>
+        <span class="shuimo-about-page__stat-label">{{ t('shuimo.tags') }}</span>
         <span class="shuimo-about-page__stat-count">{{ tagCount }}</span>
       </router-link>
     </div>
@@ -73,7 +75,7 @@ const tagCount = computed(() => tags.value?.size || 0)
 
     <!-- 返回 -->
     <a href="#" class="shuimo-about-page__back" @click.prevent="goBack">
-      归去来兮 ←
+      {{ t('shuimo.back') }} ←
     </a>
   </div>
 </template>
