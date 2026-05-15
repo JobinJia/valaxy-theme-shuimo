@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useSiteConfig } from 'valaxy'
+import { useI18n } from 'vue-i18n'
 import { useThemeConfig } from '../composables'
 
 const siteConfig = useSiteConfig()
 const themeConfig = useThemeConfig()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -27,7 +29,7 @@ const themeConfig = useThemeConfig()
     />
 
     <!-- 导航 -->
-    <nav v-if="themeConfig?.nav?.length" class="shuimo-header__nav">
+    <nav v-if="themeConfig?.nav?.length" :aria-label="t('shuimo.nav.label')" class="shuimo-header__nav">
       <template v-for="(item, i) in themeConfig.nav" :key="item.link">
         <span v-if="i > 0" class="shuimo-header__nav-sep">|</span>
         <router-link
