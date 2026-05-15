@@ -34,3 +34,22 @@ shuimo:
     restore_blogger_view: Restore default
     location_failed: Could not get location; staying on default view.
     locating: Locating…
+  untitled: Untitled
+  back_to_top: Back to top
+  archives_studio: Studio
+  post_count: '{count} posts'
+  not_found:
+    title: Lost
+    desc: The path leads nowhere. Wander a while and find another way.
+  series:
+    nav_title: In this series
+  theme:
+    toggle_to_light: Switch to light
+    toggle_to_dark: Switch to dark
+  author:
+    anonymous: Anonymous
+  seed:
+    label: seed
+    copy: Copy seed
+    copied: Copied
+    refresh: Regenerate

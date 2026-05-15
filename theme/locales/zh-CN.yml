@@ -5,7 +5,7 @@ shuimo:
   next_post: 下一篇
   back: 归去来兮
   empty: 暂无文章
-  categories: 类目
+  categories: 分类
   tags: 标签
   recent: 近作
   powered_by: 由 Valaxy 驱动
@@ -34,3 +34,22 @@ shuimo:
     restore_blogger_view: 还原博主视角
     location_failed: 无法获取位置，已保留博主视角
     locating: 正在获取位置…
+  untitled: 无题
+  back_to_top: 回到顶部
+  archives_studio: 栖墨斋
+  post_count: '{count} 篇'
+  not_found:
+    title: 迷途
+    desc: 此路不通，山水之间，尚需寻觅。
+  series:
+    nav_title: 本卷目录
+  theme:
+    toggle_to_light: 切换亮色
+    toggle_to_dark: 切换暗色
+  author:
+    anonymous: 佚名
+  seed:
+    label: seed
+    copy: 复制 seed
+    copied: 已复制
+    refresh: 随机重生
