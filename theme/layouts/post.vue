@@ -127,7 +127,7 @@ function goBack() {
 
       <!-- 文章标题 -->
       <h1 class="shuimo-post-page__title">
-        {{ frontmatter.title || '无题' }}
+        {{ frontmatter.title || t('shuimo.untitled') }}
       </h1>
 
       <!-- 日期 + 分类 -->
