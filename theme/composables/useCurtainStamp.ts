@@ -35,17 +35,17 @@ if (typeof window !== 'undefined') {
   fetch(yishanFontUrl).catch(() => {})
 }
 
-type ShapeStr =
-  | 'auto' | 'square' | 'rect' | 'rectangle'
-  | 'circle' | 'ellipse' | 'polygon'
+type ShapeStr
+  = | 'auto' | 'square' | 'rect' | 'rectangle'
+    | 'circle' | 'ellipse' | 'polygon'
 
 function mapShape(s: ShapeStr | undefined, sides?: number, orient?: 'flat-top' | 'point-top'): SealShape {
   switch (s) {
     case 'polygon':
       return { kind: 'polygon', sides: sides ?? 6, orientation: orient ?? 'flat-top' }
-    case 'auto':    return { kind: 'auto' }
-    case 'square':  return { kind: 'square' }
-    case 'circle':  return { kind: 'circle' }
+    case 'auto': return { kind: 'auto' }
+    case 'square': return { kind: 'square' }
+    case 'circle': return { kind: 'circle' }
     case 'ellipse': return { kind: 'ellipse' }
     case 'rectangle': // alias
     case 'rect':

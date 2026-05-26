@@ -189,8 +189,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
         corner: 'none' | 'round' | 'stone'
         roughness: number
       }>
-      carving: Partial<{ intensity: number; breakage: number }>
-      ink: Partial<{ density: number; bleed: number; grain: number; aging: number }>
+      carving: Partial<{ intensity: number, breakage: number }>
+      ink: Partial<{ density: number, bleed: number, grain: number, aging: number }>
       notch: {
         strategy: 'auto' | 'manual' | 'none'
         charIndex?: number
