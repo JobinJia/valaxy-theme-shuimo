@@ -2,12 +2,10 @@
 import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useIsMobile, useThemeConfig } from '../composables'
+import { useIsMobile } from '../composables'
 
 const { isDark, toggleDark } = useValaxyDark()
 const { t } = useI18n()
-const themeConfig = useThemeConfig()
-const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
 const isMobile = useIsMobile()
 const toggleSize = computed(() => isMobile.value ? 32 : 48)
 const toggleStyle = computed(() => ({
@@ -28,10 +26,9 @@ const toggleStyle = computed(() => ({
     <span class="shuimo-theme-toggle__stamp" :style="toggleStyle">
       <ShuimoStamp
         :text="isDark ? '月映' : '日照'"
-        :type="isDark ? 'yin' : 'yang'"
-        shape="rectangle"
+        :mode="isDark ? 'yin' : 'yang'"
+        shape="rect"
         color="#8B2500"
-        :font-family="titleFont"
         :size="toggleSize"
       />
     </span>
