@@ -1,7 +1,7 @@
 // 单例化幕布印章生成：4 个挂载点（桌面 left/right + 移动 top/bottom）原本各跑
-// 一次 generateStampAsync —— 主线程同步串行 + 1.2MB 字体 fontkit parse，4 倍冗余。
+// 一次 generateSealAsync —— 主线程同步串行 + 1.2MB 字体 fontkit parse，4 倍冗余。
 // 现在共享一份 SVG 字符串，挂载点只做轻量 ID 重命名后 v-html。
-import type { StampOptions } from '@jobinjia/shuimo-core/drawing'
+import type { SealOptions, SealShape } from '@jobinjia/shuimo-core/stamp-v2'
 import type { ComputedRef, Ref } from 'vue'
 import { onMounted, ref, watch } from 'vue'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.woff2?url'
@@ -9,32 +9,49 @@ import { useThemeConfig } from './config'
 import { getStampFontWorker } from './useStampFontWorker'
 import { warnMissingShuimoCore } from './warnMissingShuimoCore'
 
-// 运行时 generateStampAsync 在 textCarving='normal' 路径返回 SVG 字符串，
-// 但保留对 { toDataURL } 形态的容错（未来 backend 可能换 canvas 路径）。
-type GenerateStampAsync = (opts: StampOptions) => Promise<unknown>
+type GenerateSealAsync = typeof import('@jobinjia/shuimo-core/stamp-v2').generateSealAsync
 
-let cachedGenerateStampAsync: GenerateStampAsync | null = null
-let drawingModulePromise: Promise<GenerateStampAsync> | null = null
+let cachedGenerateSealAsync: GenerateSealAsync | null = null
+let stampV2ModulePromise: Promise<GenerateSealAsync> | null = null
 
-function ensureDrawingModule(): Promise<GenerateStampAsync> {
-  if (cachedGenerateStampAsync)
-    return Promise.resolve(cachedGenerateStampAsync)
-  if (drawingModulePromise)
-    return drawingModulePromise
-  drawingModulePromise = import('@jobinjia/shuimo-core/drawing').then((mod) => {
-    cachedGenerateStampAsync = mod.generateStampAsync as GenerateStampAsync
-    return cachedGenerateStampAsync
+function ensureStampV2Module(): Promise<GenerateSealAsync> {
+  if (cachedGenerateSealAsync)
+    return Promise.resolve(cachedGenerateSealAsync)
+  if (stampV2ModulePromise)
+    return stampV2ModulePromise
+  stampV2ModulePromise = import('@jobinjia/shuimo-core/stamp-v2').then((mod) => {
+    cachedGenerateSealAsync = mod.generateSealAsync
+    return cachedGenerateSealAsync
   })
-  return drawingModulePromise
+  return stampV2ModulePromise
 }
 
-// 模块加载时（App.vue import useCurtainStamp 即触发）立即并行预热 drawing
+// 模块加载时（App.vue import useCurtainStamp 即触发）立即并行预热 stamp-v2
 // chunk + yishan woff2 fetch；fontWorker 由 useStampFontWorker 共享模块管理，
 // 模块顶部 import 即 spawn，所有 stamp 调用点（curtain / theme toggle / 文章
 // frontmatter stamp）共用一个 worker。
 if (typeof window !== 'undefined') {
-  ensureDrawingModule().catch(() => {})
+  ensureStampV2Module().catch(() => {})
   fetch(yishanFontUrl).catch(() => {})
+}
+
+type ShapeStr =
+  | 'auto' | 'square' | 'rect' | 'rectangle'
+  | 'circle' | 'ellipse' | 'polygon'
+
+function mapShape(s: ShapeStr | undefined, sides?: number, orient?: 'flat-top' | 'point-top'): SealShape {
+  switch (s) {
+    case 'polygon':
+      return { kind: 'polygon', sides: sides ?? 6, orientation: orient ?? 'flat-top' }
+    case 'auto':    return { kind: 'auto' }
+    case 'square':  return { kind: 'square' }
+    case 'circle':  return { kind: 'circle' }
+    case 'ellipse': return { kind: 'ellipse' }
+    case 'rectangle': // alias
+    case 'rect':
+    default:
+      return { kind: 'rect' }
+  }
 }
 
 function parseStampText(text: string | string[]): string[] {
@@ -43,6 +60,18 @@ function parseStampText(text: string | string[]): string[] {
   if (text.includes(',') || text.includes('，'))
     return text.split(/[,，]/).map(s => s.trim())
   return [text]
+}
+
+function pruneEmpty<T extends Record<string, any>>(obj: T): T | undefined {
+  const out: Record<string, any> = {}
+  let has = false
+  for (const k of Object.keys(obj)) {
+    if (obj[k] !== undefined) {
+      out[k] = obj[k]
+      has = true
+    }
+  }
+  return has ? (out as T) : undefined
 }
 
 export function useCurtainStamp(input: ComputedRef<Record<string, any>> | Ref<Record<string, any>>) {
@@ -54,56 +83,46 @@ export function useCurtainStamp(input: ComputedRef<Record<string, any>> | Ref<Re
   // 落地不能覆盖新结果
   let generation = 0
 
-  function buildStampOptions(props: Record<string, any>): StampOptions {
-    const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
+  function buildSealOptions(p: Record<string, any>): SealOptions {
+    const stampColor = p.color || themeConfig.value?.colors?.stamp || '#C8102E'
+    const mode = (p.mode ?? p.type ?? 'yang') as 'yin' | 'yang'
     return {
-      text: parseStampText(props.text),
-      type: props.type,
-      shape: props.shape,
-      color: stampColor,
-      textColor: props.type === 'yin' ? '#FFFFFF' : stampColor,
-      fontFamily: props.fontFamily,
-      fontSize: props.fontSize,
-      fontWeight: props.fontWeight,
-      textCarving: props.textCarving ?? 'normal',
-      offsetX: props.offsetX,
-      offsetY: props.offsetY,
-      borderScale: props.borderScale,
-      columnSpacing: props.columnSpacing,
-      characterSpacing: props.characterSpacing,
-      paddingX: props.paddingX,
-      paddingY: props.paddingY,
-      columnSpacingPx: props.columnSpacingPx,
-      characterSpacingPx: props.characterSpacingPx,
-      paddingXPx: props.paddingXPx,
-      paddingYPx: props.paddingYPx,
-      borderScaleX: props.borderScaleX,
-      borderScaleY: props.borderScaleY,
-      noiseAmountPx: props.noiseAmountPx,
-      borderPointsPx: props.borderPointsPx,
-      cornerRadiusPx: props.cornerRadiusPx,
-      borderWidthPx: props.borderWidthPx,
-      regularShape: props.regularShape,
-      seed: props.seed ?? 69706,
-      fontUrl: yishanFontUrl,
-      // 把 fontkit 解 woff2 + 提取 glyph 路径全部 offload 到 worker，主线程零
-      // brotli 解压。shuimo-core 1.2.x+ 支持。
+      text: parseStampText(p.text ?? p.author ?? ''),
+      size: p.size,
+      mode,
+      shape: mapShape(p.shape, p.polygonSides, p.polygonOrientation),
+      seed: p.seed ?? 69706,
+      script: p.script,
+      font: yishanFontUrl,
+      // fontkit woff2 brotli 解压 offload 到 worker 主线程零成本（shuimo-core
+      // 1.2.x+ 已支持，V2 走同一 worker 协议）。
       fontWorker: getStampFontWorker() ?? undefined,
-    } as StampOptions
+      ink: { color: stampColor, ...(p.ink ?? {}) },
+      border: p.border,
+      carving: p.carving,
+      notch: p.notch,
+      pressing: p.pressing,
+      layout: pruneEmpty({
+        offsetX: p.offsetX,
+        offsetY: p.offsetY,
+        padding: p.padding,
+        gap: p.gap,
+        columnGap: p.columnGap,
+        rowGap: p.rowGap,
+        stretch: p.stretch,
+      }),
+    }
   }
 
   async function render() {
     const id = ++generation
     failed.value = false
     try {
-      const generateStampAsync = await ensureDrawingModule()
-      const result = await generateStampAsync(buildStampOptions(input.value))
+      const generateSealAsync = await ensureStampV2Module()
+      const result = await generateSealAsync(buildSealOptions(input.value))
       if (id !== generation)
         return
-      if (typeof result === 'string')
-        svgRaw.value = result
-      else if (result && typeof (result as any).toDataURL === 'function')
-        svgRaw.value = `<img src="${(result as any).toDataURL()}" width="100%" height="100%" />`
+      svgRaw.value = result.svg ?? null
     }
     catch (err) {
       if (id !== generation)
