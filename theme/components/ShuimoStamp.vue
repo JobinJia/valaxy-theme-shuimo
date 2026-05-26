@@ -2,78 +2,70 @@
 /**
  * ShuimoStamp — Chinese seal stamp component.
  *
- * Renders an SVG seal stamp via @jobinjia/shuimo-core, with a CSS fallback
- * when the optional peer dependency is not installed.
+ * Renders an SVG seal via @jobinjia/shuimo-core's stamp-v2 entry, with a CSS
+ * fallback when the optional peer dependency is not installed.
  *
- * Supports per-post customization: text, color, type (yin/yang), shape,
- * and size can all be overridden via props (driven by frontmatter).
+ * Per-post customization via frontmatter: text, color, mode (yin/yang),
+ * shape, script, and any nested V2 group (border/carving/ink/notch/pressing).
  *
  * Text layout: use commas to split text into columns, e.g. "月下,独酌"
- * renders as a 2×2 grid (right column "月下", left column "独酌").
+ * renders as a 2-column seal (right column "月下", left column "独酌").
  *
  * Default font: YiShanBeiZhuan (seal script / 篆书).
  */
-import { onMounted, ref, watch } from 'vue'
+import type {
+  SealBorderOptions,
+  SealCarvingOptions,
+  SealInkOptions,
+  SealNotchSpec,
+  SealOptions,
+  SealPressingOptions,
+  SealScript,
+  SealShape,
+} from '@jobinjia/shuimo-core/stamp-v2'
+import { computed, onMounted, ref, watch } from 'vue'
 import yishanFontUrl from '../assets/fonts/yishanbeizhuanti.woff2?url'
 import { useThemeConfig } from '../composables'
 import { getStampFontWorker } from '../composables/useStampFontWorker'
 import { warnMissingShuimoCore } from '../composables/warnMissingShuimoCore'
 
+type ShapeStr
+  = | 'auto' | 'square' | 'rect' | 'rectangle'
+    | 'circle' | 'ellipse' | 'polygon'
+
 const props = withDefaults(defineProps<{
   text?: string
+  /** 阴章/阳章 */
+  mode?: 'yin' | 'yang'
+  /** @deprecated 改用 `mode`；若两者都设，`mode` 优先 */
   type?: 'yin' | 'yang'
-  shape?: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
-  fontFamily?: string
+  /** `'rectangle'` 为 `'rect'` 的兼容别名 */
+  shape?: ShapeStr
+  polygonSides?: number
+  polygonOrientation?: 'flat-top' | 'point-top'
+  script?: SealScript
   size?: number
-  fontSize?: number
-  fontWeight?: string
   offsetX?: number
   offsetY?: number
   color?: string
-  textCarving?: 'normal' | 'strong' | 'stone-cut'
   seed?: number
-  borderScale?: number
-  columnSpacing?: number
-  characterSpacing?: number
-  paddingX?: number
-  paddingY?: number
-  columnSpacingPx?: number
-  characterSpacingPx?: number
-  paddingXPx?: number
-  paddingYPx?: number
-  borderScaleX?: number
-  borderScaleY?: number
-  noiseAmountPx?: number
-  borderPointsPx?: number
-  cornerRadiusPx?: number
-  borderWidthPx?: number
-  regularShape?: boolean
+  padding?: number
+  gap?: number
+  columnGap?: number
+  rowGap?: number
+  stretch?: boolean
+  border?: SealBorderOptions
+  carving?: SealCarvingOptions
+  ink?: Omit<SealInkOptions, 'color'>
+  notch?: SealNotchSpec
+  pressing?: SealPressingOptions
 }>(), {
   text: '受命,于天,既寿,永昌',
-  type: 'yang',
-  shape: 'rectangle',
-  fontFamily: '峄山碑篆体',
+  mode: 'yang',
+  shape: 'rect',
   size: 200,
-  fontSize: 70,
-  fontWeight: 'normal',
   offsetX: 0,
   offsetY: 0,
-  borderScale: 1,
-  columnSpacing: undefined,
-  characterSpacing: undefined,
-  paddingX: undefined,
-  paddingY: undefined,
-  columnSpacingPx: 0.35,
-  characterSpacingPx: 3.2,
-  paddingXPx: 1.5,
-  paddingYPx: 1.5,
-  borderScaleX: undefined,
-  borderScaleY: undefined,
-  noiseAmountPx: 10,
-  borderPointsPx: 24,
-  cornerRadiusPx: 10,
-  borderWidthPx: 4,
-  regularShape: true,
 })
 
 const emit = defineEmits<{
@@ -92,6 +84,8 @@ function emitFirstRender() {
   emit('rendered')
 }
 
+const resolvedMode = computed<'yin' | 'yang'>(() => props.mode ?? props.type ?? 'yang')
+
 // stampUid 在 onMounted 才生成：setup 顶层走 SSR 会用 Math.random / crypto，
 // 服务端和客户端值不同导致 hydration 警告 + 整 stamp 重渲。renderStamp 也是
 // onMounted 才跑，stamp 在 SSR 阶段不可见，延后到 client 完全 OK
@@ -105,8 +99,24 @@ function ensureStampUid() {
     stampUid = Math.random().toString(36).slice(2, 10)
 }
 
-// Cache the dynamic import so we only load shuimo-core once
-let generateStampAsync: any = null
+// Cache the dynamic import so we only load stamp-v2 once
+type GenerateSealAsync = typeof import('@jobinjia/shuimo-core/stamp-v2').generateSealAsync
+let generateSealAsync: GenerateSealAsync | null = null
+
+function mapShape(s: ShapeStr): SealShape {
+  switch (s) {
+    case 'polygon':
+      return { kind: 'polygon', sides: props.polygonSides ?? 6, orientation: props.polygonOrientation ?? 'flat-top' }
+    case 'auto': return { kind: 'auto' }
+    case 'square': return { kind: 'square' }
+    case 'circle': return { kind: 'circle' }
+    case 'ellipse': return { kind: 'ellipse' }
+    case 'rectangle': // alias
+    case 'rect':
+    default:
+      return { kind: 'rect' }
+  }
+}
 
 /** Split stamp text into columns by comma delimiter for multi-column layout. */
 function parseStampText(text: string | string[]): string[] {
@@ -117,67 +127,64 @@ function parseStampText(text: string | string[]): string[] {
   return [text]
 }
 
-/** Generate the stamp SVG via shuimo-core. Called on mount and when props change. */
+function pruneEmpty<T extends Record<string, any>>(obj: T): T | undefined {
+  const out: Record<string, any> = {}
+  let has = false
+  for (const k of Object.keys(obj)) {
+    if (obj[k] !== undefined) {
+      out[k] = obj[k]
+      has = true
+    }
+  }
+  return has ? (out as T) : undefined
+}
+
+function buildSealOptions(): SealOptions {
+  const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
+  return {
+    text: parseStampText(props.text),
+    size: props.size,
+    mode: resolvedMode.value,
+    shape: mapShape(props.shape ?? 'rect'),
+    seed: props.seed ?? 69706,
+    script: props.script,
+    font: yishanFontUrl,
+    // fontWorker offload 让 fontkit woff2 brotli 解压离开主线程（shuimo-core
+    // 1.2.x+；V2 走同一 worker 协议）。所有 stamp 共享一个 worker，二次调用
+    // (fontUrl, chars) 命中 worker 内部缓存零成本。
+    fontWorker: getStampFontWorker() ?? undefined,
+    ink: { color: stampColor, ...(props.ink ?? {}) },
+    border: props.border,
+    carving: props.carving,
+    notch: props.notch,
+    pressing: props.pressing,
+    layout: pruneEmpty({
+      offsetX: props.offsetX,
+      offsetY: props.offsetY,
+      padding: props.padding,
+      gap: props.gap,
+      columnGap: props.columnGap,
+      rowGap: props.rowGap,
+      stretch: props.stretch,
+    }),
+  }
+}
+
 async function renderStamp() {
   ensureStampUid()
   try {
-    if (!generateStampAsync) {
-      const mod = await import('@jobinjia/shuimo-core/drawing')
-      generateStampAsync = mod.generateStampAsync
+    if (!generateSealAsync) {
+      const mod = await import('@jobinjia/shuimo-core/stamp-v2')
+      generateSealAsync = mod.generateSealAsync
     }
 
-    // 不等 document.fonts.ready —— 它会等正文/标题等所有 webfont 一起到位，
-    // 最慢可能 1-2s。stamp 实际只需要 yishan 字体，shuimo-core 通过 fontUrl
-    // 接收并在内部 FontFace.load 自己 await，所以这里不需要再等全局字体。
+    const result = await generateSealAsync(buildSealOptions())
+    const svg = result.svg ?? ''
 
-    const textArray = parseStampText(props.text)
-    const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
-    const stampOptions: Record<string, any> = {
-      text: textArray,
-      type: props.type,
-      shape: props.shape,
-      color: stampColor,
-      textColor: props.type === 'yin' ? '#FFFFFF' : stampColor,
-      fontFamily: props.fontFamily,
-      fontSize: props.fontSize,
-      fontWeight: props.fontWeight,
-      textCarving: props.textCarving ?? 'normal',
-      offsetX: props.offsetX,
-      offsetY: props.offsetY,
-      borderScale: props.borderScale,
-      columnSpacing: props.columnSpacing,
-      characterSpacing: props.characterSpacing,
-      paddingX: props.paddingX,
-      paddingY: props.paddingY,
-      columnSpacingPx: props.columnSpacingPx,
-      characterSpacingPx: props.characterSpacingPx,
-      paddingXPx: props.paddingXPx,
-      paddingYPx: props.paddingYPx,
-      borderScaleX: props.borderScaleX,
-      borderScaleY: props.borderScaleY,
-      noiseAmountPx: props.noiseAmountPx,
-      borderPointsPx: props.borderPointsPx,
-      cornerRadiusPx: props.cornerRadiusPx,
-      borderWidthPx: props.borderWidthPx,
-      regularShape: props.regularShape,
-      seed: props.seed ?? 69706,
-      fontUrl: yishanFontUrl,
-      // fontWorker offload 让 fontkit woff2 brotli 解压离开主线程（shuimo-core
-      // 1.2.x+）。所有 stamp 共享一个 worker，二次调用 (fontUrl, chars) 命中
-      // worker 内部缓存零成本。
-      fontWorker: getStampFontWorker() ?? undefined,
-    }
-    const result = await generateStampAsync(stampOptions)
-
-    if (typeof result === 'string') {
-      stampSvg.value = result
-        .replace(/stamp-ink-texture/g, `stamp-ink-texture-${stampUid}`)
-        .replace(/stamp-border-texture/g, `stamp-border-texture-${stampUid}`)
-        .replace(/stamp-text-texture/g, `stamp-text-texture-${stampUid}`)
-    }
-    else if (result?.toDataURL) {
-      stampSvg.value = `<img src="${result.toDataURL()}" width="100%" height="100%" />`
-    }
+    stampSvg.value = svg
+      .replace(/stamp-ink-texture/g, `stamp-ink-texture-${stampUid}`)
+      .replace(/stamp-border-texture/g, `stamp-border-texture-${stampUid}`)
+      .replace(/stamp-text-texture/g, `stamp-text-texture-${stampUid}`)
   }
   catch (err) {
     showFallback.value = true
@@ -197,8 +204,32 @@ onMounted(renderStamp)
 
 // Re-render when stamp props change (e.g. SPA route navigation updates frontmatter)
 watch(
-  () => [props.text, props.type, props.shape, props.color, props.size, props.fontSize, props.fontWeight, props.offsetX, props.offsetY, props.textCarving, props.seed, props.borderScale, props.columnSpacing, props.characterSpacing, props.paddingX, props.paddingY, props.columnSpacingPx, props.characterSpacingPx, props.paddingXPx, props.paddingYPx, props.borderScaleX, props.borderScaleY, props.noiseAmountPx, props.borderPointsPx, props.cornerRadiusPx, props.borderWidthPx, props.regularShape],
+  () => [
+    props.text,
+    props.mode,
+    props.type,
+    props.shape,
+    props.polygonSides,
+    props.polygonOrientation,
+    props.script,
+    props.color,
+    props.size,
+    props.seed,
+    props.offsetX,
+    props.offsetY,
+    props.padding,
+    props.gap,
+    props.columnGap,
+    props.rowGap,
+    props.stretch,
+    props.border,
+    props.carving,
+    props.ink,
+    props.notch,
+    props.pressing,
+  ],
   renderStamp,
+  { deep: true },
 )
 </script>
 
@@ -211,7 +242,7 @@ watch(
   <div
     v-else-if="showFallback"
     class="shuimo-stamp-fallback"
-    :class="[`shuimo-stamp-fallback--${type}`]"
+    :class="[`shuimo-stamp-fallback--${resolvedMode}`]"
     :style="{ width: `${size}px`, height: `${size}px`, fontSize: `${size * 0.4}px` }"
   >
     {{ text.slice(0, 2) }}
