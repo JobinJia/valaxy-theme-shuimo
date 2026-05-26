@@ -41,13 +41,8 @@ function resolveModeColor(value: ThemeModeColor | undefined, dark: boolean): str
 
 const curtainStampConfig = computed(() => themeConfig.value?.stamp?.curtain || {})
 const curtainStampText = computed(() => curtainStampConfig.value.author || '墨')
-const curtainStampType = computed(() => curtainStampConfig.value.type || 'yin')
+const curtainStampMode = computed(() => curtainStampConfig.value.mode ?? curtainStampConfig.value.type ?? 'yin')
 const curtainStampShape = computed(() => curtainStampConfig.value.shape || 'auto')
-const curtainStampFont = computed(() =>
-  curtainStampConfig.value.fontFamily
-  || themeConfig.value?.fonts?.title
-  || 'YiShanBeiZhuan, serif',
-)
 const curtainStampSize = computed(() => {
   const userSize = curtainStampConfig.value.size
   if (typeof userSize === 'number' && userSize > 0)
@@ -62,9 +57,8 @@ const curtainStampSize = computed(() => {
 const curtainStampProps = computed(() => ({
   ...curtainStampConfig.value,
   text: curtainStampText.value,
-  type: curtainStampType.value,
+  mode: curtainStampMode.value,
   shape: curtainStampShape.value,
-  fontFamily: curtainStampFont.value,
   size: curtainStampSize.value,
 }))
 
@@ -275,7 +269,7 @@ watch(isDark, () => {
         :size="curtainStampSize"
         :failed="curtainStampFailed"
         :fallback-text="curtainStampText"
-        :fallback-type="curtainStampType"
+        :fallback-type="curtainStampMode"
       />
     </div>
   </div>
@@ -287,7 +281,7 @@ watch(isDark, () => {
         :size="curtainStampSize"
         :failed="curtainStampFailed"
         :fallback-text="curtainStampText"
-        :fallback-type="curtainStampType"
+        :fallback-type="curtainStampMode"
       />
     </div>
   </div>
@@ -301,7 +295,7 @@ watch(isDark, () => {
         :size="curtainStampSize"
         :failed="curtainStampFailed"
         :fallback-text="curtainStampText"
-        :fallback-type="curtainStampType"
+        :fallback-type="curtainStampMode"
       />
     </div>
   </div>
@@ -313,7 +307,7 @@ watch(isDark, () => {
         :size="curtainStampSize"
         :failed="curtainStampFailed"
         :fallback-text="curtainStampText"
-        :fallback-type="curtainStampType"
+        :fallback-type="curtainStampMode"
       />
     </div>
   </div>
