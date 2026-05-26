@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useThemeConfig } from '../composables'
 import { getSolarTerm, getTimeOfDay } from '../composables/useSolarTerm'
 
-const themeConfig = useThemeConfig()
-const titleFont = computed(() => themeConfig.value?.fonts?.title || 'YiShanBeiZhuan, serif')
 const term = getSolarTerm()
 const time = getTimeOfDay()
 </script>
@@ -13,10 +9,9 @@ const time = getTimeOfDay()
   <div class="shuimo-solar-seal" :title="`${term.name} · ${time.shichen}时`">
     <ShuimoStamp
       :text="term.name"
-      type="yang"
+      mode="yang"
       shape="ellipse"
       color="#8B2500"
-      :font-family="titleFont"
       :size="80"
     />
   </div>
