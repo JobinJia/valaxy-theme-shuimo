@@ -110,6 +110,7 @@ export function useCurtainStamp(input: ComputedRef<Record<string, any>> | Ref<Re
         columnGap: p.columnGap,
         rowGap: p.rowGap,
         stretch: p.stretch,
+        cellHeightMode: p.cellHeightMode,
       }),
     }
   }

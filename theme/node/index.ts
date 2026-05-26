@@ -58,7 +58,8 @@ export const defaultThemeConfig: ThemeConfig = {
     padding: 0,
     gap: 2,
     columnGap: 2,
-    border: { thickness: 5, cornerRadius: 8, corner: 'round', roughness: 0.2 },
+    cellHeightMode: 'fit',
+    border: { thickness: 3, cornerRadius: 8, corner: 'round', roughness: 0.2 },
     carving: { intensity: 0.9 },
     ink: { bleed: 1.0 },
     nav: {
@@ -77,7 +78,8 @@ export const defaultThemeConfig: ThemeConfig = {
       padding: 0,
       gap: 2,
       columnGap: 2,
-      border: { thickness: 5, cornerRadius: 8, corner: 'round', roughness: 0.2 },
+      cellHeightMode: 'fit',
+      border: { thickness: 3, cornerRadius: 8, corner: 'round', roughness: 0.2 },
       carving: { intensity: 0.9 },
       ink: { bleed: 0.7 }, // 阴章 bleed 0.7（gallery 阴章值），阳章用 1.0
     },

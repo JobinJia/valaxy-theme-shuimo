@@ -17,7 +17,7 @@ describe('defaultThemeConfig', () => {
     expect(defaultThemeConfig.stamp?.size).toBe(200)
     expect(defaultThemeConfig.stamp?.color).toBe('#C8102E')
     expect(defaultThemeConfig.stamp?.border).toEqual({
-      thickness: 5,
+      thickness: 3,
       cornerRadius: 8,
       corner: 'round',
       roughness: 0.2,

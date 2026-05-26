@@ -79,6 +79,7 @@ const postStamp = computed(() => {
     columnGap: fm.columnGap ?? global.columnGap,
     rowGap: fm.rowGap ?? global.rowGap,
     stretch: fm.stretch ?? global.stretch,
+    cellHeightMode: fm.cellHeightMode ?? global.cellHeightMode,
     border: fm.border ?? global.border,
     carving: fm.carving ?? global.carving,
     ink: fm.ink ?? global.ink,

@@ -54,6 +54,7 @@ const props = withDefaults(defineProps<{
   columnGap?: number
   rowGap?: number
   stretch?: boolean
+  cellHeightMode?: 'uniform' | 'fit'
   border?: SealBorderOptions
   carving?: SealCarvingOptions
   ink?: Omit<SealInkOptions, 'color'>
@@ -166,6 +167,7 @@ function buildSealOptions(): SealOptions {
       columnGap: props.columnGap,
       rowGap: props.rowGap,
       stretch: props.stretch,
+      cellHeightMode: props.cellHeightMode,
     }),
   }
 }
@@ -222,6 +224,7 @@ watch(
     props.columnGap,
     props.rowGap,
     props.stretch,
+    props.cellHeightMode,
     props.border,
     props.carving,
     props.ink,

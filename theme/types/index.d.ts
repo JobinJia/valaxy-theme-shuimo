@@ -103,6 +103,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
     rowGap: number
     /** → V2 `layout.stretch` */
     stretch: boolean
+    /** → V2 `layout.cellHeightMode`：'fit' 按每行最高字 ink height 分配行高，避免短字 cell 视觉空缺；'uniform'（默认）所有 cell 等高 */
+    cellHeightMode: 'uniform' | 'fit'
     /** → V2 `border.*` */
     border: Partial<{
       thickness: number
@@ -183,6 +185,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
       columnGap: number
       rowGap: number
       stretch: boolean
+      cellHeightMode: 'uniform' | 'fit'
       border: Partial<{
         thickness: number
         cornerRadius: number
