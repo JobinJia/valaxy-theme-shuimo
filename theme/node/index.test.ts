@@ -12,16 +12,23 @@ describe('defaultThemeConfig', () => {
   it('enables the default stamp with author text', () => {
     expect(defaultThemeConfig.stamp?.enable).toBe(true)
     expect(defaultThemeConfig.stamp?.author).toBeTruthy()
-    expect(defaultThemeConfig.stamp?.type).toBe('yang')
-    expect(defaultThemeConfig.stamp?.shape).toBe('rectangle')
-    expect(defaultThemeConfig.stamp?.fontSize).toBe(70)
-    expect(defaultThemeConfig.stamp?.borderScale).toBe(1)
-    expect(defaultThemeConfig.stamp?.columnSpacingPx).toBe(0.35)
-    expect(defaultThemeConfig.stamp?.characterSpacingPx).toBe(3.2)
-    expect(defaultThemeConfig.stamp?.paddingXPx).toBe(1.5)
-    expect(defaultThemeConfig.stamp?.paddingYPx).toBe(1.5)
-    expect(defaultThemeConfig.stamp?.borderWidthPx).toBe(4)
-    expect(defaultThemeConfig.stamp?.regularShape).toBe(true)
+    expect(defaultThemeConfig.stamp?.mode).toBe('yang')
+    expect(defaultThemeConfig.stamp?.shape).toBe('rect')
+    expect(defaultThemeConfig.stamp?.size).toBe(200)
+    expect(defaultThemeConfig.stamp?.color).toBe('#C8102E')
+    expect(defaultThemeConfig.stamp?.border).toEqual({
+      thickness: 4,
+      cornerRadius: 10,
+      corner: 'round',
+      roughness: 0.05,
+    })
+    expect(defaultThemeConfig.stamp?.carving).toEqual({ intensity: 0.4 })
+  })
+
+  it('ships curtain stamp defaults aligned with V1 visual (yin / rect / bleed)', () => {
+    expect(defaultThemeConfig.stamp?.curtain?.mode).toBe('yin')
+    expect(defaultThemeConfig.stamp?.curtain?.shape).toBe('rect')
+    expect(defaultThemeConfig.stamp?.curtain?.ink).toEqual({ bleed: 1.0 })
   })
 
   it('enables core visual subsystems by default', () => {
