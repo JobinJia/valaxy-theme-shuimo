@@ -67,68 +67,87 @@ export interface ThemeConfig extends DefaultTheme.Config {
   stamp: Partial<{
     /** @default true */
     enable: boolean
-    /** 印章文字 */
+    /** 印章文字（传给 V2 的 `text`） */
     author: string
-    /** 印章颜色 @default '#C8102E' */
-    color: string
     /** 阴章/阳章 @default 'yang' */
+    mode: 'yin' | 'yang'
+    /** @deprecated 改用 `mode`；若两者都设，`mode` 优先 */
     type: 'yin' | 'yang'
-    /** 印章形状 @default 'rectangle' */
-    shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
-    /** 字体族 */
-    fontFamily: string
-    /** 字体大小（px） @default 70 */
-    fontSize: number
-    /** 字体粗细 @default 'normal' */
-    fontWeight: string
-    /** 文字刻法 @default 'normal' */
-    textCarving: 'normal' | 'strong' | 'stone-cut'
-    /** 文字水平偏移 -1~1 @default 0 */
-    offsetX: number
-    /** 文字垂直偏移 -1~1 @default 0 */
-    offsetY: number
-    /** 总体边框缩放 @default 1 */
-    borderScale: number
-    /** 列间距比例 @default 0.01 */
-    columnSpacing: number
-    /** 字间距比例 @default 0.045 */
-    characterSpacing: number
-    /** 水平内边距比例 @default 0.015 */
-    paddingX: number
-    /** 垂直内边距比例 @default 0.02 */
-    paddingY: number
-    /** 绝对列间距（px），优先级高于 columnSpacing */
-    columnSpacingPx: number
-    /** 绝对字间距（px），优先级高于 characterSpacing */
-    characterSpacingPx: number
-    /** 绝对水平内边距（px），优先级高于 paddingX */
-    paddingXPx: number
-    /** 绝对垂直内边距（px），优先级高于 paddingY */
-    paddingYPx: number
-    /** 水平边框缩放 @default 1 */
-    borderScaleX: number
-    /** 垂直边框缩放 @default 1 */
-    borderScaleY: number
-    /** 噪点量（px） @default 10 */
-    noiseAmountPx: number
-    /** 边框采样点数 @default 24 */
-    borderPointsPx: number
-    /** 圆角半径（px） @default 10 */
-    cornerRadiusPx: number
-    /** 边框宽度（px） @default 4 */
-    borderWidthPx: number
-    /** 是否规则形状 @default true */
-    regularShape: boolean
-    /** 随机种子，用于可复现的生成 @default 69706 */
+    /** 印章形状 @default 'rect'；`'rectangle'` 为 `'rect'` 的兼容别名 */
+    shape:
+      | 'auto' | 'square' | 'rect' | 'rectangle'
+      | 'circle' | 'ellipse' | 'polygon'
+    /** shape='polygon' 时的边数 @default 6 */
+    polygonSides: number
+    /** shape='polygon' 时的顶/边朝向 @default 'flat-top' */
+    polygonOrientation: 'flat-top' | 'point-top'
+    /** 篆体几何 baseline（V2 新增） */
+    script: 'jinwen' | 'dazhuan' | 'xiaozhuan' | 'jiudiezhuan' | 'custom'
+    /** 印泥色 @default '#C8102E' → V2 `ink.color` */
+    color: string
+    /** 随机种子 @default 69706 */
     seed: number
-    /** 容器显示尺寸（px） */
+    /** 容器显示尺寸 + V2 `size`（px） @default 200 */
     size: number
+    /** 文字水平偏移 -1~1 → V2 `layout.offsetX` @default 0 */
+    offsetX: number
+    /** 文字垂直偏移 -1~1 → V2 `layout.offsetY` @default 0 */
+    offsetY: number
+    /** → V2 `layout.padding` */
+    padding: number
+    /** → V2 `layout.gap`（行列共享） */
+    gap: number
+    /** → V2 `layout.columnGap` */
+    columnGap: number
+    /** → V2 `layout.rowGap` */
+    rowGap: number
+    /** → V2 `layout.stretch` */
+    stretch: boolean
+    /** → V2 `border.*` */
+    border: Partial<{
+      thickness: number
+      cornerRadius: number
+      corner: 'none' | 'round' | 'stone'
+      /** 0..1 */
+      roughness: number
+    }>
+    /** → V2 `carving.*` */
+    carving: Partial<{
+      intensity: number
+      breakage: number
+    }>
+    /** → V2 `ink.*`（不含 color，color 走顶层） */
+    ink: Partial<{
+      density: number
+      bleed: number
+      grain: number
+      aging: number
+    }>
+    /** → V2 `notch.*` */
+    notch: {
+      strategy: 'auto' | 'manual' | 'none'
+      charIndex?: number
+      strokeHint?: 'longest' | 'nearest'
+      jitter?: number
+    }
+    /** → V2 `pressing.*` */
+    pressing: Partial<{
+      rotate: number
+      pressure: number
+      partialLoss: number
+      offset: [number, number]
+    }>
+
     /** 导航菜单印章配置 */
     nav: Partial<{
       /** 阴章/阳章 @default 'yang' */
+      mode: 'yin' | 'yang'
+      /** @deprecated 改用 `mode` */
       type: 'yin' | 'yang'
-      /** 印章形状 @default 'rectangle' */
-      shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
+      /** 印章形状 @default 'rect' */
+      shape: 'auto' | 'square' | 'rect' | 'rectangle' | 'circle' | 'ellipse' | 'polygon'
+      polygonSides: number
+      polygonOrientation: 'flat-top' | 'point-top'
       /** 是否显示菜单 icon @default false */
       showIcon: boolean
       /** 移动端菜单印章尺寸（px） @default 40 */
@@ -136,64 +155,54 @@ export interface ThemeConfig extends DefaultTheme.Config {
       /** 桌面端菜单印章尺寸（px） @default 48 */
       desktopSize: number
     }>
+
     /** 开屏幕布印章配置（独立于主印章，不会继承 `stamp.*`） */
     curtain: Partial<{
       /** 印章文字 @default '受命,于天,既寿,永昌' */
       author: string
       /** 印章颜色 */
       color: string
-      /** 阴章/阳章 @default 'yang' */
+      /** 阴章/阳章 @default 'yin'（V1 默认就是 yin，保留视觉一致） */
+      mode: 'yin' | 'yang'
+      /** @deprecated 改用 `mode` */
       type: 'yin' | 'yang'
-      /** 印章形状 @default 'rectangle' */
-      shape: 'auto' | 'circle' | 'ellipse' | 'rectangle' | 'square'
-      /** 字体族，缺省时走 `fonts.title` */
-      fontFamily: string
-      /** 字体大小（px） @default 70 */
-      fontSize: number
-      /** 字体粗细 @default 'normal' */
-      fontWeight: string
-      /** 文字刻法 @default 'normal' */
-      textCarving: 'normal' | 'strong' | 'stone-cut'
-      /** 文字水平偏移 -1~1 @default 0 */
-      offsetX: number
-      /** 文字垂直偏移 -1~1 @default 0 */
-      offsetY: number
-      /** 总体边框缩放 @default 1 */
-      borderScale: number
-      /** 列间距比例 */
-      columnSpacing: number
-      /** 字间距比例 */
-      characterSpacing: number
-      /** 水平内边距比例 */
-      paddingX: number
-      /** 垂直内边距比例 */
-      paddingY: number
-      /** 绝对列间距（px） @default 0.35 */
-      columnSpacingPx: number
-      /** 绝对字间距（px） @default 3.2 */
-      characterSpacingPx: number
-      /** 绝对水平内边距（px） @default 1.5 */
-      paddingXPx: number
-      /** 绝对垂直内边距（px） @default 1.5 */
-      paddingYPx: number
-      /** 水平边框缩放 @default 1 */
-      borderScaleX: number
-      /** 垂直边框缩放 @default 1 */
-      borderScaleY: number
-      /** 噪点量（px） @default 10 */
-      noiseAmountPx: number
-      /** 边框采样点数 @default 24 */
-      borderPointsPx: number
-      /** 圆角半径（px） @default 10 */
-      cornerRadiusPx: number
-      /** 边框宽度（px） @default 4 */
-      borderWidthPx: number
-      /** 是否规则形状 @default true */
-      regularShape: boolean
-      /** 随机种子 @default 69706 */
+      /** 印章形状 @default 'rect' */
+      shape: 'auto' | 'square' | 'rect' | 'rectangle' | 'circle' | 'ellipse' | 'polygon'
+      polygonSides: number
+      polygonOrientation: 'flat-top' | 'point-top'
+      /** 篆体几何 baseline（V2 新增） */
+      script: 'jinwen' | 'dazhuan' | 'xiaozhuan' | 'jiudiezhuan' | 'custom'
+      /** @default 69706 */
       seed: number
-      /** 幕布印章容器尺寸（px）。未设置时根据文字长度自适应 */
+      /** 幕布印章容器尺寸（px）。未设置时由 App.vue 按文字列数自适应 */
       size: number
+      offsetX: number
+      offsetY: number
+      padding: number
+      gap: number
+      columnGap: number
+      rowGap: number
+      stretch: boolean
+      border: Partial<{
+        thickness: number
+        cornerRadius: number
+        corner: 'none' | 'round' | 'stone'
+        roughness: number
+      }>
+      carving: Partial<{ intensity: number; breakage: number }>
+      ink: Partial<{ density: number; bleed: number; grain: number; aging: number }>
+      notch: {
+        strategy: 'auto' | 'manual' | 'none'
+        charIndex?: number
+        strokeHint?: 'longest' | 'nearest'
+        jitter?: number
+      }
+      pressing: Partial<{
+        rotate: number
+        pressure: number
+        partialLoss: number
+        offset: [number, number]
+      }>
     }>
   }>
 
