@@ -55,40 +55,35 @@ const articleRef = ref<HTMLElement>()
 const imageCaptionConfig = computed(() => themeConfig.value?.imageCaption || {})
 
 // Merge per-post frontmatter stamp config with global theme stamp config.
-// Frontmatter values take priority over global defaults.
+// Frontmatter values take priority over global defaults. Forwarded keys
+// follow the V2 SealOptions surface; `type` / `shape: 'rectangle'` are
+// honored via aliases on ShuimoStamp.
 const postStamp = computed(() => {
   const fm = frontmatter.value.stamp || {}
   const global = stampConfig.value || {}
   return {
     enable: fm.enable ?? global.enable ?? true,
     text: fm.text ?? fm.author ?? global.author ?? '受命,于天,既寿,永昌',
-    type: fm.type ?? global.type ?? 'yang',
-    shape: fm.shape ?? global.shape ?? 'rectangle',
+    mode: fm.mode ?? fm.type ?? global.mode ?? global.type ?? 'yang',
+    shape: fm.shape ?? global.shape ?? 'rect',
+    polygonSides: fm.polygonSides ?? global.polygonSides,
+    polygonOrientation: fm.polygonOrientation ?? global.polygonOrientation,
+    script: fm.script ?? global.script,
     color: fm.color ?? global.color,
     size: fm.size ?? global.size,
-    fontFamily: fm.fontFamily ?? global.fontFamily,
-    fontSize: fm.fontSize ?? global.fontSize,
-    fontWeight: fm.fontWeight ?? global.fontWeight,
-    textCarving: fm.textCarving ?? global.textCarving,
+    seed: fm.seed ?? global.seed,
     offsetX: fm.offsetX ?? global.offsetX,
     offsetY: fm.offsetY ?? global.offsetY,
-    columnSpacing: fm.columnSpacing ?? global.columnSpacing,
-    characterSpacing: fm.characterSpacing ?? global.characterSpacing,
-    paddingX: fm.paddingX ?? global.paddingX,
-    paddingY: fm.paddingY ?? global.paddingY,
-    borderScaleX: fm.borderScaleX ?? global.borderScaleX,
-    borderScaleY: fm.borderScaleY ?? global.borderScaleY,
-    borderScale: fm.borderScale ?? global.borderScale,
-    columnSpacingPx: fm.columnSpacingPx ?? global.columnSpacingPx,
-    characterSpacingPx: fm.characterSpacingPx ?? global.characterSpacingPx,
-    paddingXPx: fm.paddingXPx ?? global.paddingXPx,
-    paddingYPx: fm.paddingYPx ?? global.paddingYPx,
-    noiseAmountPx: fm.noiseAmountPx ?? global.noiseAmountPx,
-    borderPointsPx: fm.borderPointsPx ?? global.borderPointsPx,
-    cornerRadiusPx: fm.cornerRadiusPx ?? global.cornerRadiusPx,
-    borderWidthPx: fm.borderWidthPx ?? global.borderWidthPx,
-    regularShape: fm.regularShape ?? global.regularShape,
-    seed: fm.seed ?? global.seed,
+    padding: fm.padding ?? global.padding,
+    gap: fm.gap ?? global.gap,
+    columnGap: fm.columnGap ?? global.columnGap,
+    rowGap: fm.rowGap ?? global.rowGap,
+    stretch: fm.stretch ?? global.stretch,
+    border: fm.border ?? global.border,
+    carving: fm.carving ?? global.carving,
+    ink: fm.ink ?? global.ink,
+    notch: fm.notch ?? global.notch,
+    pressing: fm.pressing ?? global.pressing,
   }
 })
 
@@ -151,36 +146,7 @@ function goBack() {
 
       <!-- 落款印章 -->
       <div v-if="postStamp.enable" class="shuimo-post-page__stamp">
-        <ShuimoStamp
-          :text="postStamp.text"
-          :type="postStamp.type"
-          :shape="postStamp.shape"
-          :size="postStamp.size || 200"
-          :color="postStamp.color"
-          :font-family="postStamp.fontFamily"
-          :font-size="postStamp.fontSize"
-          :font-weight="postStamp.fontWeight"
-          :text-carving="postStamp.textCarving"
-          :offset-x="postStamp.offsetX"
-          :offset-y="postStamp.offsetY"
-          :column-spacing="postStamp.columnSpacing"
-          :character-spacing="postStamp.characterSpacing"
-          :padding-x="postStamp.paddingX"
-          :padding-y="postStamp.paddingY"
-          :border-scale="postStamp.borderScale"
-          :column-spacing-px="postStamp.columnSpacingPx"
-          :character-spacing-px="postStamp.characterSpacingPx"
-          :padding-x-px="postStamp.paddingXPx"
-          :padding-y-px="postStamp.paddingYPx"
-          :border-scale-x="postStamp.borderScaleX"
-          :border-scale-y="postStamp.borderScaleY"
-          :noise-amount-px="postStamp.noiseAmountPx"
-          :border-points-px="postStamp.borderPointsPx"
-          :corner-radius-px="postStamp.cornerRadiusPx"
-          :border-width-px="postStamp.borderWidthPx"
-          :regular-shape="postStamp.regularShape"
-          :seed="postStamp.seed"
-        />
+        <ShuimoStamp v-bind="postStamp" :size="postStamp.size || 200" />
       </div>
 
       <!-- 系列文章导航 -->
