@@ -17,18 +17,18 @@ describe('defaultThemeConfig', () => {
     expect(defaultThemeConfig.stamp?.size).toBe(200)
     expect(defaultThemeConfig.stamp?.color).toBe('#C8102E')
     expect(defaultThemeConfig.stamp?.border).toEqual({
-      thickness: 4,
-      cornerRadius: 10,
+      thickness: 5,
+      cornerRadius: 8,
       corner: 'round',
-      roughness: 0.05,
+      roughness: 0.2,
     })
-    expect(defaultThemeConfig.stamp?.carving).toEqual({ intensity: 0.4 })
+    expect(defaultThemeConfig.stamp?.carving).toEqual({ intensity: 0.9 })
   })
 
   it('ships curtain stamp defaults aligned with V1 visual (yin / rect / bleed)', () => {
     expect(defaultThemeConfig.stamp?.curtain?.mode).toBe('yin')
     expect(defaultThemeConfig.stamp?.curtain?.shape).toBe('rect')
-    expect(defaultThemeConfig.stamp?.curtain?.ink).toEqual({ bleed: 1.0 })
+    expect(defaultThemeConfig.stamp?.curtain?.ink).toEqual({ bleed: 0.7 })
   })
 
   it('enables core visual subsystems by default', () => {
@@ -105,5 +105,37 @@ describe('applyPreset', () => {
     expect(merged.colors.stamp).toBe('#654321')
     expect(merged.xuanPaper?.variant).toBe('gold')
     expect(merged.xuanPaper?.goldDensity).toBe(0.1)
+  })
+
+  it('translates V1 stamp aliases (type → mode, shape: rectangle → rect)', () => {
+    // Without this normalization, user `type: 'yin'` would coexist with
+    // default `mode: 'yang'` in the merged config, and downstream readers
+    // doing `mode ?? type` would keep returning 'yang'.
+    const merged = applyPreset(defaultThemeConfig, {
+      stamp: {
+        type: 'yin',
+        shape: 'rectangle',
+        nav: { type: 'yang', shape: 'rectangle' },
+        curtain: { type: 'yin', shape: 'rectangle' },
+      } as any,
+    })
+
+    expect(merged.stamp?.mode).toBe('yin')
+    expect(merged.stamp?.shape).toBe('rect')
+    expect(merged.stamp?.nav?.mode).toBe('yang')
+    expect(merged.stamp?.nav?.shape).toBe('rect')
+    expect(merged.stamp?.curtain?.mode).toBe('yin')
+    expect(merged.stamp?.curtain?.shape).toBe('rect')
+  })
+
+  it('prefers V2 `mode` over V1 `type` when both are set', () => {
+    const merged = applyPreset(defaultThemeConfig, {
+      stamp: {
+        mode: 'yin',
+        type: 'yang', // ignored; mode wins
+      } as any,
+    })
+
+    expect(merged.stamp?.mode).toBe('yin')
   })
 })

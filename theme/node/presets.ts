@@ -95,13 +95,43 @@ function deepMerge<T extends Record<string, any>>(target: T, source: Record<stri
 }
 
 /**
+ * V1 → V2 alias 归一化：把用户配置里的 `type` 翻译成 `mode`，`shape: 'rectangle'`
+ * 翻译成 `'rect'`。归一化只在用户「未显式提供 V2 字段」时生效（V2 名字优先于
+ * V1 别名）。在 deepMerge 之前做这步，是为了让用户的 V1 别名也能正确盖过
+ * 默认 V2 字段 —— 否则 default `mode: 'yang'` 与 user `type: 'yin'` 会同时存在，
+ * 下游读 `mode ?? type` 时永远是默认值。
+ */
+function normalizeStampAliases(s: any): any {
+  if (!s)
+    return s
+  const out = { ...s }
+  if (out.mode === undefined && out.type !== undefined)
+    out.mode = out.type
+  if (out.shape === 'rectangle')
+    out.shape = 'rect'
+  return out
+}
+
+function normalizeUserConfig(userConfig: Partial<ThemeConfig>): Partial<ThemeConfig> {
+  if (!userConfig.stamp)
+    return userConfig
+  const stamp = normalizeStampAliases(userConfig.stamp)
+  if (stamp.nav)
+    stamp.nav = normalizeStampAliases(stamp.nav)
+  if (stamp.curtain)
+    stamp.curtain = normalizeStampAliases(stamp.curtain)
+  return { ...userConfig, stamp }
+}
+
+/**
  * 将预设值作为底层默认，用户显式配置覆盖预设
  */
 export function applyPreset(defaultConfig: ThemeConfig, userConfig: Partial<ThemeConfig>): ThemeConfig {
-  const preset = userConfig.preset
+  const normalized = normalizeUserConfig(userConfig)
+  const preset = normalized.preset
   if (!preset || !themePresets[preset])
-    return deepMerge(defaultConfig, userConfig as Record<string, any>)
+    return deepMerge(defaultConfig, normalized as Record<string, any>)
 
   const withPreset = deepMerge(defaultConfig, themePresets[preset] as Record<string, any>)
-  return deepMerge(withPreset, userConfig as Record<string, any>)
+  return deepMerge(withPreset, normalized as Record<string, any>)
 }
