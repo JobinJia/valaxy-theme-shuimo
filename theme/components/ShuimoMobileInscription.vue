@@ -49,10 +49,9 @@ const stampSize = 40
         <span class="shuimo-inscription__stamp">
           <ShuimoStamp
             :text="stampText"
-            type="yin"
+            mode="yin"
             shape="auto"
             :size="stampSize"
-            font-family="YiShanBeiZhuan, serif"
           />
         </span>
       </span>
