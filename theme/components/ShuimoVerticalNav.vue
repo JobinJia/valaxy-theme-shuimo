@@ -16,22 +16,19 @@ const navStampConfig = computed(() => themeConfig.value?.stamp?.nav)
 const mainStampProps = computed(() => ({
   ...(themeConfig.value?.stamp || {}),
   text: themeConfig.value?.stamp?.author || '墨',
-  type: themeConfig.value?.stamp?.type || 'yin',
+  mode: themeConfig.value?.stamp?.mode ?? themeConfig.value?.stamp?.type ?? 'yin',
   shape: themeConfig.value?.stamp?.shape || 'auto',
-  fontFamily: titleFont.value || themeConfig.value?.stamp?.fontFamily || 'YiShanBeiZhuan, serif',
   size: 56,
   offsetX: -4 / 56,
 }))
 const mobileMenuStampProps = computed(() => ({
-  type: navStampConfig.value?.type || 'yang',
-  shape: navStampConfig.value?.shape || 'rectangle',
-  fontFamily: titleFont.value || 'YiShanBeiZhuan, serif',
+  mode: navStampConfig.value?.mode ?? navStampConfig.value?.type ?? 'yang',
+  shape: navStampConfig.value?.shape || 'rect',
   size: navStampConfig.value?.mobileSize || 40,
 }))
 const desktopMenuStampProps = computed(() => ({
-  type: navStampConfig.value?.type || 'yang',
-  shape: navStampConfig.value?.shape || 'rectangle',
-  fontFamily: titleFont.value || 'YiShanBeiZhuan, serif',
+  mode: navStampConfig.value?.mode ?? navStampConfig.value?.type ?? 'yang',
+  shape: navStampConfig.value?.shape || 'rect',
   size: navStampConfig.value?.desktopSize || 48,
 }))
 const showMenuIcon = computed(() => navStampConfig.value?.showIcon === true)
