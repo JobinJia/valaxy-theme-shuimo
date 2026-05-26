@@ -13,9 +13,8 @@ const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const stampProps = computed(() => ({
   ...(themeConfig.value?.stamp || {}),
   text: themeConfig.value?.stamp?.author || '墨',
-  type: themeConfig.value?.stamp?.type || 'yin',
+  mode: themeConfig.value?.stamp?.mode ?? themeConfig.value?.stamp?.type ?? 'yin',
   shape: themeConfig.value?.stamp?.shape || 'auto',
-  fontFamily: titleFont.value || themeConfig.value?.stamp?.fontFamily || 'serif',
   size: 64,
 }))
 
