@@ -2,13 +2,14 @@
 import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useIsMobile, useThemeConfig } from '../composables'
+import { resolveStampSize, useIsMobile, useThemeConfig } from '../composables'
 
 const { isDark, toggleDark } = useValaxyDark()
 const { t } = useI18n()
 const isMobile = useIsMobile()
 const themeConfig = useThemeConfig()
-const toggleSize = computed(() => isMobile.value ? 32 : 48)
+// 默认移动端 32 / 桌面端 48；当用户在 stamp.size 配全局值时统一使用该值。
+const toggleSize = computed(() => resolveStampSize(themeConfig.value?.stamp, isMobile.value ? 32 : 48))
 const toggleStyle = computed(() => ({
   width: `${toggleSize.value}px`,
   height: `${toggleSize.value}px`,

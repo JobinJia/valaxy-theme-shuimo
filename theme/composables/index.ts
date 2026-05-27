@@ -1,5 +1,6 @@
 export * from './astronomy'
 export * from './config'
+export * from './resolveStampSize'
 export * from './useArticleContentObserver'
 export { type AstronomyOptions, type AstronomyState, type MoonState, type SunState, useAstronomy } from './useAstronomy'
 export * from './useBlankSide'

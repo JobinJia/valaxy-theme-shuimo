@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
-import { useBlankSide, useThemeConfig } from '../composables'
+import { resolveVnavMainStampSize, useBlankSide, useThemeConfig } from '../composables'
 
 defineProps<{
   revealed?: boolean
@@ -13,14 +13,19 @@ const { blankSide } = useBlankSide()
 
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const navStampConfig = computed(() => themeConfig.value?.stamp?.nav)
-const mainStampProps = computed(() => ({
-  ...(themeConfig.value?.stamp || {}),
-  text: themeConfig.value?.stamp?.author || '墨',
-  mode: themeConfig.value?.stamp?.mode ?? themeConfig.value?.stamp?.type ?? 'yin',
-  shape: themeConfig.value?.stamp?.shape || 'auto',
-  size: 56,
-  offsetX: -4 / 56,
-}))
+const mainStampProps = computed(() => {
+  // 三层尺寸优先级：stamp.nav.mainSize > stamp.size > 56（vnav 主印章历史值）
+  const size = resolveVnavMainStampSize(themeConfig.value?.stamp)
+  return {
+    ...(themeConfig.value?.stamp || {}),
+    text: themeConfig.value?.stamp?.author || '墨',
+    mode: themeConfig.value?.stamp?.mode ?? themeConfig.value?.stamp?.type ?? 'yin',
+    shape: themeConfig.value?.stamp?.shape || 'auto',
+    size,
+    // 历史 offset 是 -4px / 56px 容器；按 size 等比保持视觉一致
+    offsetX: -4 / size,
+  }
+})
 const mobileMenuStampProps = computed(() => ({
   mode: navStampConfig.value?.mode ?? navStampConfig.value?.type ?? 'yang',
   shape: navStampConfig.value?.shape || 'rect',

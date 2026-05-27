@@ -2,7 +2,7 @@
 import { useCategories, usePostList, useTags } from 'valaxy'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useGoBack, useThemeConfig } from '../composables'
+import { resolveStampSize, useGoBack, useThemeConfig } from '../composables'
 
 const { goBack } = useGoBack()
 
@@ -15,7 +15,8 @@ const stampProps = computed(() => ({
   text: themeConfig.value?.stamp?.author || '墨',
   mode: themeConfig.value?.stamp?.mode ?? themeConfig.value?.stamp?.type ?? 'yin',
   shape: themeConfig.value?.stamp?.shape || 'auto',
-  size: 64,
+  // about 页印章默认 64；用户在 stamp.size 配置全局尺寸时跟随。
+  size: resolveStampSize(themeConfig.value?.stamp, 64),
 }))
 
 const postList = usePostList()

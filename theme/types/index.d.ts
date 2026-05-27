@@ -87,7 +87,13 @@ export interface ThemeConfig extends DefaultTheme.Config {
     color: string
     /** 随机种子 @default 69706 */
     seed: number
-    /** 容器显示尺寸 + V2 `size`（px） @default 200 */
+    /**
+     * 顶层非特化印章 (vnav 主印章、about 页、theme toggle、mobile inscription、
+     * solar seal 等) 的默认尺寸（px）。各组件自己的 size override 优先。
+     * vnav 主印章另有 `stamp.nav.mainSize` 单独覆盖；post 落款印章走 frontmatter；
+     * curtain 走 `stamp.curtain.size`。
+     * @default 200
+     */
     size: number
     /** 文字水平偏移 -1~1 → V2 `layout.offsetX` @default 0 */
     offsetX: number
@@ -170,6 +176,12 @@ export interface ThemeConfig extends DefaultTheme.Config {
       polygonOrientation: 'flat-top' | 'point-top'
       /** 是否显示菜单 icon @default false */
       showIcon: boolean
+      /**
+       * vnav 区域的主"作者印章"尺寸（与 mobile/desktop menu 印章不同）。
+       * 未设置时回退到顶层 `stamp.size`，再回退到 56。
+       * @default 56
+       */
+      mainSize: number
       /** 移动端菜单印章尺寸（px） @default 40 */
       mobileSize: number
       /** 桌面端菜单印章尺寸（px） @default 48 */

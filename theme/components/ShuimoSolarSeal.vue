@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useThemeConfig } from '../composables'
+import { resolveStampSize, useThemeConfig } from '../composables'
 import { getSolarTerm, getTimeOfDay } from '../composables/useSolarTerm'
 
 const themeConfig = useThemeConfig()
@@ -10,6 +10,8 @@ const time = getTimeOfDay()
 const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
 const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
 const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
+// 默认 80；当用户在 stamp.size 配全局值时跟随。
+const sealSize = computed(() => resolveStampSize(themeConfig.value?.stamp, 80))
 </script>
 
 <template>
@@ -19,7 +21,7 @@ const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSu
       mode="yang"
       shape="ellipse"
       color="#8B2500"
-      :size="80"
+      :size="sealSize"
       :font-url="stampFontUrl"
       :font-fallback-url="stampFontFallbackUrl"
       :harfbuzz-subset-wasm-url="stampHarfbuzzWasmUrl"
