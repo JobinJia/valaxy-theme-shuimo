@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { lunar } from '@shuimo-design/lunar'
 import { computed, ref } from 'vue'
-import { resolveStampSize, useThemeConfig } from '../composables'
+import { resolveDecorStampSize, useThemeConfig } from '../composables'
 import { useInterval } from '../composables/useTimedCallback'
 
 const themeConfig = useThemeConfig()
@@ -41,8 +41,9 @@ const stampText = computed(() =>
 const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
 const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
 const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
-// 默认 40；当用户在 stamp.size 配全局值时跟随。
-const stampSize = computed(() => resolveStampSize(themeConfig.value?.stamp, 40))
+// 默认 40；走 stamp.decor.size（装饰类）而非 stamp.size，
+// 否则一改作者主印章尺寸会把这个移动端落款挂件撑成 200px。
+const stampSize = computed(() => resolveDecorStampSize(themeConfig.value?.stamp, 40))
 </script>
 
 <template>

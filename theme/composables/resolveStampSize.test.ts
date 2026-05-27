@@ -1,6 +1,6 @@
 import type { ThemeConfig } from '../types'
 import { describe, expect, it } from 'vitest'
-import { resolveStampSize, resolveVnavMainStampSize } from './resolveStampSize'
+import { resolveDecorStampSize, resolveStampSize, resolveVnavMainStampSize } from './resolveStampSize'
 
 type Stamp = ThemeConfig['stamp']
 
@@ -45,5 +45,35 @@ describe('resolveStampSize', () => {
 
   it('treats stamp.size=0 as a valid override (?? semantics)', () => {
     expect(resolveStampSize({ size: 0 } as Stamp, 64)).toBe(0)
+  })
+
+  it('ignores stamp.decor.size — author-identity helper only reads stamp.size', () => {
+    // Cross-scope isolation: setting decor.size MUST NOT change author seal sizing.
+    expect(resolveStampSize({ decor: { size: 56 } } as Stamp, 64)).toBe(64)
+    expect(resolveStampSize({ size: 200, decor: { size: 56 } } as Stamp, 64)).toBe(200)
+  })
+})
+
+describe('resolveDecorStampSize', () => {
+  it('returns the component default when stamp / decor / decor.size is missing', () => {
+    expect(resolveDecorStampSize(undefined, 32)).toBe(32)
+    expect(resolveDecorStampSize(null, 40)).toBe(40)
+    expect(resolveDecorStampSize({} as Stamp, 80)).toBe(80)
+    expect(resolveDecorStampSize({ decor: {} } as Stamp, 48)).toBe(48)
+  })
+
+  it('returns stamp.decor.size when configured', () => {
+    expect(resolveDecorStampSize({ decor: { size: 56 } } as Stamp, 32)).toBe(56)
+    expect(resolveDecorStampSize({ decor: { size: 24 } } as Stamp, 80)).toBe(24)
+  })
+
+  it('ignores stamp.size — decor helper is independent of author-identity sizing', () => {
+    // The whole point of decor.size: a giant author seal must not balloon UI chrome.
+    expect(resolveDecorStampSize({ size: 200 } as Stamp, 32)).toBe(32)
+    expect(resolveDecorStampSize({ size: 200, decor: { size: 56 } } as Stamp, 32)).toBe(56)
+  })
+
+  it('treats stamp.decor.size=0 as a valid override (?? semantics)', () => {
+    expect(resolveDecorStampSize({ decor: { size: 0 } } as Stamp, 32)).toBe(0)
   })
 })

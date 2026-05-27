@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { resolveStampSize, useThemeConfig } from '../composables'
+import { resolveDecorStampSize, useThemeConfig } from '../composables'
 import { getSolarTerm, getTimeOfDay } from '../composables/useSolarTerm'
 
 const themeConfig = useThemeConfig()
@@ -10,8 +10,9 @@ const time = getTimeOfDay()
 const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
 const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
 const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
-// 默认 80；当用户在 stamp.size 配全局值时跟随。
-const sealSize = computed(() => resolveStampSize(themeConfig.value?.stamp, 80))
+// 默认 80；走 stamp.decor.size（装饰类）而非 stamp.size，
+// 否则一改作者主印章尺寸会把这个节气小印章撑大。
+const sealSize = computed(() => resolveDecorStampSize(themeConfig.value?.stamp, 80))
 </script>
 
 <template>

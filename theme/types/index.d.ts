@@ -88,13 +88,28 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 随机种子 @default 69706 */
     seed: number
     /**
-     * 顶层非特化印章 (vnav 主印章、about 页、theme toggle、mobile inscription、
-     * solar seal 等) 的默认尺寸（px）。各组件自己的 size override 优先。
-     * vnav 主印章另有 `stamp.nav.mainSize` 单独覆盖；post 落款印章走 frontmatter；
-     * curtain 走 `stamp.curtain.size`。
+     * 顶层"作者落款类"印章 (vnav 主印章、about 页、post 落款) 的默认尺寸（px）。
+     * 各组件自己的 size override 优先。vnav 主印章另有 `stamp.nav.mainSize` 单独
+     * 覆盖；post 落款印章走 frontmatter；curtain 走 `stamp.curtain.size`；装饰/
+     * 功能类小印章 (theme toggle / mobile inscription / solar seal) 走
+     * `stamp.decor.size`。
      * @default 200
      */
     size: number
+    /**
+     * 装饰/功能类小印章 (theme toggle、mobile inscription、solar seal) 的默认
+     * 尺寸（px）。独立于 `size` (那是给作者落款类印章的)，便于在"巨大的作者印章"
+     * 和"恒定小尺寸的装饰挂件"之间分开调，避免一改 `stamp.size` 把 toggle 撑成
+     * 200px。各组件自己的 size override 仍优先。
+     *
+     * 字段名故意叫 `decor` 而非 `decorations`，避免和顶层 `themeConfig.decorations`
+     * (画面装饰：花卉/山水/幕布) 视觉混淆。
+     *
+     * @default 由各组件决定 (toggle 32/48, inscription 40, solar 80)
+     */
+    decor: Partial<{
+      size: number
+    }>
     /** 文字水平偏移 -1~1 → V2 `layout.offsetX` @default 0 */
     offsetX: number
     /** 文字垂直偏移 -1~1 → V2 `layout.offsetY` @default 0 */
