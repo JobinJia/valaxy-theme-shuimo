@@ -60,6 +60,12 @@ const props = withDefaults(defineProps<{
   ink?: Omit<SealInkOptions, 'color'>
   notch?: SealNotchSpec
   pressing?: SealPressingOptions
+  /** 印章字形字体 URL（woff2/ttf/otf）。不填走主题自带的 yishanbeizhuanti.woff2。 */
+  fontUrl?: string
+  /** 缺字补全字体 URL（仅 TTF/OTF），配合 `harfbuzzSubsetWasmUrl` 在运行时子集化补字 */
+  fontFallbackUrl?: string
+  /** harfbuzz-subset.wasm 的 URL，配合 `fontFallbackUrl` 使用 */
+  harfbuzzSubsetWasmUrl?: string
 }>(), {
   text: '受命,于天,既寿,永昌',
   mode: 'yang',
@@ -149,7 +155,12 @@ function buildSealOptions(): SealOptions {
     shape: mapShape(props.shape ?? 'rect'),
     seed: props.seed ?? 69706,
     script: props.script,
-    font: yishanFontUrl,
+    // 默认使用主题自带的 yishanbeizhuanti.woff2；用户传入 fontUrl 时覆盖。
+    font: props.fontUrl ?? yishanFontUrl,
+    // 仅在用户显式提供时才传 fallback —— 否则会触发 V2 内部"primary missing
+    // chars + fallback fetch"分支的额外开销与日志告警。
+    fontFallbackUrl: props.fontFallbackUrl,
+    harfbuzzSubsetWasmUrl: props.harfbuzzSubsetWasmUrl,
     // fontWorker offload 让 fontkit woff2 brotli 解压离开主线程（shuimo-core
     // 1.2.x+；V2 走同一 worker 协议）。所有 stamp 共享一个 worker，二次调用
     // (fontUrl, chars) 命中 worker 内部缓存零成本。
@@ -230,6 +241,9 @@ watch(
     props.ink,
     props.notch,
     props.pressing,
+    props.fontUrl,
+    props.fontFallbackUrl,
+    props.harfbuzzSubsetWasmUrl,
   ],
   renderStamp,
   { deep: true },

@@ -37,6 +37,10 @@ useInterval(1000, () => {
 const stampText = computed(() =>
   themeConfig.value?.stamp?.author || '墨',
 )
+// 字体走顶层 stamp.* —— 落款印章和主印章是同一个作者身份。
+const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
+const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
+const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
 const stampSize = 40
 </script>
 
@@ -52,6 +56,9 @@ const stampSize = 40
             mode="yin"
             shape="auto"
             :size="stampSize"
+            :font-url="stampFontUrl"
+            :font-fallback-url="stampFontFallbackUrl"
+            :harfbuzz-subset-wasm-url="stampHarfbuzzWasmUrl"
           />
         </span>
       </span>

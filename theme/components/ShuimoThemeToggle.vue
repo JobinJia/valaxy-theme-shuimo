@@ -2,16 +2,21 @@
 import { useValaxyDark } from 'valaxy'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useIsMobile } from '../composables'
+import { useIsMobile, useThemeConfig } from '../composables'
 
 const { isDark, toggleDark } = useValaxyDark()
 const { t } = useI18n()
 const isMobile = useIsMobile()
+const themeConfig = useThemeConfig()
 const toggleSize = computed(() => isMobile.value ? 32 : 48)
 const toggleStyle = computed(() => ({
   width: `${toggleSize.value}px`,
   height: `${toggleSize.value}px`,
 }))
+// 字体走顶层 stamp.* —— theme toggle 是 24 节气+昼夜印章，与主印章统一字体。
+const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
+const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
+const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
 </script>
 
 <template>
@@ -30,6 +35,9 @@ const toggleStyle = computed(() => ({
         shape="rect"
         color="#8B2500"
         :size="toggleSize"
+        :font-url="stampFontUrl"
+        :font-fallback-url="stampFontFallbackUrl"
+        :harfbuzz-subset-wasm-url="stampHarfbuzzWasmUrl"
       />
     </span>
   </button>

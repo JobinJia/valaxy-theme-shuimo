@@ -1,8 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useThemeConfig } from '../composables'
 import { getSolarTerm, getTimeOfDay } from '../composables/useSolarTerm'
 
+const themeConfig = useThemeConfig()
 const term = getSolarTerm()
 const time = getTimeOfDay()
+// 字体走顶层 stamp.* —— 节气印章与主印章是同一作者身份。
+const stampFontUrl = computed(() => themeConfig.value?.stamp?.fontUrl)
+const stampFontFallbackUrl = computed(() => themeConfig.value?.stamp?.fontFallbackUrl)
+const stampHarfbuzzWasmUrl = computed(() => themeConfig.value?.stamp?.harfbuzzSubsetWasmUrl)
 </script>
 
 <template>
@@ -13,6 +20,9 @@ const time = getTimeOfDay()
       shape="ellipse"
       color="#8B2500"
       :size="80"
+      :font-url="stampFontUrl"
+      :font-fallback-url="stampFontFallbackUrl"
+      :harfbuzz-subset-wasm-url="stampHarfbuzzWasmUrl"
     />
   </div>
 </template>

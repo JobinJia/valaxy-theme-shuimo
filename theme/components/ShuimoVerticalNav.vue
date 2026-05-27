@@ -25,11 +25,18 @@ const mobileMenuStampProps = computed(() => ({
   mode: navStampConfig.value?.mode ?? navStampConfig.value?.type ?? 'yang',
   shape: navStampConfig.value?.shape || 'rect',
   size: navStampConfig.value?.mobileSize || 40,
+  // 字体配置只读 stamp.nav.* —— 与 V1 约定一致：nav 不继承顶层 stamp。
+  fontUrl: navStampConfig.value?.fontUrl,
+  fontFallbackUrl: navStampConfig.value?.fontFallbackUrl,
+  harfbuzzSubsetWasmUrl: navStampConfig.value?.harfbuzzSubsetWasmUrl,
 }))
 const desktopMenuStampProps = computed(() => ({
   mode: navStampConfig.value?.mode ?? navStampConfig.value?.type ?? 'yang',
   shape: navStampConfig.value?.shape || 'rect',
   size: navStampConfig.value?.desktopSize || 48,
+  fontUrl: navStampConfig.value?.fontUrl,
+  fontFallbackUrl: navStampConfig.value?.fontFallbackUrl,
+  harfbuzzSubsetWasmUrl: navStampConfig.value?.harfbuzzSubsetWasmUrl,
 }))
 const showMenuIcon = computed(() => navStampConfig.value?.showIcon === true)
 

@@ -85,6 +85,9 @@ const postStamp = computed(() => {
     ink: fm.ink ?? global.ink,
     notch: fm.notch ?? global.notch,
     pressing: fm.pressing ?? global.pressing,
+    fontUrl: fm.fontUrl ?? global.fontUrl,
+    fontFallbackUrl: fm.fontFallbackUrl ?? global.fontFallbackUrl,
+    harfbuzzSubsetWasmUrl: fm.harfbuzzSubsetWasmUrl ?? global.harfbuzzSubsetWasmUrl,
   }
 })
 

@@ -105,6 +105,24 @@ export interface ThemeConfig extends DefaultTheme.Config {
     stretch: boolean
     /** → V2 `layout.cellHeightMode`：'fit' 按每行最高字 ink height 分配行高，避免短字 cell 视觉空缺；'uniform'（默认）所有 cell 等高 */
     cellHeightMode: 'uniform' | 'fit'
+    /**
+     * 印章字形字体的 URL（woff2/ttf/otf；shuimo-core V2 用 fontkit 抽取矢量路径）。
+     * 不填则用主题自带的 yishanbeizhuanti.woff2。注意这不是 CSS font-family，
+     * 是真实字节流的网络地址。
+     * @example '/fonts/mySeal.woff2'
+     */
+    fontUrl: string
+    /**
+     * 缺字补全字体 URL（必须 TTF/OTF，不支持 woff2）。当主 `fontUrl` 加载的
+     * 字体里没有 `text` 中的某些字时，V2 会用 harfbuzz-subset 对该 URL 做
+     * 运行时子集化补字。需配合 `harfbuzzSubsetWasmUrl`。
+     */
+    fontFallbackUrl: string
+    /**
+     * harfbuzz-subset.wasm 的 URL，配合 `fontFallbackUrl` 使用。wasm 文件随
+     * `harfbuzzjs` npm 包发布，位于 `harfbuzzjs/dist/harfbuzz-subset.wasm`。
+     */
+    harfbuzzSubsetWasmUrl: string
     /** → V2 `border.*` */
     border: Partial<{
       thickness: number
@@ -156,6 +174,12 @@ export interface ThemeConfig extends DefaultTheme.Config {
       mobileSize: number
       /** 桌面端菜单印章尺寸（px） @default 48 */
       desktopSize: number
+      /** 印章字形字体的 URL（woff2/ttf/otf）。不填走主题自带的 yishanbeizhuanti.woff2。 */
+      fontUrl: string
+      /** 缺字补全字体 URL（仅 TTF/OTF），配合 `harfbuzzSubsetWasmUrl` 在运行时子集化补字 */
+      fontFallbackUrl: string
+      /** harfbuzz-subset.wasm 的 URL，配合 `fontFallbackUrl` 使用 */
+      harfbuzzSubsetWasmUrl: string
     }>
 
     /** 开屏幕布印章配置（独立于主印章，不会继承 `stamp.*`） */
@@ -206,6 +230,12 @@ export interface ThemeConfig extends DefaultTheme.Config {
         partialLoss: number
         offset: [number, number]
       }>
+      /** 印章字形字体的 URL（woff2/ttf/otf）。不填走主题自带的 yishanbeizhuanti.woff2。 */
+      fontUrl: string
+      /** 缺字补全字体 URL（仅 TTF/OTF），配合 `harfbuzzSubsetWasmUrl` 在运行时子集化补字 */
+      fontFallbackUrl: string
+      /** harfbuzz-subset.wasm 的 URL，配合 `fontFallbackUrl` 使用 */
+      harfbuzzSubsetWasmUrl: string
     }>
   }>
 

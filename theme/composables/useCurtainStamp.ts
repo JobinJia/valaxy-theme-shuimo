@@ -93,7 +93,13 @@ export function useCurtainStamp(input: ComputedRef<Record<string, any>> | Ref<Re
       shape: mapShape(p.shape, p.polygonSides, p.polygonOrientation),
       seed: p.seed ?? 69706,
       script: p.script,
-      font: yishanFontUrl,
+      // 默认使用主题自带的 yishanbeizhuanti.woff2；用户在 stamp.curtain.fontUrl
+      // 配置自定义字体时覆盖。
+      font: p.fontUrl ?? yishanFontUrl,
+      // 仅在用户显式提供时才传 fallback —— 否则会触发 V2 内部 fallback 分支
+      // 的额外开销与日志告警。
+      fontFallbackUrl: p.fontFallbackUrl,
+      harfbuzzSubsetWasmUrl: p.harfbuzzSubsetWasmUrl,
       // fontkit woff2 brotli 解压 offload 到 worker 主线程零成本（shuimo-core
       // 1.2.x+ 已支持，V2 走同一 worker 协议）。
       fontWorker: getStampFontWorker() ?? undefined,
