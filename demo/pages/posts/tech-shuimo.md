@@ -12,6 +12,7 @@ tags:
   - 水墨
 stamp:
   text: 水墨
+  type: yang
 ---
 
 如何用 HTML Canvas 模拟传统毛笔的压力变化与飞白效果？
