@@ -45,6 +45,25 @@ const props = withDefaults(defineProps<{
   polygonOrientation?: 'flat-top' | 'point-top'
   script?: SealScript
   size?: number
+  /**
+   * Supersampling 倍率。SVG filter（feTurbulence / feDisplacementMap）按
+   * SVG 物理像素栅格化——小 size 下 filter 没有足够像素铺细节，结果就是糊。
+   * 这里让 generateSealAsync 用 size*density 的画布生成，CSS 再缩回 size
+   * 显示，等于在 size 像素里塞进 density² 倍的 filter 细节。
+   *
+   * 实际渲染 size 还会取 `max(size*density, minRenderSize)` —— 见 minRenderSize。
+   */
+  density?: number
+  /**
+   * SVG filter 栅格化的最小物理画布尺寸（像素）。
+   *
+   * 即便 size*density 还不够这个值，也按这个值给 generateSealAsync。这样
+   * size=56 的小印章也能享受到大画布的 filter 细节，CSS 上再无损缩回显示。
+   *
+   * 默认 280 —— shuimo-core playground 的视觉基准 size，对齐 playground 的
+   * 清晰度。小尺寸印章（vnav 56px / nav 48px）会被这个下限拉到 280 渲染。
+   */
+  minRenderSize?: number
   offsetX?: number
   offsetY?: number
   color?: string
@@ -71,6 +90,8 @@ const props = withDefaults(defineProps<{
   mode: 'yang',
   shape: 'rect',
   size: 200,
+  density: 2,
+  minRenderSize: 280,
   offsetX: 0,
   offsetY: 0,
 })
@@ -150,7 +171,10 @@ function buildSealOptions(): SealOptions {
   const stampColor = props.color || themeConfig.value?.colors?.stamp || '#C8102E'
   return {
     text: parseStampText(props.text),
-    size: props.size,
+    // Supersampling：用 density 倍的画布让 filter 有足够像素铺细节，
+    // 但不低于 minRenderSize —— 保证小印章也能拿到 playground 基准的
+    // 像素预算。CSS max-width=${props.size}px 把高密度 SVG 缩回显示尺寸。
+    size: Math.max(props.size * (props.density ?? 1), props.minRenderSize ?? 0),
     mode: resolvedMode.value,
     shape: mapShape(props.shape ?? 'rect'),
     seed: props.seed ?? 69706,
@@ -227,6 +251,8 @@ watch(
     props.script,
     props.color,
     props.size,
+    props.density,
+    props.minRenderSize,
     props.seed,
     props.offsetX,
     props.offsetY,

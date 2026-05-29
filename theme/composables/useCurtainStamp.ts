@@ -86,9 +86,20 @@ export function useCurtainStamp(input: ComputedRef<Record<string, any>> | Ref<Re
   function buildSealOptions(p: Record<string, any>): SealOptions {
     const stampColor = p.color || themeConfig.value?.colors?.stamp || '#C8102E'
     const mode = (p.mode ?? p.type ?? 'yang') as 'yin' | 'yang'
+    // Supersampling：filter 链按 SVG 像素栅格化，小 size 下细节不够。
+    // 用 density 倍的画布生成，挂载点的 CSS max-width 把 SVG 缩回显示尺寸，
+    // 等于在 size 像素里塞 density² 倍的纹理。默认 2。
+    //
+    // 再加 minRenderSize 兜底（默认 280，对齐 shuimo-core playground 的视觉
+    // 基准），保证 size*density 还不够时也不让 filter 像素预算掉到 playground
+    // 以下——这是小印章看着糊的根因。
+    const density = typeof p.density === 'number' && p.density > 0 ? p.density : 2
+    const minRenderSize = typeof p.minRenderSize === 'number' && p.minRenderSize > 0
+      ? p.minRenderSize
+      : 280
     return {
       text: parseStampText(p.text ?? p.author ?? ''),
-      size: p.size,
+      size: Math.max((p.size ?? 0) * density, minRenderSize),
       mode,
       shape: mapShape(p.shape, p.polygonSides, p.polygonOrientation),
       seed: p.seed ?? 69706,

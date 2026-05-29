@@ -1,7 +1,7 @@
 {
   "name": "@jobinjia/valaxy-theme-shuimo",
   "type": "module",
-  "version": "1.1.7-beta.5",
+  "version": "1.1.7",
   "packageManager": "pnpm@10.24.0",
   "author": {
     "name": "jobinjia"
@@ -17,7 +17,7 @@
   "main": "client/index.ts",
   "types": "types/index.ts",
   "peerDependencies": {
-    "@jobinjia/shuimo-core": ">=2.0.3-beta.2",
+    "@jobinjia/shuimo-core": ">=2.0.3",
     "@jobinjia/vite-plugin-shuimo-font-subset": ">=1.0.1-beta.2"
   },
   "peerDependenciesMeta": {
