@@ -143,6 +143,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  // dvh follows the mobile browser's shrinking address bar; vh above is the fallback
+  min-height: 100dvh;
   position: relative;
 
   &__paper {

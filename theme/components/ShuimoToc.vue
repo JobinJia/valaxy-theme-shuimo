@@ -249,6 +249,7 @@ useArticleContentObserver(articleRef, refreshToc)
     right: calc((100vw - 680px) / 2 - 220px);
     width: 180px;
     max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
     overflow-y: auto;
     scrollbar-width: none;
 

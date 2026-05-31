@@ -87,6 +87,7 @@ const pageType = computed(() => {
 <style lang="scss" scoped>
 .shuimo-page {
   min-height: 100vh;
+  min-height: 100dvh;
   background: transparent;
   color: var(--sm-ink-dark);
   position: relative;
@@ -105,6 +106,7 @@ const pageType = computed(() => {
 
 .shuimo-page__paper {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .shuimo-page--plain {
