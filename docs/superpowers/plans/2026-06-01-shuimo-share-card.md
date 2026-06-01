@@ -1394,6 +1394,7 @@ rm -f /tmp/spike-napi-backend.mjs /tmp/spike-wasm.mjs /tmp/spike.png
 - **Task 0.2（WASM noise）**：**非阻塞**。`generateScene` 在 Node 成功本身证明 noise 引擎在 Node 可用（山脊 = FBM noise）；wasm 已 inline/JS-fallback，**无需手动 `initWasmNoiseEngine`、无需 wasm 文件**（published 包里也确实没有 dist/wasm）。
 - **Task 0.3（钩子 + head）**：head 用 `import { useHead } from '@unhead/vue'`（valaxy 底层即 unhead，`@unhead/vue` 可解析）。文章枚举沿用 `collectStampChars` 的 `pages/**/*.md` walk。⚠️ 产物目录时机：closeBundle 在资源拷贝后，写 `public/` 可能赶不上 —— 实现时需解析真实 outDir 或在 build 早期生成；这是集成细节，可行性不受影响。
 - **Task 0.4（客户端耗时）**：待 Phase 3 后在浏览器实测。
+- **追加 spike（Node 印章，2026-06-01）**：`generateCanvasStampAsync` 在 Node（DOM shim + fontData / file:// fontUrl）**渲染失败**（`Cannot set properties of undefined (setting 'width')`，错误在 core 内部，与 xuanPaper/InkMount 不同，未被 shim 覆盖）。山水（`InkMount.generate`）与纸底（`xuanPaper`）在 Node 正常。**决策：v1 构建时 OG 卡不含印章**——Node 端 `drawStampPath` 做 best-effort（try/catch，失败仅 log 一次并跳过，不炸整张卡）。客户端（浏览器）印章不受影响。给 OG 卡加印章需改 shuimo-core canvas-stamp 的 Node 兼容性（走 /orchestrate，列为后续）。
 
 ### 据 spike 修正的计划要点
 
