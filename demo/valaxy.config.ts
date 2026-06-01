@@ -1,4 +1,5 @@
 import type { ThemeConfig } from 'valaxy-theme-shuimo'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'valaxy'
 
 export default defineConfig<ThemeConfig>({
@@ -72,6 +73,12 @@ export default defineConfig<ThemeConfig>({
         type: 'yin',
         shape: 'rectangle',
       },
+    },
+
+    shareCard: {
+      // CJK font for build-time OG card titles (subset of Noto Serif SC, OFL).
+      // Without this, OG card titles render with missing-glyph boxes in Node.
+      titleFontPath: fileURLToPath(new URL('./assets/fonts/noto-serif-sc.card-subset.ttf', import.meta.url)),
     },
 
     decorations: {
