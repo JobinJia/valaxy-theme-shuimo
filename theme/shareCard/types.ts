@@ -42,6 +42,8 @@ export interface Box {
  */
 export interface ComposeDeps {
   drawMountain: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void
-  drawStampPath: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void
+  // Async: the seal renders via shuimo-core's generateCanvasStampAsync, which
+  // loads the woff2 stamp font before rasterizing the carved glyphs.
+  drawStampPath: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void | Promise<void>
   drawXuanPaper: (ctx: CanvasRenderingContext2D, spec: CardSpec) => void
 }

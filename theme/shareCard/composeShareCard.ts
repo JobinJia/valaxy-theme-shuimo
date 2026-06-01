@@ -21,9 +21,9 @@ export async function composeShareCard(
   // 4. Colophon
   drawColophon(ctx, spec)
 
-  // 5. Stamp (only when there is text)
+  // 5. Stamp (only when there is text) — async because the seal font loads
   if (spec.stamp?.text)
-    deps.drawStampPath(ctx, spec, stampBoxFor(spec))
+    await deps.drawStampPath(ctx, spec, stampBoxFor(spec))
 }
 
 function mountainBoxFor(spec: CardSpec): Box {
