@@ -153,6 +153,14 @@ function goBack() {
         <ShuimoStamp v-bind="postStamp" :size="postStamp.size || 200" />
       </div>
 
+      <!-- 分享卡片按钮 + 对话框 -->
+      <ShuimoShareCard
+        v-if="themeConfig?.shareCard?.enable !== false && themeConfig?.shareCard?.button !== false"
+        :slug="route?.path || '/'"
+        :frontmatter="frontmatter"
+        :theme-config="themeConfig || {}"
+      />
+
       <!-- 系列文章导航 -->
       <ShuimoSeriesNav />
 
