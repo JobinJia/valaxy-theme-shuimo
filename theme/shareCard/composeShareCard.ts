@@ -15,8 +15,9 @@ export async function composeShareCard(
   // 2. Mountain region (variant-dependent box)
   deps.drawMountain(ctx, spec, mountainBoxFor(spec))
 
-  // 3. Title
-  drawTitle(ctx, spec)
+  // 3. Title — pass stamp box top so portrait columns stay above the seal.
+  const sBox = spec.stamp?.text ? stampBoxFor(spec) : null
+  drawTitle(ctx, spec, sBox?.y ?? spec.height)
 
   // 4. Colophon
   drawColophon(ctx, spec)
@@ -32,7 +33,7 @@ function mountainBoxFor(spec: CardSpec): Box {
   return { x: Math.round(spec.width * 0.5), y: 0, w: Math.round(spec.width * 0.5), h: spec.height }
 }
 
-function drawTitle(ctx: CanvasRenderingContext2D, spec: CardSpec): void {
+function drawTitle(ctx: CanvasRenderingContext2D, spec: CardSpec, bottomLimit: number): void {
   const fontPx = spec.variant === 'portrait'
     ? Math.round(spec.width * 0.075)
     : Math.round(spec.height * 0.11)
@@ -44,14 +45,21 @@ function drawTitle(ctx: CanvasRenderingContext2D, spec: CardSpec): void {
   ctx.textBaseline = 'top'
 
   if (spec.variant === 'portrait')
-    drawVerticalTitle(ctx, spec, fontPx)
+    drawVerticalTitle(ctx, spec, fontPx, bottomLimit)
   else
     drawHorizontalTitle(ctx, spec, fontPx)
 }
 
-function drawVerticalTitle(ctx: CanvasRenderingContext2D, spec: CardSpec, fontPx: number): void {
+function drawVerticalTitle(
+  ctx: CanvasRenderingContext2D,
+  spec: CardSpec,
+  fontPx: number,
+  // Title columns must not render at or below this y-coordinate.
+  // When no stamp is present this equals spec.height (unconstrained).
+  bottomLimit: number,
+): void {
   const top = Math.round(spec.height * 0.6)
-  const maxPerCol = Math.max(1, Math.floor((spec.height - top - fontPx) / (fontPx * 1.1)))
+  const maxPerCol = Math.max(1, Math.floor((bottomLimit - top - fontPx) / (fontPx * 1.1)))
   const maxChars = maxPerCol * 2
   const chars = [...spec.title]
   const shown = chars.length > maxChars ? [...chars.slice(0, maxChars - 1), '…'] : chars

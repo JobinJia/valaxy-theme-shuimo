@@ -2,9 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { composeShareCard } from './composeShareCard'
 import { resolveCardSpec } from './resolveCardSpec'
 
+interface FillTextCall {
+  text: string
+  x: number
+  y: number
+}
+
 interface MockCtx {
   calls: string[]
   drawnText: string[]
+  fillTextCalls: FillTextCall[]
   fillRect: (x: number, y: number, w: number, h: number) => void
   fillText: (t: string, x: number, y: number) => void
   measureText: (t: string) => { width: number }
@@ -19,13 +26,15 @@ function createMockCtx(): MockCtx {
   const ctx = {
     calls: [] as string[],
     drawnText: [] as string[],
+    fillTextCalls: [] as FillTextCall[],
     font: '16px serif',
     fillStyle: '',
     textBaseline: '',
     globalCompositeOperation: '',
     fillRect(_x: number, _y: number, _w: number, _h: number) { this.calls.push('fillRect') },
-    fillText(t: string, _x: number, _y: number) {
+    fillText(t: string, x: number, y: number) {
       this.drawnText.push(t)
+      this.fillTextCalls.push({ text: t, x, y })
       this.calls.push('fillText')
     },
     measureText(t: string) { return { width: [...t].length * (Number.parseInt(this.font) || 16) } },
@@ -93,5 +102,36 @@ describe('composeShareCard', () => {
     const { deps, order } = fakeDeps()
     await composeShareCard(spec, ctx as unknown as CanvasRenderingContext2D, deps)
     expect(order).not.toContain('stamp')
+  })
+
+  // --- FIX 2: portrait title must not overlap the seal box ---
+
+  it('portrait title glyphs stay above the stamp box top when stamp is set', async () => {
+    const longTitle = '寒'.repeat(20)
+    const spec = resolveCardSpec({
+      slug: '/posts/portrait-stamp',
+      variant: 'portrait',
+      frontmatter: { title: longTitle },
+      themeConfig: { stamp: { author: '受命之宝' } },
+    })
+    const ctx = createMockCtx()
+    const { deps } = fakeDeps()
+    await composeShareCard(spec, ctx as unknown as CanvasRenderingContext2D, deps)
+
+    // Replicate stampBoxFor geometry to determine the expected boundary.
+    // stampBoxFor: size = round(width * 0.14) for portrait; y = height - size - round(height * 0.06)
+    const size = Math.round(spec.width * 0.14)
+    const stampBoxTop = spec.height - size - Math.round(spec.height * 0.06)
+
+    // Title glyphs are single-character fillText calls (length === 1).
+    // The colophon is a multi-character joined string — exclude it by length.
+    const titleGlyphs = ctx.fillTextCalls.filter(c => [...c.text].length === 1)
+
+    // There must be at least one title glyph rendered.
+    expect(titleGlyphs.length).toBeGreaterThan(0)
+
+    // Every title glyph's y must be strictly above the stamp box top.
+    for (const glyph of titleGlyphs)
+      expect(glyph.y).toBeLessThan(stampBoxTop)
   })
 })
