@@ -1,4 +1,5 @@
 import type { DefaultTheme } from 'valaxy'
+import type { CardVariant } from '../shareCard/types'
 
 export namespace ShuimoTheme {
   export type Config = ThemeConfig
@@ -391,6 +392,9 @@ export interface ThemeConfig extends DefaultTheme.Config {
     prefix: string
   }>
 
+  /** 水墨分享卡片 / OG 图配置 */
+  shareCard?: ShareCardConfig
+
   /** 天文驱动的暗色夜空（仅 dark mode 生效，且仅在显示 Hero 的页面） */
   astronomy?: Partial<{
     /** 总开关 @default true */
@@ -445,6 +449,21 @@ export interface ThemeConfig extends DefaultTheme.Config {
       driftDuration: number
     }>
   }>
+}
+
+export interface ShareCardConfig {
+  /** 总开关。默认 true；shuimo-core 缺席时自动失效。 */
+  enable?: boolean
+  /** 文章页是否显示主动分享按钮。默认 true。 */
+  button?: boolean
+  /** 是否构建时生成 PNG 并注入 og:image。默认 true。 */
+  og?: boolean
+  /** 出哪些版式。默认 ['portrait', 'landscape']。 */
+  variants?: CardVariant[]
+  /** 横版尺寸，默认 1200×630（OG 标准）。 */
+  landscape?: { width?: number, height?: number }
+  /** 竖版尺寸，默认 1080×1440（3:4）。 */
+  portrait?: { width?: number, height?: number }
 }
 
 export interface NavItem {
