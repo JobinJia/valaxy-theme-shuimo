@@ -185,6 +185,50 @@ const themeConfigExample = {
 }
 ```
 
+## 水墨分享卡片 / Share Card (OG 图)
+
+`shareCard` 提供两项功能：**文章页主动分享按钮**（客户端实时渲染，含印章）和**构建时 OG 图生成**（Node 端静态 PNG，自动注入 `og:image` / `twitter:card` meta）。
+
+### 依赖
+
+| 依赖                    | 用途                            | 说明                                                                         |
+| ----------------------- | ------------------------------- | ---------------------------------------------------------------------------- |
+| `@jobinjia/shuimo-core` | 宣纸纹理 + 山水画 + 印章绘制    | 必选可选依赖（缺席时 `shareCard` 自动失效）                                  |
+| `@napi-rs/canvas`       | 构建时 OG 图合成（Node Canvas） | 主题 devDependency；消费者如需 OG 图须自行安装；缺席时构建静默跳过并打印提示 |
+
+### 配置项
+
+| 配置项                       | 类型                            | 默认值                      | 说明                                                                                                                                            |
+| ---------------------------- | ------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shareCard.enable`           | `boolean`                       | `true`                      | 总开关；`@jobinjia/shuimo-core` 缺席时自动失效                                                                                                  |
+| `shareCard.button`           | `boolean`                       | `true`                      | 文章页是否显示「分享」按钮及预览对话框（客户端渲染，含印章）                                                                                    |
+| `shareCard.og`               | `boolean`                       | `true`                      | 是否在构建时生成 OG PNG 并注入 `og:image` / `twitter:card` meta                                                                                 |
+| `shareCard.variants`         | `('portrait' \| 'landscape')[]` | `['portrait', 'landscape']` | 出哪些版式；`portrait` 竖版用于主动分享，`landscape` 横版用于 OG 链接预览                                                                       |
+| `shareCard.portrait.width`   | `number`                        | `1080`                      | 竖版宽度（px）                                                                                                                                  |
+| `shareCard.portrait.height`  | `number`                        | `1440`                      | 竖版高度（px）                                                                                                                                  |
+| `shareCard.landscape.width`  | `number`                        | `1200`                      | 横版宽度（px），OG 标准宽度                                                                                                                     |
+| `shareCard.landscape.height` | `number`                        | `630`                       | 横版高度（px），OG 标准高度                                                                                                                     |
+| `shareCard.titleFontPath`    | `string`                        | —                           | 构建时 OG 卡片标题所用 CJK 字体的本地路径（TTF/OTF）。未设置时 OG 卡片中文标题可能显示豆腐块；客户端分享卡片不受影响（走站点已加载的 web 字体） |
+
+```ts
+const themeConfigExample = {
+  shareCard: {
+    enable: true,
+    button: true,
+    og: true,
+    variants: ['portrait', 'landscape'],
+    portrait: { width: 1080, height: 1440 },
+    landscape: { width: 1200, height: 630 },
+    titleFontPath: '/home/user/.fonts/NotoSerifCJK-Regular.ttf',
+  },
+}
+```
+
+### 已知限制
+
+1. **OG 卡片不含印章**：`@jobinjia/shuimo-core` 的 Canvas 印章渲染仅限浏览器环境，构建时（Node）无法执行。印章会出现在客户端分享按钮的预览卡片里，但不会出现在静态 OG PNG 里。
+2. **OG 卡片标题需配置字体**：构建时 Node 没有 web 字体上下文，CJK 标题渲染依赖 `shareCard.titleFontPath` 指向的本地 TTF/OTF 文件。未配置时构建日志会打印提示，OG 图中文标题将显示为系统回退字形（可能是豆腐块）。
+
 ## 印章调参 / Stamp Tuning
 
 主题层现在不再二次修改 `shuimo-core` 生成结果，而是把参数直接透传给底层 API。也就是说，用户可以只通过 `themeConfig.stamp` 来实时调整印章效果。
