@@ -1377,12 +1377,30 @@ rm -f /tmp/spike-napi-backend.mjs /tmp/spike-wasm.mjs /tmp/spike.png
 
 ---
 
-## Spike Results（执行 Phase 0 时填写）
+## Spike Results（2026-06-01 隔离环境实测，/tmp/shuimo-spike）
 
-- Task 0.1（napi → Canvas2DBackend）：_待填_
-- Task 0.2（Node WASM noise init）：_待填_
-- Task 0.3（构建钩子 + 产物目录 + head API）：_待填_
-- Task 0.4（客户端同步生成耗时）：_待填_
+- **Task 0.1（napi → core 渲染）**：
+  - `InkMount.generateScene(...)` 纯数据生成 ✅（5 层山，Node 直接可用）
+  - `generateStampPath(...)` 返回 `{ path, bounds }` 矢量 ✅（Node-safe，不碰 canvas）
+  - ⚠️ **`InkMount.generate({ ctx })` / `Canvas2DBackend` / `xuanPaper({mode:'canvas'})` 直接调会 `document is not defined`** —— core 的 canvas 渲染路径内部用 `document.createElement('canvas')` 建离屏层，是浏览器专用。
+  - ✅ **解法（无需改 core、无需 orchestrate）**：在 import core 之前给 Node 注入极简 DOM shim：
+    ```js
+    import { createCanvas } from '@napi-rs/canvas'
+    globalThis.document = { createElement: tag => tag === 'canvas' ? createCanvas(300, 150) : (() => { throw new Error(`unsupported <${tag}>`) })() }
+    globalThis.OffscreenCanvas = function (w, h) { return createCanvas(w, h) }
+    ```
+    加 shim 后 `InkMount.generate({ width, height, seed, ctx, backend: 'canvas2d' })` 与 `xuanPaper({mode:'canvas'})` 均成功渲染出真实水墨山 + 宣纸纹理（已肉眼验证 PNG）。
+  - `InkMount.generate` 接受 `ctx?: CanvasRenderingContext2D` + `backend: 'canvas2d'`，直接喂 napi ctx 即可，输出 `RenderOutput { type: 'canvas' }`。
+- **Task 0.2（WASM noise）**：**非阻塞**。`generateScene` 在 Node 成功本身证明 noise 引擎在 Node 可用（山脊 = FBM noise）；wasm 已 inline/JS-fallback，**无需手动 `initWasmNoiseEngine`、无需 wasm 文件**（published 包里也确实没有 dist/wasm）。
+- **Task 0.3（钩子 + head）**：head 用 `import { useHead } from '@unhead/vue'`（valaxy 底层即 unhead，`@unhead/vue` 可解析）。文章枚举沿用 `collectStampChars` 的 `pages/**/*.md` walk。⚠️ 产物目录时机：closeBundle 在资源拷贝后，写 `public/` 可能赶不上 —— 实现时需解析真实 outDir 或在 build 早期生成；这是集成细节，可行性不受影响。
+- **Task 0.4（客户端耗时）**：待 Phase 3 后在浏览器实测。
+
+### 据 spike 修正的计划要点
+
+1. **新增 `theme/node/domShim.ts`**（仅构建期用）：导出 `installNodeCanvasShim()`，在 `buildShareCardPlugin` 动态 import shuimo-core **之前**调用。Task 14 的 `buildNodeDeps` 必须先 `installNodeCanvasShim()`。
+2. **客户端 `adaptCoreToDeps`（Task 10）**：`drawXuanPaper` 用 `xuanPaper({mode:'canvas'})` 拿 canvas 再 `ctx.drawImage`；`drawMountain` 用 `InkMount.generate({ ctx: 离屏ctx })` 或直接传目标 ctx + box 平移；`drawStampPath` 用 `generateStampPath` 拿 `{path,bounds}` 自己描到 ctx（矢量，两端一致）。
+3. **Task 0.2 相关步骤删除**：`buildNodeDeps` 不需要 WASM 初始化逻辑。
+4. **依赖**：构建时与 Phase 3 Node 单测都需 workspace 内 `@napi-rs/canvas`；当前被 `trustPolicy: no-downgrade` 拦截（chokidar@4.0.3 误报），**待用户决定安装方式**（见对话）。Phase 1-2 不需要它，可先行。
 
 ---
 
