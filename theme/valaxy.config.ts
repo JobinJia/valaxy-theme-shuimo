@@ -1,6 +1,6 @@
 import type { ThemeConfig } from './types'
 import { defineTheme } from 'valaxy'
-import { buildShuimoFontSubsetPlugin, defaultThemeConfig, generateSafelist, themePlugin } from './node'
+import { buildShareCardPlugin, buildShuimoFontSubsetPlugin, defaultThemeConfig, generateSafelist, themePlugin } from './node'
 import { applyPreset } from './node/presets'
 
 export default defineTheme<ThemeConfig>((options) => {
@@ -8,6 +8,7 @@ export default defineTheme<ThemeConfig>((options) => {
   const effectiveThemeConfig = applyPreset(defaultThemeConfig, userThemeConfig)
 
   const fontSubsetPlugin = buildShuimoFontSubsetPlugin(options)
+  const shareCardPlugin = buildShareCardPlugin(options)
 
   return {
     themeConfig: effectiveThemeConfig,
@@ -15,6 +16,7 @@ export default defineTheme<ThemeConfig>((options) => {
       plugins: [
         themePlugin(options),
         ...(fontSubsetPlugin ? [fontSubsetPlugin] : []),
+        shareCardPlugin,
       ],
     },
     unocss: {
