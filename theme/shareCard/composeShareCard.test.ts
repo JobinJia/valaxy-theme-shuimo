@@ -39,9 +39,12 @@ function fakeDeps() {
   return {
     order,
     deps: {
-      drawXuanPaper: () => order.push('paper'),
-      drawMountain: () => order.push('mountain'),
-      drawStampPath: () => order.push('stamp'),
+      // Block bodies so each returns void — drawStampPath's type is
+      // `void | Promise<void>`, to which a bare `array.push()` number is not
+      // assignable (the return-value-to-void rule excludes union returns).
+      drawXuanPaper: () => { order.push('paper') },
+      drawMountain: () => { order.push('mountain') },
+      drawStampPath: () => { order.push('stamp') },
     },
   }
 }
