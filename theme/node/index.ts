@@ -85,6 +85,15 @@ export const defaultThemeConfig: ThemeConfig = {
     },
   },
 
+  shareCard: {
+    enable: true,
+    button: true,
+    og: true,
+    variants: ['portrait', 'landscape'],
+    landscape: { width: 1200, height: 630 },
+    portrait: { width: 1080, height: 1440 },
+  },
+
   decorations: {
     enable: true,
     seasonAware: true,
