@@ -414,6 +414,8 @@ function collectStampChars(userRoot: string): Set<string> {
   return chars
 }
 
+export { buildShareCardPlugin } from './buildShareCardPlugin'
+
 export function buildShuimoFontSubsetPlugin(
   options: ResolvedValaxyOptions<ThemeConfig>,
 ): Plugin | null {
