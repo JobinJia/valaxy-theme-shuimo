@@ -62,11 +62,18 @@ export function resolveCardSpec(input: ResolveCardSpecInput): CardSpec {
   // Explicit dateText wins; otherwise derive from raw date field.
   const dateText = fm.dateText ?? formatDate(fm.date)
 
+  const seed = hashString(slug)
+
+  // Deterministically derive scene type and flower variant from seed.
+  // ~1/3 of posts get a flower; the rest render the ink landscape.
+  const scene: CardSpec['scene'] = seed % 3 === 0 ? 'flower' : 'landscape'
+  const flowerType: CardSpec['flowerType'] = seed % 2 === 0 ? 'herbal' : 'woody'
+
   return {
     variant,
     width,
     height,
-    seed: hashString(slug),
+    seed,
     title: fm.title ?? '',
     subtitle: fm.subtitle,
     author: tc.sidebar?.author?.name,
@@ -81,5 +88,7 @@ export function resolveCardSpec(input: ResolveCardSpecInput): CardSpec {
       primary: tc.colors?.primary ?? '#8B4513',
       paper: DEFAULT_PAPER,
     },
+    scene,
+    flowerType,
   }
 }

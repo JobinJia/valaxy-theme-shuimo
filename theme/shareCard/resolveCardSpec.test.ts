@@ -100,4 +100,49 @@ describe('resolveCardSpec', () => {
     expect(spec.dateText).toBeTruthy()
     expect(spec.dateText).toContain('2026')
   })
+
+  // --- scene / flowerType determinism ---
+
+  it('scene is one of the allowed literals', () => {
+    const spec = resolveCardSpec({ ...baseInput, variant: 'landscape' })
+    expect(['landscape', 'flower']).toContain(spec.scene)
+  })
+
+  it('flowerType is one of the allowed literals', () => {
+    const spec = resolveCardSpec({ ...baseInput, variant: 'landscape' })
+    expect(['herbal', 'woody']).toContain(spec.flowerType)
+  })
+
+  it('same slug always yields the same scene and flowerType (stability)', () => {
+    const a = resolveCardSpec({ ...baseInput, variant: 'portrait' })
+    const b = resolveCardSpec({ ...baseInput, variant: 'landscape' })
+    expect(a.scene).toBe(b.scene)
+    expect(a.flowerType).toBe(b.flowerType)
+  })
+
+  it('different slugs can produce different scenes', () => {
+    // Find two slugs that differ by checking enough variants.
+    // '/posts/hello' and '/posts/other' already have different seeds (proven by
+    // the seed stability test above); we just need at least one to differ in scene.
+    const slugs = ['/posts/hello', '/posts/other', '/posts/abc', '/posts/xyz', '/posts/a', '/posts/b']
+    const scenes = slugs.map(slug =>
+      resolveCardSpec({ ...baseInput, slug, variant: 'landscape' }).scene,
+    )
+    // At least two distinct scene values must exist across these slugs.
+    const unique = new Set(scenes)
+    expect(unique.size).toBeGreaterThan(1)
+  })
+
+  it('scene is derived from seed (seed % 3 === 0 → flower)', () => {
+    // Verify the derivation formula is consistent: spec.seed % 3 should match.
+    const spec = resolveCardSpec({ ...baseInput, variant: 'landscape' })
+    const expectedScene = spec.seed % 3 === 0 ? 'flower' : 'landscape'
+    expect(spec.scene).toBe(expectedScene)
+  })
+
+  it('flowerType is derived from seed (seed % 2 === 0 → herbal)', () => {
+    const spec = resolveCardSpec({ ...baseInput, variant: 'landscape' })
+    const expectedFlowerType = spec.seed % 2 === 0 ? 'herbal' : 'woody'
+    expect(spec.flowerType).toBe(expectedFlowerType)
+  })
 })

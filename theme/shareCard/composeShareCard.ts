@@ -12,8 +12,8 @@ export async function composeShareCard(
   ctx.fillRect(0, 0, spec.width, spec.height)
   ctx.globalCompositeOperation = 'source-over'
 
-  // 2. Mountain region (variant-dependent box)
-  deps.drawMountain(ctx, spec, mountainBoxFor(spec))
+  // 2. Scene region (ink landscape or flower, variant-dependent box)
+  deps.drawScene(ctx, spec, sceneBoxFor(spec))
 
   // 3. Title — pass stamp box top so portrait columns stay above the seal.
   const sBox = spec.stamp?.text ? stampBoxFor(spec) : null
@@ -27,7 +27,7 @@ export async function composeShareCard(
     await deps.drawStampPath(ctx, spec, stampBoxFor(spec))
 }
 
-function mountainBoxFor(spec: CardSpec): Box {
+function sceneBoxFor(spec: CardSpec): Box {
   if (spec.variant === 'portrait')
     return { x: 0, y: 0, w: spec.width, h: Math.round(spec.height * 0.55) }
   return { x: Math.round(spec.width * 0.5), y: 0, w: Math.round(spec.width * 0.5), h: spec.height }

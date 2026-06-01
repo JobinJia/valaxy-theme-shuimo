@@ -52,7 +52,7 @@ function fakeDeps() {
       // `void | Promise<void>`, to which a bare `array.push()` number is not
       // assignable (the return-value-to-void rule excludes union returns).
       drawXuanPaper: () => { order.push('paper') },
-      drawMountain: () => { order.push('mountain') },
+      drawScene: () => { order.push('scene') },
       drawStampPath: () => { order.push('stamp') },
     },
   }
@@ -89,7 +89,7 @@ describe('composeShareCard', () => {
     const ctx = createMockCtx()
     const { deps, order } = fakeDeps()
     await composeShareCard(spec, ctx as unknown as CanvasRenderingContext2D, deps)
-    expect(order).toContain('mountain')
+    expect(order).toContain('scene')
     expect(order).toContain('stamp')
     const joined = ctx.drawnText.join('')
     expect(joined).toContain('墨客')

@@ -104,12 +104,24 @@ async function buildNodeDeps(napi: typeof import('@napi-rs/canvas')): Promise<Co
       const paper = elements.xuanPaper({ width: spec.width, height: spec.height, seed: spec.seed, mode: 'canvas' })
       ctx.drawImage(paper as unknown as CanvasImageSource, 0, 0)
     },
-    drawMountain(ctx, spec, box) {
-      const out = drawing.InkMount.generate({ width: box.w, height: box.h, seed: spec.seed })
-      if (out.type === 'canvas')
-        ctx.drawImage(out.canvas as unknown as CanvasImageSource, box.x, box.y)
-      else
-        ctx.drawImage(out.bitmap as unknown as CanvasImageSource, box.x, box.y)
+    drawScene(ctx, spec, box) {
+      if (spec.scene === 'flower') {
+        const flower = drawing.generateFlowerCanvas({
+          seed: spec.seed,
+          type: spec.flowerType,
+          width: box.w,
+          height: box.h,
+          background: 'none',
+        })
+        ctx.drawImage(flower as unknown as CanvasImageSource, box.x, box.y)
+      }
+      else {
+        const out = drawing.InkMount.generate({ width: box.w, height: box.h, seed: spec.seed, layers: 6, mist: { coverage: 0.6 } })
+        if (out.type === 'canvas')
+          ctx.drawImage(out.canvas as unknown as CanvasImageSource, box.x, box.y)
+        else
+          ctx.drawImage(out.bitmap as unknown as CanvasImageSource, box.x, box.y)
+      }
     },
     async drawStampPath(_ctx, _spec, _box) {
       // Build-time best-effort: core's canvas stamp is browser-only and throws

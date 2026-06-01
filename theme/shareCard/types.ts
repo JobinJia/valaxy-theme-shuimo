@@ -27,6 +27,10 @@ export interface CardSpec {
     primary: string
     paper: string
   }
+  /** Which scene to render in the image region: ink landscape or ink flower. */
+  scene: 'landscape' | 'flower'
+  /** Flower species variant; only meaningful when scene === 'flower', always set for determinism. */
+  flowerType: 'herbal' | 'woody'
 }
 
 export interface Box {
@@ -41,7 +45,7 @@ export interface Box {
  * 合成器不直接 import core，便于「core 缺席时不触发加载」。
  */
 export interface ComposeDeps {
-  drawMountain: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void
+  drawScene: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void
   // Async: the seal renders via shuimo-core's generateCanvasStampAsync, which
   // loads the woff2 stamp font before rasterizing the carved glyphs.
   drawStampPath: (ctx: CanvasRenderingContext2D, spec: CardSpec, box: Box) => void | Promise<void>

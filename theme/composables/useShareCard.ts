@@ -41,16 +41,24 @@ async function loadComposeDeps(): Promise<ComposeDeps | null> {
           ctx.drawImage(paper, 0, 0)
         },
 
-        drawMountain(ctx, spec, box) {
-          const out = drawing.InkMount.generate({
-            width: box.w,
-            height: box.h,
-            seed: spec.seed,
-          })
-          if (out.type === 'canvas')
-            ctx.drawImage(out.canvas, box.x, box.y)
-          else
-            ctx.drawImage(out.bitmap, box.x, box.y)
+        drawScene(ctx, spec, box) {
+          if (spec.scene === 'flower') {
+            const flower = drawing.generateFlowerCanvas({
+              seed: spec.seed,
+              type: spec.flowerType,
+              width: box.w,
+              height: box.h,
+              background: 'none',
+            })
+            ctx.drawImage(flower, box.x, box.y)
+          }
+          else {
+            const out = drawing.InkMount.generate({ width: box.w, height: box.h, seed: spec.seed, layers: 6, mist: { coverage: 0.6 } })
+            if (out.type === 'canvas')
+              ctx.drawImage(out.canvas, box.x, box.y)
+            else
+              ctx.drawImage(out.bitmap, box.x, box.y)
+          }
         },
 
         async drawStampPath(ctx, spec, box) {
@@ -108,6 +116,11 @@ export function useShareCard(opts: UseShareCardOptions) {
   /** Blob URL pointing to the most recently rendered PNG. Caller must revoke on unmount. */
   const previewUrl = ref<string | null>(null)
   const error = ref<string | null>(null)
+  // Cache the last successfully rendered blob so download/copy reuse it instead
+  // of re-rendering. Critical for copy: it keeps clipboard.write inside the
+  // user-gesture activation window (an awaited render() would break it →
+  // "Document is not focused" NotAllowedError).
+  let lastBlob: { variant: 'portrait' | 'landscape', blob: Blob } | null = null
 
   async function render(variant: 'portrait' | 'landscape' = 'portrait'): Promise<Blob | null> {
     generating.value = true
@@ -150,6 +163,7 @@ export function useShareCard(opts: UseShareCardOptions) {
       if (previewUrl.value)
         URL.revokeObjectURL(previewUrl.value)
       previewUrl.value = URL.createObjectURL(blob)
+      lastBlob = { variant, blob }
 
       return blob
     }
@@ -162,8 +176,15 @@ export function useShareCard(opts: UseShareCardOptions) {
     }
   }
 
-  async function download(variant?: 'portrait' | 'landscape'): Promise<void> {
-    const blob = await render(variant)
+  /** Reuse the cached blob for this variant, else render a fresh one. */
+  async function ensureBlob(variant: 'portrait' | 'landscape'): Promise<Blob | null> {
+    if (lastBlob && lastBlob.variant === variant)
+      return lastBlob.blob
+    return render(variant)
+  }
+
+  async function download(variant: 'portrait' | 'landscape' = 'portrait'): Promise<void> {
+    const blob = await ensureBlob(variant)
     if (!blob)
       return
 
@@ -175,13 +196,37 @@ export function useShareCard(opts: UseShareCardOptions) {
     URL.revokeObjectURL(url)
   }
 
-  async function copyToClipboard(variant?: 'portrait' | 'landscape'): Promise<boolean> {
-    const blob = await render(variant)
-    if (!blob || !navigator.clipboard?.write)
+  async function copyToClipboard(variant: 'portrait' | 'landscape' = 'portrait'): Promise<boolean> {
+    if (!navigator.clipboard?.write) {
+      error.value = '当前浏览器不支持复制图片到剪贴板'
       return false
-
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-    return true
+    }
+    try {
+      const cached = lastBlob && lastBlob.variant === variant ? lastBlob.blob : null
+      if (cached) {
+        // Already rendered (preview): write synchronously within the gesture.
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': cached })])
+      }
+      else {
+        // Not yet rendered: hand a Promise<Blob> to ClipboardItem so the async
+        // render stays inside the user-activation window (avoids the
+        // "Document is not focused" rejection from awaiting render() first).
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': render(variant).then((b) => {
+              if (!b)
+                throw new Error('render failed')
+              return b
+            }),
+          }),
+        ])
+      }
+      return true
+    }
+    catch (e) {
+      error.value = (e as Error).message
+      return false
+    }
   }
 
   return {
