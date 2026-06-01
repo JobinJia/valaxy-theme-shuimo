@@ -12,6 +12,7 @@ demo/public/atom.xml
 demo/public/feed.xml
 demo/public/feed.json
 demo/public/valaxy-fuse-list.json
+demo/public/share-cards/
 
 .vite-ssg-dist
 .vite-ssg-temp
