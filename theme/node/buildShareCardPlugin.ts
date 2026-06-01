@@ -11,6 +11,19 @@ import { slugToFileName } from '../shareCard/slugToFileName'
 import { installNodeCanvasShim } from './domShim'
 
 /**
+ * Format a raw date string to zh-CN locale. Mirrors the logic in resolveCardSpec's
+ * formatDate helper so the font subset covers the exact glyphs that will render.
+ */
+function formatDateForSubset(date?: string): string | undefined {
+  if (!date)
+    return undefined
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime()))
+    return undefined
+  return d.toLocaleDateString('zh-CN')
+}
+
+/**
  * Collect all characters used across card texts (titles + colophon parts) so
  * the font can be subset to the minimal glyph set before registering.
  */
@@ -20,8 +33,10 @@ function collectCardChars(posts: PostEntry[]): string {
     if (post.frontmatter.title) {
       for (const ch of post.frontmatter.title) chars.add(ch)
     }
-    if (post.frontmatter.dateText) {
-      for (const ch of post.frontmatter.dateText) chars.add(ch)
+    // Collect from the formatted date string — these are the glyphs that render.
+    const formatted = formatDateForSubset(post.frontmatter.date)
+    if (formatted) {
+      for (const ch of formatted) chars.add(ch)
     }
   }
   // Include the colophon separator that appears between parts
@@ -111,7 +126,8 @@ interface PostEntry {
   slug: string
   frontmatter: {
     title?: string
-    dateText?: string
+    /** Raw date string extracted from YAML frontmatter. Formatted by resolveCardSpec. */
+    date?: string
   }
 }
 
@@ -169,8 +185,8 @@ function collectPostEntries(userRoot: string): PostEntry[] {
       const rel = path.relative(pagesDir, p).replace(/\.md$/, '').replace(/\\/g, '/')
       const slug = `/${rel}`
 
-      const dateText = date ? new Date(date).toLocaleDateString('zh-CN') : undefined
-      entries.push({ slug, frontmatter: { title, dateText } })
+      // Pass raw date through — resolveCardSpec formats it via formatDate.
+      entries.push({ slug, frontmatter: { title, date } })
     }
   }
 

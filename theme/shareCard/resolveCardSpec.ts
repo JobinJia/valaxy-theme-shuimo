@@ -7,7 +7,18 @@ export interface ResolveCardSpecInput {
   frontmatter: {
     title?: string
     subtitle?: string
+    /**
+     * Pre-formatted date string (e.g. "2026年1月2日"). Takes precedence over
+     * `date` when both are supplied. Kept for back-compat with callers that
+     * already formatted the date themselves.
+     */
     dateText?: string
+    /**
+     * Raw date value from post frontmatter. Accepted as string or Date object
+     * (valaxy's frontmatter parser may return either). Formatted to zh-CN
+     * locale string when `dateText` is not present.
+     */
+    date?: string | Date
     stamp?: { text?: string, author?: string, mode?: 'yin' | 'yang', color?: string }
   }
   themeConfig: {
@@ -20,6 +31,19 @@ export interface ResolveCardSpecInput {
       landscape?: { width?: number, height?: number }
     }
   }
+}
+
+/**
+ * Format a raw date value to a zh-CN locale date string.
+ * Returns undefined when the value is absent or represents an invalid date.
+ */
+function formatDate(date?: string | Date): string | undefined {
+  if (date === undefined || date === null || date === '')
+    return undefined
+  const d = date instanceof Date ? date : new Date(date)
+  if (Number.isNaN(d.getTime()))
+    return undefined
+  return d.toLocaleDateString('zh-CN')
 }
 
 const DIM = {
@@ -35,6 +59,9 @@ export function resolveCardSpec(input: ResolveCardSpecInput): CardSpec {
   const width = dimCfg?.width ?? DIM[variant].width
   const height = dimCfg?.height ?? DIM[variant].height
 
+  // Explicit dateText wins; otherwise derive from raw date field.
+  const dateText = fm.dateText ?? formatDate(fm.date)
+
   return {
     variant,
     width,
@@ -44,7 +71,7 @@ export function resolveCardSpec(input: ResolveCardSpecInput): CardSpec {
     subtitle: fm.subtitle,
     author: tc.sidebar?.author?.name,
     siteName: tc.header?.title,
-    dateText: fm.dateText,
+    dateText,
     stamp: {
       text: fm.stamp?.text ?? fm.stamp?.author ?? tc.stamp?.author ?? '',
       mode: fm.stamp?.mode ?? tc.stamp?.mode ?? 'yang',

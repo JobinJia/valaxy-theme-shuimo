@@ -45,4 +45,59 @@ describe('resolveCardSpec', () => {
     expect(spec.colors.primary).toBe('#8B4513')
     expect(spec.width).toBe(1200)
   })
+
+  // --- FIX 1: date formatting unification ---
+
+  it('derives dateText from raw date when dateText is absent', () => {
+    const spec = resolveCardSpec({
+      slug: '/posts/x',
+      variant: 'portrait',
+      frontmatter: { title: '测试', date: '2026-01-02' },
+      themeConfig: {},
+    })
+    // Must be non-empty and contain the year
+    expect(spec.dateText).toBeTruthy()
+    expect(spec.dateText).toContain('2026')
+  })
+
+  it('explicit dateText overrides raw date', () => {
+    const spec = resolveCardSpec({
+      slug: '/posts/x',
+      variant: 'portrait',
+      frontmatter: { title: '测试', date: '2026-01-02', dateText: '手动日期' },
+      themeConfig: {},
+    })
+    expect(spec.dateText).toBe('手动日期')
+  })
+
+  it('yields undefined dateText for invalid date string', () => {
+    const spec = resolveCardSpec({
+      slug: '/posts/x',
+      variant: 'portrait',
+      frontmatter: { title: '测试', date: 'not-a-date' },
+      themeConfig: {},
+    })
+    expect(spec.dateText).toBeUndefined()
+  })
+
+  it('yields undefined dateText when neither date nor dateText is provided', () => {
+    const spec = resolveCardSpec({
+      slug: '/posts/x',
+      variant: 'portrait',
+      frontmatter: { title: '测试' },
+      themeConfig: {},
+    })
+    expect(spec.dateText).toBeUndefined()
+  })
+
+  it('handles Date object passed as date field', () => {
+    const spec = resolveCardSpec({
+      slug: '/posts/x',
+      variant: 'portrait',
+      frontmatter: { title: '测试', date: new Date('2026-03-15') },
+      themeConfig: {},
+    })
+    expect(spec.dateText).toBeTruthy()
+    expect(spec.dateText).toContain('2026')
+  })
 })
