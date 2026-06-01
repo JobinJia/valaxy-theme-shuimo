@@ -35,6 +35,7 @@
     "suncalc": "catalog:"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "catalog:",
     "@types/suncalc": "catalog:",
     "valaxy": "catalog:"
   }

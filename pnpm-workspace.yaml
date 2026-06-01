@@ -1,10 +1,3 @@
-catalogMode: prefer
-
-cleanupUnusedCatalogs: true
-
-shellEmulator: true
-
-trustPolicy: no-downgrade
 packages:
   - theme
   - demo
@@ -15,6 +8,7 @@ catalog:
   '@iconify-json/simple-icons': ^1.2.61
   '@jobinjia/shuimo-core': 2.0.3
   '@jobinjia/vite-plugin-shuimo-font-subset': 1.0.1-beta.2
+  '@napi-rs/canvas': ^1.0.0
   '@shuimo-design/lunar': ^0.0.8
   '@types/suncalc': ^1.9.2
   '@unocss/eslint-plugin': ^66.5.10
@@ -26,6 +20,15 @@ catalog:
   valaxy: ^0.28.5
   vitest: ^4.1.5
   vue-tsc: ^3.2.8
+
+catalogMode: prefer
+
+cleanupUnusedCatalogs: true
+
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
+
+shellEmulator: true
+
+trustPolicy: no-downgrade
