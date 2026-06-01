@@ -37,7 +37,10 @@ function drawTitle(ctx: CanvasRenderingContext2D, spec: CardSpec): void {
     ? Math.round(spec.width * 0.075)
     : Math.round(spec.height * 0.11)
   ctx.fillStyle = '#1a1a1a'
-  ctx.font = `${fontPx}px serif`
+  // 'ShuimoCardCJK' is registered at build time by buildShareCardPlugin when
+  // shareCard.titleFontPath is set. In the browser it is unknown and falls
+  // through to the site's serif webfont — no visual change.
+  ctx.font = `${fontPx}px 'ShuimoCardCJK', serif`
   ctx.textBaseline = 'top'
 
   if (spec.variant === 'portrait')
@@ -80,7 +83,9 @@ function drawHorizontalTitle(ctx: CanvasRenderingContext2D, spec: CardSpec, font
 
 function drawColophon(ctx: CanvasRenderingContext2D, spec: CardSpec): void {
   const fontPx = Math.round((spec.variant === 'portrait' ? spec.width : spec.height) * 0.03)
-  ctx.font = `${fontPx}px serif`
+  // Same sentinel family as drawTitle — resolved by Node font registration or
+  // falls through to serif in the browser.
+  ctx.font = `${fontPx}px 'ShuimoCardCJK', serif`
   ctx.fillStyle = '#4a4a4a'
   ctx.textBaseline = 'alphabetic'
   const parts = [spec.author, spec.siteName, spec.dateText].filter(Boolean) as string[]

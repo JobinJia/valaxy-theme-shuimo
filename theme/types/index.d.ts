@@ -464,6 +464,16 @@ export interface ShareCardConfig {
   landscape?: { width?: number, height?: number }
   /** 竖版尺寸，默认 1080×1440（3:4）。 */
   portrait?: { width?: number, height?: number }
+  /**
+   * Path to a CJK TTF/OTF font used to render OG-card titles in Node
+   * (build-time). The font is subset to the characters actually used across
+   * all post titles and colophon text before being registered with
+   * @napi-rs/canvas under the family name `ShuimoCardCJK`. When unset, OG
+   * card titles fall back to the system default and may show missing glyphs
+   * for CJK characters.
+   * @example '/home/user/.fonts/NotoSerifCJK.ttf'
+   */
+  titleFontPath?: string
 }
 
 export interface NavItem {
