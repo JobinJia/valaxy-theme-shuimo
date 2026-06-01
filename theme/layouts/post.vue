@@ -7,12 +7,14 @@ import type { Ref } from 'vue'
  * navigation, ensuring all client-side features (TOC, word count, stamp)
  * reinitialize correctly for each post.
  */
-import { useSiteStore } from 'valaxy'
+import { useHead } from '@unhead/vue'
+import { useSiteConfig, useSiteStore } from 'valaxy'
 import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useImageCaption, useThemeConfig } from '../composables'
 import { CURRENT_ROUTE_PATH_KEY, ROUTER_KEY } from '../composables/useCurtainTransition'
+import { slugToFileName } from '../shareCard/slugToFileName'
 
 const { t } = useI18n()
 const themeConfig = useThemeConfig()
@@ -49,6 +51,33 @@ const next = computed(() => {
   const i = currentPostIndex.value
   const list = site.postList || []
   return i >= 0 && i + 1 < list.length ? list[i + 1] : null
+})
+
+const siteConfig = useSiteConfig()
+
+// Compute og:image URL for the share card PNG generated at build time.
+// Absolute URL is preferred for social crawlers; fall back to root-relative
+// if site.url is not configured (empty or '/').
+const ogImage = computed(() => {
+  if (themeConfig.value?.shareCard?.enable === false || themeConfig.value?.shareCard?.og === false)
+    return undefined
+  const fileName = slugToFileName(route?.path || '/')
+  const relative = `/share-cards/${fileName}.png`
+  const base = siteConfig.value?.url || ''
+  return base && base !== '/' ? `${base.replace(/\/$/, '')}${relative}` : relative
+})
+
+useHead({
+  meta: computed(() => {
+    const img = ogImage.value
+    if (!img)
+      return []
+    return [
+      { property: 'og:image', content: img },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:image', content: img },
+    ]
+  }),
 })
 
 const articleRef = ref<HTMLElement>()
