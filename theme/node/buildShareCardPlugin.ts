@@ -4,11 +4,33 @@ import type { ComposeDeps } from '../shareCard/types'
 import type { ThemeConfig } from '../types'
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { composeShareCard } from '../shareCard/composeShareCard'
 import { resolveCardSpec } from '../shareCard/resolveCardSpec'
 import { slugToFileName } from '../shareCard/slugToFileName'
 import { installNodeCanvasShim } from './domShim'
+
+const require = createRequire(import.meta.url)
+
+// harfbuzz-subset.wasm must be configured once before subsetFontBuffer works.
+// It ships with the harfbuzzjs package (a shuimo-core dependency). Best-effort:
+// if it can't be resolved, subsetting is skipped and the full font is used.
+let wasmConfigured = false
+function ensureFontSubsetWasm(configure: (src: ArrayBuffer) => void): boolean {
+  if (wasmConfigured)
+    return true
+  try {
+    const wasmPath = require.resolve('harfbuzzjs/dist/harfbuzz-subset.wasm')
+    const buf = fs.readFileSync(wasmPath)
+    configure(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
+    wasmConfigured = true
+    return true
+  }
+  catch {
+    return false
+  }
+}
 
 /**
  * Format a raw date string to zh-CN locale. Mirrors the logic in resolveCardSpec's
@@ -27,20 +49,23 @@ function formatDateForSubset(date?: string): string | undefined {
  * Collect all characters used across card texts (titles + colophon parts) so
  * the font can be subset to the minimal glyph set before registering.
  */
-function collectCardChars(posts: PostEntry[]): string {
+function collectCardChars(posts: PostEntry[], themeConfig: ThemeConfig): string {
   const chars = new Set<string>()
-  for (const post of posts) {
-    if (post.frontmatter.title) {
-      for (const ch of post.frontmatter.title) chars.add(ch)
-    }
-    // Collect from the formatted date string — these are the glyphs that render.
-    const formatted = formatDateForSubset(post.frontmatter.date)
-    if (formatted) {
-      for (const ch of formatted) chars.add(ch)
-    }
+  const add = (s?: string): void => {
+    if (!s)
+      return
+    for (const ch of s) chars.add(ch)
   }
-  // Include the colophon separator that appears between parts
-  for (const ch of '  ·  ') chars.add(ch)
+  for (const post of posts) {
+    add(post.frontmatter.title)
+    // The formatted date string — these are the glyphs that render.
+    add(formatDateForSubset(post.frontmatter.date))
+  }
+  // Colophon parts rendered by composeShareCard: author name + site name +
+  // separator, plus the ellipsis used when a title is truncated.
+  add(themeConfig.sidebar?.author?.name)
+  add(themeConfig.header?.title)
+  add('  ·  …')
   return [...chars].join('')
 }
 
@@ -55,22 +80,26 @@ async function registerTitleFont(
   titleFontPath: string,
   chars: string,
 ): Promise<void> {
-  const { subsetFontBuffer } = await import('@jobinjia/shuimo-core')
+  const { subsetFontBuffer, configureFontSubsetWasm } = await import('@jobinjia/shuimo-core')
   try {
     const fontData = fs.readFileSync(titleFontPath)
     // Extract the exact slice the Buffer occupies — Buffer may reference a
     // shared pool whose .buffer starts at byteOffset, not 0.
     const fontArrayBuffer = fontData.buffer.slice(fontData.byteOffset, fontData.byteOffset + fontData.byteLength)
-    let subset: ArrayBuffer
-    try {
-      subset = await subsetFontBuffer(fontArrayBuffer, [...chars])
-      napi.GlobalFonts.register(Buffer.from(subset), 'ShuimoCardCJK')
-      console.warn(`[shuimo:share-card] registered title font (${[...chars].length} glyphs subset from ${path.basename(titleFontPath)})`)
+    if (ensureFontSubsetWasm(configureFontSubsetWasm)) {
+      try {
+        const subset = await subsetFontBuffer(fontArrayBuffer, [...chars])
+        napi.GlobalFonts.register(Buffer.from(subset), 'ShuimoCardCJK')
+        console.warn(`[shuimo:share-card] registered title font (${[...chars].length} glyphs subset from ${path.basename(titleFontPath)})`)
+        return
+      }
+      catch (subsetErr) {
+        console.warn('[shuimo:share-card] font subsetting failed, registering full font:', subsetErr)
+      }
     }
-    catch (subsetErr) {
-      console.warn('[shuimo:share-card] font subsetting failed, registering full font:', subsetErr)
-      napi.GlobalFonts.registerFromPath(titleFontPath, 'ShuimoCardCJK')
-    }
+    // Fallback: register the font as-is (fine when a pre-subset font is shipped).
+    napi.GlobalFonts.registerFromPath(titleFontPath, 'ShuimoCardCJK')
+    console.warn(`[shuimo:share-card] registered title font (full, from ${path.basename(titleFontPath)})`)
   }
   catch (err) {
     console.warn('[shuimo:share-card] title font registration failed:', err)
@@ -252,7 +281,7 @@ export function buildShareCardPlugin(
         // Must happen before any card is rendered so ctx.font resolves correctly.
         const titleFontPath = themeConfig.shareCard?.titleFontPath
         if (titleFontPath && fs.existsSync(titleFontPath)) {
-          const chars = collectCardChars(posts)
+          const chars = collectCardChars(posts, themeConfig)
           await registerTitleFont(napi, titleFontPath, chars)
         }
         else {
