@@ -14,7 +14,7 @@ describe('defaultThemeConfig', () => {
     expect(defaultThemeConfig.stamp?.author).toBeTruthy()
     expect(defaultThemeConfig.stamp?.mode).toBe('yang')
     expect(defaultThemeConfig.stamp?.shape).toBe('rect')
-    expect(defaultThemeConfig.stamp?.size).toBe(200)
+    expect(defaultThemeConfig.stamp?.size).toBe(56)
     expect(defaultThemeConfig.stamp?.color).toBe('#C8102E')
     expect(defaultThemeConfig.stamp?.border).toEqual({
       thickness: 3,

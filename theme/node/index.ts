@@ -52,7 +52,7 @@ export const defaultThemeConfig: ThemeConfig = {
     shape: 'rect',
     color: '#C8102E',
     seed: 69706,
-    size: 200,
+    size: 56,
     offsetX: 0,
     offsetY: 0,
     padding: 0,
