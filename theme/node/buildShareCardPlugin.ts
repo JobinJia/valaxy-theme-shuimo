@@ -2,12 +2,65 @@ import type { ResolvedValaxyOptions } from 'valaxy'
 import type { Plugin } from 'vite'
 import type { ComposeDeps } from '../shareCard/types'
 import type { ThemeConfig } from '../types'
+import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import path from 'node:path'
 import { composeShareCard } from '../shareCard/composeShareCard'
 import { resolveCardSpec } from '../shareCard/resolveCardSpec'
 import { slugToFileName } from '../shareCard/slugToFileName'
 import { installNodeCanvasShim } from './domShim'
+
+/**
+ * Collect all characters used across card texts (titles + colophon parts) so
+ * the font can be subset to the minimal glyph set before registering.
+ */
+function collectCardChars(posts: PostEntry[]): string {
+  const chars = new Set<string>()
+  for (const post of posts) {
+    if (post.frontmatter.title) {
+      for (const ch of post.frontmatter.title) chars.add(ch)
+    }
+    if (post.frontmatter.dateText) {
+      for (const ch of post.frontmatter.dateText) chars.add(ch)
+    }
+  }
+  // Include the colophon separator that appears between parts
+  for (const ch of '  ·  ') chars.add(ch)
+  return [...chars].join('')
+}
+
+/**
+ * Attempt to subset the font at `titleFontPath` to `chars` and register it
+ * with napi under the family name `ShuimoCardCJK`. Falls back to registering
+ * the full font if subsetting throws. Any error is caught and logged so it
+ * never aborts card generation.
+ */
+async function registerTitleFont(
+  napi: typeof import('@napi-rs/canvas'),
+  titleFontPath: string,
+  chars: string,
+): Promise<void> {
+  const { subsetFontBuffer } = await import('@jobinjia/shuimo-core')
+  try {
+    const fontData = fs.readFileSync(titleFontPath)
+    // Extract the exact slice the Buffer occupies — Buffer may reference a
+    // shared pool whose .buffer starts at byteOffset, not 0.
+    const fontArrayBuffer = fontData.buffer.slice(fontData.byteOffset, fontData.byteOffset + fontData.byteLength)
+    let subset: ArrayBuffer
+    try {
+      subset = await subsetFontBuffer(fontArrayBuffer, [...chars])
+      napi.GlobalFonts.register(Buffer.from(subset), 'ShuimoCardCJK')
+      console.warn(`[shuimo:share-card] registered title font (${[...chars].length} glyphs subset from ${path.basename(titleFontPath)})`)
+    }
+    catch (subsetErr) {
+      console.warn('[shuimo:share-card] font subsetting failed, registering full font:', subsetErr)
+      napi.GlobalFonts.registerFromPath(titleFontPath, 'ShuimoCardCJK')
+    }
+  }
+  catch (err) {
+    console.warn('[shuimo:share-card] title font registration failed:', err)
+  }
+}
 
 async function loadCanvas(): Promise<typeof import('@napi-rs/canvas') | null> {
   try {
@@ -166,6 +219,18 @@ export function buildShareCardPlugin(
         fs.mkdirSync(outDir, { recursive: true })
 
         const posts = collectPostEntries(userRoot)
+
+        // Register a CJK font for card title/colophon rendering if configured.
+        // Must happen before any card is rendered so ctx.font resolves correctly.
+        const titleFontPath = themeConfig.shareCard?.titleFontPath
+        if (titleFontPath && fs.existsSync(titleFontPath)) {
+          const chars = collectCardChars(posts)
+          await registerTitleFont(napi, titleFontPath, chars)
+        }
+        else {
+          console.warn('[shuimo:share-card] no shareCard.titleFontPath set — OG card titles may show missing CJK glyphs')
+        }
+
         let generated = 0
 
         for (const post of posts) {
