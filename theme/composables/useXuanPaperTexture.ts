@@ -47,7 +47,7 @@ function saveToLocalStorage(key: string, dataUrl: string): void {
   }
 }
 
-async function blobUrlToDataURL(blobUrl: string): Promise<string> {
+export async function blobUrlToDataURL(blobUrl: string): Promise<string> {
   const res = await fetch(blobUrl)
   const blob = await res.blob()
   return new Promise((resolve, reject) => {

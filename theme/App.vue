@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import type { XuanPaperOptions } from './composables'
 import type { ThemeModeColor } from './types'
 import { useValaxyDark } from 'valaxy'
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ShuimoMobileFlower from './components/ShuimoMobileFlower.vue'
-import { generateXuanPaperTexture, mobileFlowerReady, mobileFlowerSeed, useIsMobile, useThemeConfig } from './composables'
+import { blobUrlToDataURL, buildXuanPaperLocalStorageKey, generateXuanPaperTexture, getCurtainPaper, mobileFlowerReady, mobileFlowerSeed, putCurtainPaper, useIsMobile, useThemeConfig } from './composables'
 import { useCurtainStamp } from './composables/useCurtainStamp'
 import { CURRENT_ROUTE_PATH_KEY, curtainRevealed, markCurtainPaperReady, markCurtainStampReady, setupInitialCurtain } from './composables/useCurtainTransition'
 import { useGlobalXuanPaper } from './composables/useGlobalXuanPaper'
@@ -110,7 +111,9 @@ function makeCurtainBgStyle(side: 'left' | 'right' | 'top' | 'bottom') {
     const isVertical = side === 'top' || side === 'bottom'
     return {
       backgroundColor: userColor || 'var(--sm-curtain-bg)',
-      backgroundImage: curtainPaperUrl.value ? `url(${curtainPaperUrl.value})` : undefined,
+      // dataURL（来自 IDB / blobUrlToDataURL）含 ; 和 , ，CSS url() 须加引号；
+      // 与 node bootstrap 的 url("...") 一致。blob URL 加引号亦无副作用。
+      backgroundImage: curtainPaperUrl.value ? `url("${curtainPaperUrl.value}")` : undefined,
       backgroundRepeat: curtainPaperUrl.value ? 'no-repeat' : undefined,
       backgroundSize: curtainPaperUrl.value
         ? (isVertical ? '100% 200%' : '200% 100%')
@@ -151,8 +154,12 @@ function setCurtainPaperUrl(url: string | null) {
 
 async function ensureCurtainPaperReady() {
   const xuanPaper = themeConfig.value?.xuanPaper
-  if (xuanPaper?.enable === false)
+  if (xuanPaper?.enable === false) {
+    // 关闭宣纸时 curtain 退化为纯色 backgroundColor，但 gate 仍要解锁，否则
+    // curtainPaperReady 永不为真，tryOpenInitialCurtain 等不到信号 → 幕布永不打开
+    markCurtainPaperReady()
     return
+  }
 
   const userBase = resolveModeColor(themeConfig.value?.decorations?.curtainPaperColor, isDark.value)
   const baseColor = userBase || (isDark.value ? '#1D2230' : '#E8D7A5')
@@ -166,25 +173,55 @@ async function ensureCurtainPaperReady() {
   const width = Math.max(320, Math.ceil(Math.min(window.innerWidth, 1920) / 50) * 50)
   const height = Math.max(320, Math.ceil(Math.min(window.innerHeight, 1080) / 50) * 50)
 
-  let url: string | null = null
-  try {
-    url = await generateXuanPaperTexture({
-      variant,
-      width,
-      height,
-      seed: 42,
-      baseColor,
-      isDark: isDark.value,
-      goldDensity: curtainGold,
-      // curtain 只在首页瞬时显示，不该占用 ~2.5MB LS 配额，否则会把
-      // global paper 挤出 LS，导致下次刷新的 bootstrap pointer 找不到 dataURL
-      persistToLocalStorage: false,
-    })
+  const options: XuanPaperOptions = {
+    variant,
+    width,
+    height,
+    seed: 42,
+    baseColor,
+    isDark: isDark.value,
+    goldDensity: curtainGold,
+    // curtain paper（×3 金屑，~2.5MB）不写 localStorage：会挤掉 global paper 的
+    // LS bootstrap 缓存。改用 IndexedDB（getCurtainPaper/putCurtainPaper）持久化，
+    // 配额独立、互不挤占，curtain 保持全尺寸全金屑密度。
+    persistToLocalStorage: false,
   }
-  catch {}
 
-  if (url) {
-    // 等 image onload —— blob URL 数据已在浏览器内存，onload 几乎瞬间触发。
+  // IndexedDB 缓存 key：复用 LS 路径的同一份参数指纹，保证同参数命中
+  const cacheKey = buildXuanPaperLocalStorageKey(options)
+
+  // 二次刷新（含新 tab / 新会话）：IDB 命中直接拿 dataURL，跳过 worker 生成。
+  // curtain 的「纯色窗口」从 worker 生成 ×3 金屑的秒级，降到 IDB 读取的几 ms。
+  let dataUrl = await getCurtainPaper(cacheKey)
+
+  if (!dataUrl) {
+    // 首次访问：worker 生成 blob URL，转成 dataURL 落 IDB（dataURL 无 revoke
+    // 生命周期，适合持久化；blob URL 跨会话即失效）
+    let blobUrl: string | null = null
+    try {
+      blobUrl = await generateXuanPaperTexture(options)
+    }
+    catch {}
+    if (blobUrl) {
+      let resolved: string
+      try {
+        resolved = await blobUrlToDataURL(blobUrl)
+      }
+      catch {
+        resolved = blobUrl
+      }
+      dataUrl = resolved
+      // persistToLocalStorage:false 时 generateXuanPaperTexture 不持有该 blob URL，
+      // 转完 dataURL 后即可释放，避免泄漏
+      if (resolved !== blobUrl && blobUrl.startsWith('blob:'))
+        URL.revokeObjectURL(blobUrl)
+      if (resolved.startsWith('data:image/'))
+        putCurtainPaper(cacheKey, resolved).catch(() => {})
+    }
+  }
+
+  if (dataUrl) {
+    // 等 image onload —— dataURL 数据已在内存，onload 几乎瞬间触发。
     // decoding='async' 让 GPU 异步 decode，curtain 拉开的 0.7s transition 期间
     // 浏览器后台完成 decode，首帧 paint 时纹理就绪。onload/onerror 必触发其一。
     const preload = new Image()
@@ -192,9 +229,9 @@ async function ensureCurtainPaperReady() {
     await new Promise<void>((resolve) => {
       preload.onload = () => resolve()
       preload.onerror = () => resolve()
-      preload.src = url
+      preload.src = dataUrl as string
     })
-    setCurtainPaperUrl(url)
+    setCurtainPaperUrl(dataUrl)
   }
   else {
     setCurtainPaperUrl(null)
