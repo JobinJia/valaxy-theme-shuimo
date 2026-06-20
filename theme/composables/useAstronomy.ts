@@ -108,7 +108,7 @@ function compute(opts: Required<AstronomyOptions>): AstronomyState {
   const sunPos = getPosition(now, location.lat, location.lng)
   const sunScreen = celestialScreenPos(sunPos.altitude, sunPos.azimuth, location.lat)
 
-  const R2D = 180 / Math.PI
+  // suncalc v2 returns angles in degrees (north-based clockwise azimuth)
   return {
     location,
     updatedAt: now.getTime(),
@@ -121,15 +121,16 @@ function compute(opts: Required<AstronomyOptions>): AstronomyState {
       illumination: illum.fraction,
       phase: illum.phase,
       phaseKey: moonPhaseI18nKey(illum.phase),
-      parallacticAngleDeg: moonPos.parallacticAngle * R2D,
+      parallacticAngleDeg: moonPos.parallacticAngle,
     },
     sun: {
       hidden: sunScreen.hidden,
       x: sunScreen.x,
       y: sunScreen.y,
-      altitudeDeg: sunPos.altitude * R2D,
-      azimuthDeg: sunPos.azimuth * R2D,
-      isRising: sunPos.azimuth < 0,
+      altitudeDeg: sunPos.altitude,
+      azimuthDeg: sunPos.azimuth,
+      // v2: north-based clockwise, east = 0..180, west = 180..360
+      isRising: sunPos.azimuth < 180,
     },
   }
 }

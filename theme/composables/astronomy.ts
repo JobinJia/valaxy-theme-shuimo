@@ -1,16 +1,14 @@
 /**
  * Pure utilities for astronomy-driven night sky.
  *
- * suncalc convention:
- *   - altitude: radians, positive above horizon
- *   - azimuth:  radians, measured from south, positive west, negative east
+ * suncalc v2 convention:
+ *   - altitude: degrees, positive above horizon
+ *   - azimuth:  degrees, north-based clockwise (0 = N, 90 = E, 180 = S, 270 = W)
  *
  * Screen convention here:
  *   - x: 0–100 (% of container width)
  *   - y: 0–100 (% of container height; 0 = top)
  */
-
-const R2D = 180 / Math.PI
 
 export interface ScreenPos {
   x: number
@@ -28,16 +26,24 @@ export interface ScreenPos {
  * This trades astronomical purity for a smooth elegant arc shape — the
  * moon enters at one screen edge near the bottom, traces an arc up through
  * the centre, and exits at the other edge. No "vertical drop at horizon".
+ *
+ * suncalc v2 azimuth is north-based clockwise (0=N, 90=E, 180=S, 270=W).
+ * We convert to a south-based signed convention internally:
+ *   southAz = azimuth - 180  →  -180 (N) … 0 (S) … +180 (N via W)
+ * so east is negative and west is positive, matching the original screen
+ * mapping: azNorm 0 = east edge, 0.5 = south, 1 = west edge.
  */
 const AZIMUTH_RANGE_DEG = 120 // wider than ±90° so seasonal arcs (high/low declination) don't pin to edges
 
-export function celestialScreenPos(altitudeRad: number, azimuthRad: number, lat: number): ScreenPos {
-  if (altitudeRad <= 0)
+export function celestialScreenPos(altitudeDeg: number, azimuthDeg: number, lat: number): ScreenPos {
+  if (altitudeDeg <= 0)
     return { x: 0, y: 0, hidden: true }
 
-  const azDeg = Math.max(-AZIMUTH_RANGE_DEG, Math.min(AZIMUTH_RANGE_DEG, azimuthRad * R2D))
+  // Convert north-based clockwise azimuth to south-based signed azimuth
+  const southAz = azimuthDeg - 180
+  const azClamped = Math.max(-AZIMUTH_RANGE_DEG, Math.min(AZIMUTH_RANGE_DEG, southAz))
   // azNorm: 0 = east edge, 0.5 = south, 1 = west edge
-  const azNorm = (azDeg + AZIMUTH_RANGE_DEG) / (AZIMUTH_RANGE_DEG * 2)
+  const azNorm = (azClamped + AZIMUTH_RANGE_DEG) / (AZIMUTH_RANGE_DEG * 2)
 
   let xPct = 100 - azNorm * 100
 

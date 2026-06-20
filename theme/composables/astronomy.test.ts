@@ -10,50 +10,56 @@ import {
   writeLocationOverride,
 } from './astronomy'
 
-const D2R = Math.PI / 180
-
-describe('moonScreenPos', () => {
+describe('moonScreenPos (suncalc v2: degrees, north-based clockwise azimuth)', () => {
   it('hides moon when altitude is below the horizon', () => {
-    const pos = moonScreenPos(-5 * D2R, 0, 30)
+    // altitude = -5 degrees
+    const pos = moonScreenPos(-5, 180, 30)
     expect(pos.hidden).toBe(true)
   })
 
   it('hides moon when altitude is exactly at the horizon (0°)', () => {
-    const pos = moonScreenPos(0, 0, 30)
+    const pos = moonScreenPos(0, 180, 30)
     expect(pos.hidden).toBe(true)
   })
 
-  it('places moon at south-center when azimuth=0 (suncalc south=0)', () => {
-    const pos = moonScreenPos(30 * D2R, 0, 30)
+  it('places moon at south-center when azimuth=180° (north-based south)', () => {
+    // v2: azimuth 180° = south
+    const pos = moonScreenPos(30, 180, 30)
     expect(pos.hidden).toBe(false)
     expect(pos.x).toBeCloseTo(50, 1)
   })
 
-  it('places moon to the right (east) when azimuth is negative', () => {
-    const pos = moonScreenPos(20 * D2R, -60 * D2R, 30)
+  it('places moon to the right (east) when azimuth < 180° (east side)', () => {
+    // v2: azimuth 120° = ESE (east of south)
+    const pos = moonScreenPos(20, 120, 30)
     expect(pos.x).toBeGreaterThan(50)
   })
 
-  it('places moon to the left (west) when azimuth is positive', () => {
-    const pos = moonScreenPos(20 * D2R, 60 * D2R, 30)
+  it('places moon to the left (west) when azimuth > 180° (west side)', () => {
+    // v2: azimuth 240° = WSW (west of south)
+    const pos = moonScreenPos(20, 240, 30)
     expect(pos.x).toBeLessThan(50)
   })
 
   it('mirrors X for southern-hemisphere observers', () => {
-    const north = moonScreenPos(20 * D2R, -60 * D2R, 30)
-    const south = moonScreenPos(20 * D2R, -60 * D2R, -30)
+    // v2: azimuth 120° = east of south
+    const north = moonScreenPos(20, 120, 30)
+    const south = moonScreenPos(20, 120, -30)
     expect(north.x + south.x).toBeCloseTo(100, 1)
   })
 
-  it('places moon higher (smaller y) when nearer transit (south, az=0) than near the edges', () => {
-    const nearEdge = moonScreenPos(20 * D2R, -100 * D2R, 30)
-    const atTransit = moonScreenPos(20 * D2R, 0, 30)
+  it('places moon higher (smaller y) when nearer transit (south, az=180°) than near the edges', () => {
+    // v2: azimuth 80° = ENE (far from south) vs 180° = south (transit)
+    const nearEdge = moonScreenPos(20, 80, 30)
+    const atTransit = moonScreenPos(20, 180, 30)
     expect(atTransit.y).toBeLessThan(nearEdge.y)
   })
 
-  it('clamps azimuth outside [-120°, 120°] to the nearest edge', () => {
-    const farEast = moonScreenPos(20 * D2R, -150 * D2R, 30)
-    const justEast = moonScreenPos(20 * D2R, -120 * D2R, 30)
+  it('clamps azimuth outside the visible range to the nearest edge', () => {
+    // v2: azimuth 30° = NNE (far east, well beyond ±120° from south)
+    // azimuth 60° = ENE (also past the 120° clamp from south)
+    const farEast = moonScreenPos(20, 30, 30)
+    const justEast = moonScreenPos(20, 60, 30)
     expect(farEast.x).toBeCloseTo(justEast.x, 1)
   })
 })

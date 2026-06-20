@@ -3,14 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 vi.mock('suncalc', () => {
+  // suncalc v2: all angles in degrees, azimuth is north-based clockwise
   const getMoonPosition = vi.fn(() => ({
-    altitude: 0.5,
-    azimuth: 0,
+    altitude: 30,
+    azimuth: 180,
     distance: 384000,
     parallacticAngle: 0,
   }))
-  const getMoonIllumination = vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0 }))
-  const getPosition = vi.fn(() => ({ altitude: 0.4, azimuth: 0 }))
+  const getMoonIllumination = vi.fn(() => ({ fraction: 0.5, phase: 0.25, angle: 0, waxing: true }))
+  const getPosition = vi.fn(() => ({ altitude: 25, azimuth: 180 }))
   // Expose both named + default shapes so the composable's CJS-interop unwrap
   // (default ?? ns) resolves to the same fns in either branch.
   return {
