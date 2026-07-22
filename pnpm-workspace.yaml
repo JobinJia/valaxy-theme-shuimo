@@ -9,22 +9,22 @@ packages:
   - theme
   - demo
 catalog:
-  '@antfu/eslint-config': ^9.0.0
-  '@iconify-json/ant-design': ^1.2.5
-  '@iconify-json/simple-icons': ^1.2.86
+  '@antfu/eslint-config': ^9.2.0
+  '@iconify-json/ant-design': ^1.2.8
+  '@iconify-json/simple-icons': ^1.2.91
   '@jobinjia/shuimo-core': 2.0.3
   '@jobinjia/vite-plugin-shuimo-font-subset': 1.0.1-beta.2
-  '@napi-rs/canvas': ^1.0.0
+  '@napi-rs/canvas': ^1.0.2
   '@shuimo-design/lunar': ^0.0.8
-  '@unocss/eslint-plugin': ^66.7.2
-  bumpp: ^11.1.0
-  eslint: ^10.5.0
+  '@unocss/eslint-plugin': ^66.7.5
+  bumpp: ^12.0.0
+  eslint: ^10.7.0
   eslint-plugin-format: ^2.0.1
-  suncalc: ^2.0.0
+  suncalc: ^2.0.1
   typescript: ^6.0.3
   valaxy: ^0.28.5
-  vitest: ^4.1.9
-  vue-tsc: ^3.3.5
+  vitest: ^4.1.10
+  vue-tsc: ^3.3.8
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
