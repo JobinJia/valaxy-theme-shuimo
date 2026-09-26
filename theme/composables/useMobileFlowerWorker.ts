@@ -1,3 +1,5 @@
+import { isMobileViewport } from './useMediaQuery'
+
 export interface MobileFlowerWorkerResult {
   bitmap: ImageBitmap
   width: number
@@ -115,6 +117,7 @@ export function preheatMobileFlowerWorker(): void {
   ensureWorker()
 }
 
-// 模块 import 时立即预热
-if (typeof window !== 'undefined')
+// 模块 import 时立即预热，只在移动端宽度：桌面不渲染移动端花卉，
+// 预热等于白白下载并解析整份 shuimo-core。之后需要时 ensureWorker 会按需创建。
+if (typeof window !== 'undefined' && isMobileViewport())
   preheatMobileFlowerWorker()

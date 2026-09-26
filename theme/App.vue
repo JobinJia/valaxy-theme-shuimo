@@ -247,19 +247,29 @@ async function ensureCurtainPaperReady() {
 // 拖动期 0 次实跑，停下来才一次到位
 const curtainRegen = timedDebounce(ensureCurtainPaperReady, 200)
 
+// 幕布只在首屏出现一次（useCurtainTransition 只有 initial curtain），拉开后
+// 移到屏外再也不会合上。之后的 resize / 明暗切换再重生成 ×3 金屑幕布纸就是
+// 白干：手机上滚动收起地址栏会触发 resize，等于滚动时反复在后台跑 worker +
+// JPEG 编码 + dataURL + IndexedDB 写入。
+function onCurtainResize() {
+  if (!curtainRevealed.value)
+    curtainRegen.schedule()
+}
+
 onMounted(() => {
   ensureCurtainPaperReady()
-  window.addEventListener('resize', curtainRegen.schedule)
+  window.addEventListener('resize', onCurtainResize)
 })
 
 onUnmounted(() => {
   curtainRegen.cancel()
   setCurtainPaperUrl(null)
-  window.removeEventListener('resize', curtainRegen.schedule)
+  window.removeEventListener('resize', onCurtainResize)
 })
 
 watch(isDark, () => {
-  ensureCurtainPaperReady()
+  if (!curtainRevealed.value)
+    ensureCurtainPaperReady()
 })
 </script>
 

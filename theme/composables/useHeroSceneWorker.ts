@@ -1,3 +1,5 @@
+import { isMobileViewport } from './useMediaQuery'
+
 export interface HeroSceneResult {
   blankSide: 'left' | 'right'
   seed: number
@@ -101,6 +103,9 @@ export function preheatHeroSceneWorker(): void {
   ensureWorker()
 }
 
-// 模块 import 时立即预热，争取比真实请求早数十毫秒
-if (typeof window !== 'undefined')
+// 模块 import 时立即预热，争取比真实请求早数十毫秒。
+// 只在桌面宽度预热：移动端不渲染 hero 山水，预热等于白白下载并解析一个
+// ~775KB 的 worker，和首屏抢 CPU。之后若真的需要（例如横屏变宽），
+// buildHeroSceneInWorker 会按需创建。
+if (typeof window !== 'undefined' && !isMobileViewport())
   preheatHeroSceneWorker()

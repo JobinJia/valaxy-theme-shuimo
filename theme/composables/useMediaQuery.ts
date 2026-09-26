@@ -23,6 +23,14 @@ export function useMediaQuery(query: string) {
   return matches
 }
 
+/**
+ * One-off, non-reactive check of the mobile breakpoint. For module-level code
+ * (worker preheating) that runs before any component setup.
+ */
+export function isMobileViewport(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia(SHUIMO_MOBILE_MEDIA_QUERY).matches
+}
+
 export function useIsMobile() {
   return useMediaQuery(SHUIMO_MOBILE_MEDIA_QUERY)
 }

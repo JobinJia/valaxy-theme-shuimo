@@ -64,7 +64,16 @@ function onSeedGenerated(seed: number) {
 // 也压在后面，"碰巧"对齐；改为 worker 后主线程空闲，三个信号秒到，必须显式 gate
 // 才不会出现幕布拉开但花未到的视觉穿帮。
 
+//
+// 花卉不再硬等：纸 / 印章 / 幕布纸三条到齐后，最多再给花 FLOWER_BUDGET_MS，
+// 花到了就一起开（原设计的"同时出现"），没到就先开幕，花随后淡入
+// （ShuimoMobileFlower 自带淡入）。手机上生成花要秒级，硬等 = 用户盯着合上的
+// 幕布干等，而且等待期间 CPU 被花占满，这是"首页很卡"的主因。
+const FLOWER_BUDGET_MS = 400
+
 let initialCurtainTriggered = false
+let flowerBudgetTimer: ReturnType<typeof setTimeout> | null = null
+let flowerBudgetExpired = false
 const { ready: globalPaperReady } = useGlobalXuanPaper()
 
 function tryOpenInitialCurtain() {
@@ -76,9 +85,16 @@ function tryOpenInitialCurtain() {
     return
   if (!curtainPaperReady.value)
     return
-  if (shouldRenderMobileFlower.value && !mobileFlowerReady.value)
+  if (shouldRenderMobileFlower.value && !mobileFlowerReady.value && !flowerBudgetExpired) {
+    flowerBudgetTimer ??= setTimeout(() => {
+      flowerBudgetExpired = true
+      tryOpenInitialCurtain()
+    }, FLOWER_BUDGET_MS)
     return
+  }
   initialCurtainTriggered = true
+  if (flowerBudgetTimer)
+    clearTimeout(flowerBudgetTimer)
   openInitialCurtain()
 }
 
@@ -90,7 +106,9 @@ onMounted(() => {
     setFixedSeed(heroSeed)
 
   preheatXuanPaperWorker()
-  preheatHeroSceneWorker()
+  // 移动端不渲染 hero 山水，不预热它的 worker（~775KB）
+  if (!isMobile.value)
+    preheatHeroSceneWorker()
 })
 </script>
 

@@ -1,4 +1,5 @@
 import type { TileRegion, XuanPaperWorkerRequest } from '@jobinjia/shuimo-core/xuan-paper/worker-protocol'
+import { isMobileViewport } from './useMediaQuery'
 import { preheatXuanPaperPool, submitXuanPaperTask, xuanPaperPoolAvailable } from './useXuanPaperPool'
 
 let nextId = 1
@@ -128,8 +129,10 @@ export async function generateTiledInWorkers(
 // tiled 模式下 4 tile 并行时，避免 3 个 worker 同时冷启动 + WASM init 阻塞。
 // ---------------------------------------------------------------------------
 
+// 移动端只会同时派 2 个任务（页面纸 + 幕布纸，都不分片），多预热的第 3 个
+// worker 只是多一次下载解析 + WASM 初始化，和首屏抢 CPU。
 export function preheatXuanPaperWorker(): void {
-  preheatXuanPaperPool()
+  preheatXuanPaperPool(isMobileViewport() ? 2 : undefined)
 }
 
 if (typeof window !== 'undefined')
