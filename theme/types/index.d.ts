@@ -355,8 +355,9 @@ export interface ThemeConfig extends DefaultTheme.Config {
     /** 显示 seed 控制面板（复制 / 随机） @default false */
     showSeedControl: boolean
     /**
-     * 场景画布高度（SVG viewBox 高度）。和 shuimo-core MountPlanner 的 y 坐标系对齐，
-     * 800 是元素原生分布最自然的高度；调小会压缩上下留白，调大会拉高天空 / 露出水面。
+     * 场景画布高度。shuimo-core ≥3 按这个高度排布整幅构图（山、水域、船等比缩放），
+     * 取景框另在上方留 1/4 高度的天空，防止主峰山尖被裁。800 是元素比例最自然的高度；
+     * 调大调小都是整体缩放构图，不再是单纯露出更多天空 / 水面。
      * 视口适配由 preserveAspectRatio=slice 处理，改这个值不影响宽度。
      * @default 800
      */

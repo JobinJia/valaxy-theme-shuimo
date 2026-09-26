@@ -81,7 +81,20 @@ export async function putCurtainPaper(key: string, dataUrl: string): Promise<voi
   return new Promise((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readwrite')
-      tx.objectStore(STORE).put(dataUrl, key)
+      const store = tx.objectStore(STORE)
+      // Keys carry the paper-algorithm version (`shuimo-xuan-paper-v3-…`). Entries
+      // from an older version will never be read again, so drop them (~2.5MB each).
+      const version = key.match(/^shuimo-xuan-paper-v\d+-/)?.[0]
+      if (version) {
+        const keysReq = store.getAllKeys()
+        keysReq.onsuccess = () => {
+          for (const k of keysReq.result) {
+            if (typeof k === 'string' && k.startsWith('shuimo-xuan-paper-v') && !k.startsWith(version))
+              store.delete(k)
+          }
+        }
+      }
+      store.put(dataUrl, key)
       tx.oncomplete = () => {
         db.close()
         resolve()

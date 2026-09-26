@@ -9,7 +9,7 @@ import type { XuanPaperWorkerRequest, XuanPaperWorkerResponse } from '@jobinjia/
 
 interface Task {
   req: XuanPaperWorkerRequest
-  resolve: (blob: Blob) => void
+  resolve: (bitmap: ImageBitmap) => void
   reject: (err: Error) => void
 }
 
@@ -60,7 +60,7 @@ function dispatch(slot: Slot, task: Task): void {
     if ('error' in e.data)
       task.reject(new Error(e.data.error))
     else
-      task.resolve(e.data.blob)
+      task.resolve(e.data.bitmap)
     drain()
   }
 
@@ -100,10 +100,14 @@ function drain(): void {
   }
 }
 
-export function submitXuanPaperTask(req: XuanPaperWorkerRequest): Promise<Blob> | null {
+/**
+ * 派发一个宣纸渲染任务。shuimo-core ≥3 的 worker 不再在 worker 里编码 PNG，
+ * 而是把像素作为 ImageBitmap 转移（零拷贝）回来；调用方用完要 `close()`。
+ */
+export function submitXuanPaperTask(req: XuanPaperWorkerRequest): Promise<ImageBitmap> | null {
   if (!canUseWorker() || initFailed)
     return null
-  return new Promise<Blob>((resolve, reject) => {
+  return new Promise<ImageBitmap>((resolve, reject) => {
     queue.push({ req, resolve, reject })
     drain()
   })

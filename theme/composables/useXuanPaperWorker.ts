@@ -3,16 +3,49 @@ import { preheatXuanPaperPool, submitXuanPaperTask, xuanPaperPoolAvailable } fro
 
 let nextId = 1
 
+// shuimo-core ≥3 的请求里 options 变成可选（也可以改传预建好的 scene）；
+// 主题这边总是传 options，这里收窄成必填。
+type XuanPaperWorkerOptions = NonNullable<XuanPaperWorkerRequest['options']>
+
 // ---------------------------------------------------------------------------
 // 单 Worker 整图生成（小尺寸或 fallback）
 // ---------------------------------------------------------------------------
 
-export function generateInXuanPaperWorker(options: XuanPaperWorkerRequest['options']): Promise<string> | null {
+export function generateInXuanPaperWorker(options: XuanPaperWorkerOptions): Promise<string> | null {
   const id = nextId++
   const task = submitXuanPaperTask({ id, options })
   if (!task)
     return null
-  return task.then(blob => URL.createObjectURL(blob))
+  return task.then(bitmap => bitmapToObjectUrl(bitmap, paperImageType(options)))
+}
+
+// 编码格式：纸面没有透明区域时用 JPEG q0.9。shuimo-core 3 的宣纸带逐像素抖动，
+// PNG（无损）压不动：1950×1100 实测 PNG 2781KB → dataURL 3.7MB，超过
+// LS_MAX_ENTRY_SIZE(3MB) 被静默丢弃，每次访问都要重新跑 worker。JPEG q0.9 同图
+// 117KB，肉眼和 PNG 无差（WebP q0.9 只有 32KB 但会把颗粒和纤维抹平，不用）。
+// 开了毛边（deckleEdge）的纸边缘是透明的，JPEG 会把透明涂成黑色，只能继续用 PNG。
+interface PaperImageType { type: 'image/jpeg' | 'image/png', quality?: number }
+
+function paperImageType(options: XuanPaperWorkerOptions): PaperImageType {
+  return options.deckleEdge ? { type: 'image/png' } : { type: 'image/jpeg', quality: 0.9 }
+}
+
+// worker 转移回来的是 ImageBitmap。bitmaprenderer 上下文直接接管位图（零拷贝），
+// convertToBlob 异步编码，不在主线程上逐像素重绘。
+// 返回 blob URL 而不是 dataURL：1800×850 的 PNG dataURL 约 1.6MB，
+// useGlobalXuanPaper 后续 `await img.decode()` 在 prod 下对超大 dataURL
+// 会永远 pending（既不 resolve 也不 reject），导致 globalPaperReady 永远
+// false → 幕布永远不开。
+async function bitmapToObjectUrl(bitmap: ImageBitmap, format: PaperImageType): Promise<string> {
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
+  const ctx = canvas.getContext('bitmaprenderer')
+  if (!ctx) {
+    bitmap.close()
+    throw new Error('bitmaprenderer context unavailable')
+  }
+  ctx.transferFromImageBitmap(bitmap)
+  const blob = await canvas.convertToBlob(format)
+  return URL.createObjectURL(blob)
 }
 
 // ---------------------------------------------------------------------------
@@ -50,7 +83,7 @@ function buildTiles(fullWidth: number, fullHeight: number, tileCount: number): T
 }
 
 export async function generateTiledInWorkers(
-  options: XuanPaperWorkerRequest['options'],
+  options: XuanPaperWorkerOptions,
 ): Promise<string | null> {
   if (!xuanPaperPoolAvailable())
     return null
@@ -59,7 +92,7 @@ export async function generateTiledInWorkers(
   const fullHeight = options.height ?? 512
   const tiles = buildTiles(fullWidth, fullHeight, MAX_TILES)
 
-  const blobs = await Promise.all(
+  const bitmaps = await Promise.all(
     tiles.map((tile) => {
       const id = nextId++
       const task = submitXuanPaperTask({ id, options, tile })
@@ -68,7 +101,6 @@ export async function generateTiledInWorkers(
       return task
     }),
   )
-  const bitmaps = await Promise.all(blobs.map(blob => createImageBitmap(blob)))
 
   const canvas = document.createElement('canvas')
   canvas.width = fullWidth
@@ -79,17 +111,15 @@ export async function generateTiledInWorkers(
     bitmaps[i]!.close()
   }
 
-  // 返回 blob URL 而不是 dataURL：1800×850 的 PNG dataURL 约 1.6MB，
-  // useGlobalXuanPaper 后续 `await img.decode()` 在 prod 下对超大 dataURL
-  // 会永远 pending（既不 resolve 也不 reject），导致 globalPaperReady 永远
-  // false → 幕布永远不开。toBlob + createObjectURL 与单 worker 路径一致。
+  // 同单 worker 路径，返回 blob URL，编码格式见 paperImageType 的说明。
+  const format = paperImageType(options)
   return await new Promise<string>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob)
         resolve(URL.createObjectURL(blob))
       else
         reject(new Error('canvas.toBlob returned null'))
-    }, 'image/png')
+    }, format.type, format.quality)
   })
 }
 

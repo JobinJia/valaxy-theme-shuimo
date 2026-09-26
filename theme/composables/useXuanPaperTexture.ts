@@ -5,14 +5,18 @@ import { generateInXuanPaperWorker, generateTiledInWorkers } from './useXuanPape
 // createImageBitmap × N + drawImage × N + canvas.toBlob，1800×850 的 PNG
 // 编码在主线程吃 500-1000ms，对 page + curtain 两份 paper 叠加 = 主线程
 // 卡 2s+。trace 实测 RunMicrotasks 2.44s 全在跑 V8 native 的 canvas/PNG
-// 编码。改走单 worker 全屏路径：worker 内部直接生成 blob，主线程仅
-// createObjectURL，零合成开销。代价：单 tile 工作量大（1.5M pixels）但
-// worker 内部跑无所谓，反正主线程不卡。
+// 编码。改走单 worker 全屏路径：worker 转移回一张 ImageBitmap，主线程用
+// bitmaprenderer 零拷贝接住后异步 convertToBlob，没有 N 片合成开销。
+// 代价：单 tile 工作量大（1.5M pixels）但在 worker 里跑，主线程不卡。
 const TILE_THRESHOLD = Number.POSITIVE_INFINITY
 
 // localStorage 持久缓存：xuan paper 生成是确定性的（给定所有参数结果完全一致），
-// 一次生成后所有后续访问（包括新 tab / 新会话）都零计算命中
-const LS_PREFIX = 'shuimo-xuan-paper-v2'
+// 一次生成后所有后续访问（包括新 tab / 新会话）都零计算命中。
+// 版本号跟 shuimo-core 的宣纸算法走：core 3.0.0 重写了宣纸管线，同参数画出来的纸
+// 不一样了，所以 v2 → v3，旧缓存全部失效。幕布的 IndexedDB 缓存（App.vue）
+// 也用 buildXuanPaperLocalStorageKey 生成 key，一起失效。
+const LS_FAMILY = 'shuimo-xuan-paper-v'
+const LS_PREFIX = `${LS_FAMILY}3`
 const LS_MAX_ENTRY_SIZE = 3 * 1024 * 1024 // 3MB 单条上限，避免超大纹理吃光配额
 
 function loadFromLocalStorage(key: string): string | null {
@@ -27,21 +31,31 @@ function loadFromLocalStorage(key: string): string | null {
   }
 }
 
+// 删掉宣纸缓存条目：旧版本的全部删；sameVersion=true 时连当前版本的其他条目也删。
+function purgeLocalStorage(keep: string, sameVersion: boolean): void {
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i)
+    if (!k || k === keep || !k.startsWith(LS_FAMILY))
+      continue
+    if (sameVersion || !k.startsWith(`${LS_PREFIX}-`))
+      localStorage.removeItem(k)
+  }
+}
+
 function saveToLocalStorage(key: string, dataUrl: string): void {
   if (typeof window === 'undefined' || dataUrl.length > LS_MAX_ENTRY_SIZE)
     return
+  const fullKey = `${LS_PREFIX}-${key}`
   try {
-    localStorage.setItem(`${LS_PREFIX}-${key}`, dataUrl)
+    // 旧版本条目单条 1-3MB，升级后再也不会命中，写入前顺手清掉
+    purgeLocalStorage(fullKey, false)
+    localStorage.setItem(fullKey, dataUrl)
   }
   catch {
-    // 配额满：清理旧版本 / 同前缀的其他条目后再试一次
+    // 配额满：清掉当前版本的其他条目后再试一次
     try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const k = localStorage.key(i)
-        if (k && k.startsWith(LS_PREFIX) && k !== `${LS_PREFIX}-${key}`)
-          localStorage.removeItem(k)
-      }
-      localStorage.setItem(`${LS_PREFIX}-${key}`, dataUrl)
+      purgeLocalStorage(fullKey, true)
+      localStorage.setItem(fullKey, dataUrl)
     }
     catch {}
   }

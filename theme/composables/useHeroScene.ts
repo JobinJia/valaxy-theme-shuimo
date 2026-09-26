@@ -10,8 +10,8 @@ export interface HeroScene {
 }
 
 /**
- * 生成 hero 山水 SVG。H 是 SVG viewBox 高度（和 shuimo-core MountPlanner 的
- * y 坐标系对齐，原生自然值 800）；视口适配由外层 <img object-fit:cover>
+ * 生成 hero 山水 SVG。H 是场景画布高度（shuimo-core 按它排布构图，
+ * 默认 800）；视口适配由外层 <img object-fit:cover>
  * + SVG preserveAspectRatio=slice 兜底。
  */
 export async function buildHeroScene(W: number, H: number, seed: number): Promise<HeroScene> {
@@ -19,18 +19,19 @@ export async function buildHeroScene(W: number, H: number, seed: number): Promis
 
   const blankSide: 'left' | 'right' = seed % 2 === 0 ? 'left' : 'right'
 
-  // shuimo-core 原生坐标系 y ∈ [-200, 800]（MountPlanner 的 y_center + Mount.mountain
-  // 内部笔画向上延伸最多 ~200）。要等比缩：
-  //   1. 按 display W:H 比例把 nativeW 放大 → 场景横向填满、元素保持自然形状
-  //   2. viewBox 设成 "0 -200 nativeW 1000" 包含完整 native y 范围，不裁顶
-  //   3. display 和 viewBox 比例相同 → preserveAspectRatio slice/meet 一样效果，纯等比缩
-  const NATIVE_TOP = -200
-  const NATIVE_HEIGHT = 1000 // full y range including overflow
-  const nativeW = Math.round((W * NATIVE_HEIGHT) / H)
+  // shuimo-core ≥3 在有限画布模式下把整幅构图排进 y ∈ [0, H]（远山、主峰、
+  // 前景坡岸、水域都按 H 等比缩放），但个别主峰笔画仍会冲出顶边（实测
+  // H=800 时最多约 -110）。所以：
+  //   1. 传给 core 的 height 就是真实画布高度 H，构图不会被拉伸到取景框外
+  //   2. 取景框在画布上方多留 SKY_TOP = H/4 的天空，山尖不会被裁
+  //   3. nativeW 按 display W:H 比例放大，viewBox 和 display 同比例 → 纯等比缩
+  const SKY_TOP = Math.round(H / 4)
+  const VIEW_HEIGHT = H + SKY_TOP
+  const nativeW = Math.round((W * VIEW_HEIGHT) / H)
 
   const result = PaintingGenerator.landscape({
     width: nativeW,
-    height: NATIVE_HEIGHT,
+    height: H,
     seed,
     onXuanPaper: false,
     // 透明输出：根 SVG 无 mix-blend-mode；山体内部遮挡仍交给 shuimo-core 处理。
@@ -48,24 +49,24 @@ export async function buildHeroScene(W: number, H: number, seed: number): Promis
       boat: true,
     },
     placement: {
-      // Hero 视口的实际可见 y 是 [-200, 800]；把显式水域锚定在中下部，
+      // 水域锚定在画布中下部（H=800 时为 [700, 760]），按 H 等比，
       // 船既不会贴到底边，也不会重新漂到山体带上。
       explicitWaterBand: {
-        yRange: [700, 760],
+        yRange: [Math.round(H * 0.875), Math.round(H * 0.95)],
       },
     },
   })
 
   // 后处理：
-  // 1. viewBox 从 "0 0 nativeW 1000" 改为 "0 NATIVE_TOP nativeW NATIVE_HEIGHT"，
-  //    让 y<0 的山顶完整出现在视口内
+  // 1. viewBox 从 "0 0 nativeW H" 改为 "0 -SKY_TOP nativeW VIEW_HEIGHT"，
+  //    让冲出顶边的山尖完整出现在视口内
   // 2. 加 preserveAspectRatio=slice（aspect 匹配时 slice/meet 效果相同，写明更保险）
   // 注：shuimo-core 输出里的 `fill:white`（用于山体层次遮挡）故意不替换 —— img
   // 带 mix-blend-mode:multiply，白色 multiply 下层即透明，banner 与整页纸面
   // 接缝处完全无色差。代价是后山被前山遮挡的部分可能轻微穿帮。
   const svg = result.svg
-    .replace(/height="\d+"/, `height="${NATIVE_HEIGHT}"`)
-    .replace(/viewBox="0 0 [^"]+"/, `viewBox="0 ${NATIVE_TOP} ${nativeW} ${NATIVE_HEIGHT}"`)
+    .replace(/height="\d+"/, `height="${VIEW_HEIGHT}"`)
+    .replace(/viewBox="0 0 [^"]+"/, `viewBox="0 ${-SKY_TOP} ${nativeW} ${VIEW_HEIGHT}"`)
     .replace(/^<svg /, '<svg preserveAspectRatio="xMidYMid slice" ')
 
   return { svg, blankSide, seed }
