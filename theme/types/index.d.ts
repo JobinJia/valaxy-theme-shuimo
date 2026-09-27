@@ -94,7 +94,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
      * 覆盖；post 落款印章走 frontmatter；curtain 走 `stamp.curtain.size`；装饰/
      * 功能类小印章 (theme toggle / mobile inscription / solar seal) 走
      * `stamp.decor.size`。
-     * @default 200
+     * @default 56
      */
     size: number
     /**
@@ -212,7 +212,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
 
     /** 开屏幕布印章配置（独立于主印章，不会继承 `stamp.*`） */
     curtain: Partial<{
-      /** 印章文字 @default '受命,于天,既寿,永昌' */
+      /** 印章文字 @default '墨韵' */
       author: string
       /** 印章颜色 */
       color: string
@@ -396,7 +396,7 @@ export interface ThemeConfig extends DefaultTheme.Config {
   /** 水墨分享卡片 / OG 图配置 */
   shareCard?: ShareCardConfig
 
-  /** 天文驱动的暗色夜空（仅 dark mode 生效，且仅在显示 Hero 的页面） */
+  /** 天文驱动的天空：深色模式显示月亮与夜雾，浅色模式显示太阳与晨昏霞光 */
   astronomy?: Partial<{
     /** 总开关 @default true */
     enable: boolean

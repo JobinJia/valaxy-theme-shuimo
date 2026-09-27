@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is **valaxy-theme-shuimo** (`@jobinjia/valaxy-theme-shuimo`), a Chinese ink-wash (水墨) style theme for the [Valaxy](https://github.com/YunYouJun/valaxy) static blog framework. It features xuan paper textures, brush stroke effects, seal stamps, seasonal decorations, and traditional Chinese typography.
 
-The optional peer dependency `@jobinjia/shuimo-core` provides canvas-based drawing for xuan paper textures and ink-wash elements.
+The optional peer dependency `@jobinjia/shuimo-core` (`>=3.0.0` since theme 2.0.0) draws the xuan paper, hero landscape, seal stamps (stamp v2), mobile flower and share cards. When core changes xuan-paper pixels for the same options, bump `LS_PREFIX` in `theme/composables/useXuanPaperTexture.ts` so cached paper is regenerated.
 
 ## Commands
 

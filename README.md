@@ -6,6 +6,8 @@
 
 An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/valaxy). Xuan paper textures, brush strokes, seal stamps, and seasonal decorations.
 
+版本变化见 [CHANGELOG.md](./CHANGELOG.md)。从 1.x 升级到 2.x 请先看其中的「升级指南」。
+
 ## 预览 / Preview
 
 | Light                                 | Dark                                         |
@@ -20,24 +22,27 @@ An ink-wash (水墨) style blog theme for [Valaxy](https://github.com/YunYouJun/
 
 - 宣纸背景纹理（支持 processed / aged / gold 变体）
 - 毛笔笔触线条替代 CSS 硬线
-- 中国印章（阴章/阳章，圆形/椭圆）
+- 程序化篆刻印章（阴章/阳章，矩形/方形/圆形/椭圆/多边形），同一 seed 稳定复现
+- 首页山水画（桌面端）与花卉背景（移动端），开屏幕布动效
 - 四季花卉装饰自动切换
-- 首页山水画英雄区
-- 深色模式支持
+- 深色模式，以及按真实日月位置绘制的天空（夜间月相、白天日轮与晨昏霞光）
+- 水墨分享卡片与构建时 OG 图
+- 主题预设：`classic` / `night` / `gold` / `minimal` / `album`
 - i18n：UI 基础文案（上一篇/下一篇/返回）随 `zh-CN` / `en` 自动切换；主题其余文案（站名、副标题、印章、装饰性 copy）仍以中文书写
 - 内置峄山碑篆书字体
 
 ## 安装 / Install
 
 ```bash
-pnpm add @jobinjia/valaxy-theme-shuimo
+pnpm add @jobinjia/valaxy-theme-shuimo @jobinjia/shuimo-core
 ```
 
-可选安装 `@jobinjia/shuimo-core` 以启用 Canvas 宣纸纹理生成：
+`@jobinjia/shuimo-core` 在 package.json 里是可选的 peer 依赖，但主题的宣纸纹理、首页山水、印章、移动端花卉和分享卡片都由它生成，正常使用请一起安装。
 
-```bash
-pnpm add @jobinjia/shuimo-core
-```
+| 主题版本 | 需要的 `@jobinjia/shuimo-core` |
+| -------- | ------------------------------ |
+| 2.x      | `>=3.0.0`                      |
+| 1.x      | `>=2.0.3 <3`                   |
 
 可选安装 `@jobinjia/vite-plugin-shuimo-font-subset` 以在站点构建时按实际用字进一步裁剪内置篆书字体（`yishanbeizhuanti.woff2`）。不安装也能正常使用，主题会回退到打包内的 ~280KB top-1000 汉字子集；安装后构建产物体积通常可降到几十 KB：
 
@@ -46,6 +51,8 @@ pnpm add -D @jobinjia/vite-plugin-shuimo-font-subset
 ```
 
 启用后无需任何配置 —— 主题会自动加载该插件并扫描 `pages/**/*.{md,mdx,vue}` 与 `valaxy.config.{ts,js,mjs}` 收集字符。
+
+构建时生成 OG 分享图还需要 `@napi-rs/canvas`，见下文[水墨分享卡片](#水墨分享卡片--share-card-og-图)。
 
 ## 使用 / Usage
 
@@ -78,21 +85,10 @@ export default defineConfig<ThemeConfig>({
     },
 
     stamp: {
-      enable: true,
       author: '受命,于天,既寿,永昌',
-      type: 'yang',
-      shape: 'rectangle',
-      fontSize: 70,
-      borderScale: 1,
-      columnSpacingPx: 0.35,
-      characterSpacingPx: 3.2,
-      paddingXPx: 1.5,
-      paddingYPx: 1.5,
-      borderWidthPx: 4,
-      borderPointsPx: 24,
-      cornerRadiusPx: 10,
-      noiseAmountPx: 10,
-      regularShape: true,
+      mode: 'yang',
+      shape: 'rect',
+      seed: 69706,
     },
   },
 })
@@ -100,68 +96,131 @@ export default defineConfig<ThemeConfig>({
 
 ## 主题配置 / Theme Config
 
-| 配置项                          | 类型                                                         | 默认值                  | 说明                                                                                                           |
-| ------------------------------- | ------------------------------------------------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `colors.primary`                | `string`                                                     | `'#8B4513'`             | 主色（古铜）                                                                                                   |
-| `colors.stamp`                  | `string`                                                     | `'#C8102E'`             | 印章色（朱红）                                                                                                 |
-| `fonts.serif`                   | `string`                                                     | `'Noto Serif SC', ...`  | 衬线字体                                                                                                       |
-| `fonts.title`                   | `string`                                                     | -                       | 标题字体（如篆书）                                                                                             |
-| `fonts.body`                    | `string`                                                     | -                       | 正文字体                                                                                                       |
-| `fonts.url`                     | `string`                                                     | -                       | 外部字体 URL                                                                                                   |
-| `header.title`                  | `string`                                                     | `'墨韵书斋'`            | 站名                                                                                                           |
-| `header.subtitle`               | `string`                                                     | `'以墨会友 · 以文载道'` | 副标题                                                                                                         |
-| `footer.since`                  | `number`                                                     | `2024`                  | 建站年份                                                                                                       |
-| `footer.powered`                | `boolean`                                                    | `true`                  | 显示 Valaxy 驱动标识                                                                                           |
-| `footer.beian.enable`           | `boolean`                                                    | `false`                 | 启用备案号                                                                                                     |
-| `footer.beian.icp`              | `string`                                                     | `''`                    | ICP 备案号                                                                                                     |
-| `sidebar.author.name`           | `string`                                                     | `'墨客'`                | 作者名（About / 归档 / 分类 / 首页竖排导航 / 文章页均会读取）                                                  |
-| `sidebar.author.motto`          | `string`                                                     | `'以码为墨，以屏为纸'`  | 座右铭                                                                                                         |
-| `sidebar.author.avatar`         | `string`                                                     | -                       | 头像路径（首页竖排导航、文章页左上角使用）                                                                     |
-| `nav`                           | `NavItem[]`                                                  | `[]`                    | 导航项 `{ text, link, icon? }`                                                                                 |
-| `stamp.enable`                  | `boolean`                                                    | `true`                  | 启用印章                                                                                                       |
-| `stamp.author`                  | `string`                                                     | `'受命,于天,既寿,永昌'` | 印章文字，支持用逗号分列                                                                                       |
-| `stamp.color`                   | `string`                                                     | `'#C8102E'`             | 印章颜色                                                                                                       |
-| `stamp.type`                    | `'yin' \| 'yang'`                                            | `'yang'`                | 阴章/阳章                                                                                                      |
-| `stamp.shape`                   | `'auto' \| 'circle' \| 'ellipse' \| 'rectangle' \| 'square'` | `'rectangle'`           | 印章形状                                                                                                       |
-| `stamp.fontFamily`              | `string`                                                     | `'峄山碑篆体'`          | 印章字体                                                                                                       |
-| `stamp.fontSize`                | `number`                                                     | `70`                    | 字体大小（px）                                                                                                 |
-| `stamp.fontWeight`              | `string`                                                     | `'normal'`              | 字重                                                                                                           |
-| `stamp.textCarving`             | `'normal' \| 'strong' \| 'stone-cut'`                        | `'normal'`              | 文字刀刻质感                                                                                                   |
-| `stamp.offsetX`                 | `number`                                                     | `0`                     | 水平偏移                                                                                                       |
-| `stamp.offsetY`                 | `number`                                                     | `0`                     | 垂直偏移                                                                                                       |
-| `stamp.borderScale`             | `number`                                                     | `1`                     | 整体边框缩放                                                                                                   |
-| `stamp.columnSpacing`           | `number`                                                     | -                       | 相对列间距，未设置时优先走 `columnSpacingPx`                                                                   |
-| `stamp.characterSpacing`        | `number`                                                     | -                       | 相对字间距，未设置时优先走 `characterSpacingPx`                                                                |
-| `stamp.paddingX`                | `number`                                                     | -                       | 相对水平内边距，未设置时优先走 `paddingXPx`                                                                    |
-| `stamp.paddingY`                | `number`                                                     | -                       | 相对垂直内边距，未设置时优先走 `paddingYPx`                                                                    |
-| `stamp.columnSpacingPx`         | `number`                                                     | `0.35`                  | 绝对列间距（px）                                                                                               |
-| `stamp.characterSpacingPx`      | `number`                                                     | `3.2`                   | 绝对字间距（px）                                                                                               |
-| `stamp.paddingXPx`              | `number`                                                     | `1.5`                   | 绝对水平内边距（px）                                                                                           |
-| `stamp.paddingYPx`              | `number`                                                     | `1.5`                   | 绝对垂直内边距（px）                                                                                           |
-| `stamp.borderScaleX`            | `number`                                                     | `1`                     | 水平方向边框缩放                                                                                               |
-| `stamp.borderScaleY`            | `number`                                                     | `1`                     | 垂直方向边框缩放                                                                                               |
-| `stamp.noiseAmountPx`           | `number`                                                     | `10`                    | 噪声强度（px）                                                                                                 |
-| `stamp.borderPointsPx`          | `number`                                                     | `24`                    | 边框采样点数                                                                                                   |
-| `stamp.cornerRadiusPx`          | `number`                                                     | `10`                    | 圆角半径（px）                                                                                                 |
-| `stamp.borderWidthPx`           | `number`                                                     | `4`                     | 边框宽度（px）                                                                                                 |
-| `stamp.regularShape`            | `boolean`                                                    | `true`                  | 是否使用规整外轮廓                                                                                             |
-| `stamp.seed`                    | `number`                                                     | `69706`                 | 随机种子，用于稳定复现                                                                                         |
-| `stamp.nav.type`                | `'yin' \| 'yang'`                                            | `'yang'`                | 导航菜单印章类型                                                                                               |
-| `stamp.nav.shape`               | `'auto' \| 'circle' \| 'ellipse' \| 'rectangle' \| 'square'` | `'rectangle'`           | 导航菜单印章形状                                                                                               |
-| `stamp.nav.showIcon`            | `boolean`                                                    | `false`                 | 是否显示菜单 icon                                                                                              |
-| `stamp.nav.mobileSize`          | `number`                                                     | `40`                    | 移动端菜单印章尺寸（px）                                                                                       |
-| `stamp.nav.desktopSize`         | `number`                                                     | `48`                    | 桌面端菜单印章尺寸（px）                                                                                       |
-| `stamp.curtain.*`               | `object`                                                     | 见默认值                | 开屏幕布印章独立配置（不继承 `stamp.*`），字段同 `stamp.{author/color/type/shape/fontFamily/fontSize/...seed}` |
-| `decorations.enable`            | `boolean`                                                    | `true`                  | 启用装饰                                                                                                       |
-| `decorations.seasonAware`       | `boolean`                                                    | `true`                  | 四季花卉自动切换                                                                                               |
-| `decorations.heroLandscape`     | `boolean`                                                    | `true`                  | 首页山水画                                                                                                     |
-| `decorations.curtainColor`      | `ThemeModeColor`                                             | `''`                    | 首页幕布颜色，默认跟随纸张底色；支持 `string` 或 `{ light, dark }`                                             |
-| `decorations.curtainPaperColor` | `ThemeModeColor`                                             | `''`                    | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant`；支持 `string` 或 `{ light, dark }`                             |
-| `decorations.opacity`           | `number`                                                     | `0.12`                  | 装饰透明度                                                                                                     |
-| `xuanPaper.enable`              | `boolean`                                                    | `true`                  | 启用宣纸纹理                                                                                                   |
-| `xuanPaper.variant`             | `'processed' \| 'aged' \| 'gold'`                            | `'processed'`           | 纸张变体                                                                                                       |
-| `xuanPaper.goldDensity`         | `number`                                                     | `0.3`                   | 洒金密度 (0–1)，仅 `variant: 'gold'` 生效                                                                      |
-| `brushStrokes.enable`           | `boolean`                                                    | `true`                  | 启用毛笔线条                                                                                                   |
+下面各表的默认值取自主题内置的默认配置。完整类型见 `theme/types/index.d.ts`。
+
+### 基础
+
+| 配置项                  | 类型                                                     | 默认值                  | 说明                                                          |
+| ----------------------- | -------------------------------------------------------- | ----------------------- | ------------------------------------------------------------- |
+| `preset`                | `'classic' \| 'night' \| 'gold' \| 'minimal' \| 'album'` | -                       | 主题预设，作为底层默认值，你的配置会覆盖它                    |
+| `colors.primary`        | `string`                                                 | `'#8B4513'`             | 主色（古铜）                                                  |
+| `colors.stamp`          | `string`                                                 | `'#C8102E'`             | 印章色（朱红）                                                |
+| `fonts.serif`           | `string`                                                 | `'Noto Serif SC', ...`  | 衬线字体                                                      |
+| `fonts.title`           | `string`                                                 | -                       | 标题字体（如 `'YiShanBeiZhuan'` 篆书）                        |
+| `fonts.body`            | `string`                                                 | -                       | 正文字体                                                      |
+| `fonts.url`             | `string`                                                 | -                       | 外部字体 URL                                                  |
+| `header.title`          | `string`                                                 | `'墨韵书斋'`            | 站名                                                          |
+| `header.subtitle`       | `string`                                                 | `'以墨会友 · 以文载道'` | 副标题                                                        |
+| `footer.since`          | `number`                                                 | `2024`                  | 建站年份                                                      |
+| `footer.powered`        | `boolean`                                                | `true`                  | 显示 Valaxy 驱动标识                                          |
+| `footer.beian.enable`   | `boolean`                                                | `false`                 | 启用备案号                                                    |
+| `footer.beian.icp`      | `string`                                                 | `''`                    | ICP 备案号                                                    |
+| `sidebar.author.name`   | `string`                                                 | `'墨客'`                | 作者名（About / 归档 / 分类 / 首页竖排导航 / 文章页均会读取） |
+| `sidebar.author.motto`  | `string`                                                 | `'以码为墨，以屏为纸'`  | 座右铭                                                        |
+| `sidebar.author.avatar` | `string`                                                 | -                       | 头像路径（首页竖排导航、文章页左上角使用）                    |
+| `nav`                   | `NavItem[]`                                              | `[]`                    | 导航项 `{ text, link, icon? }`                                |
+
+### 首页 / Hero
+
+| 配置项                      | 类型                                          | 默认值     | 说明                                                                                                                     |
+| --------------------------- | --------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `hero.seed`                 | `number`                                      | -          | 固定首页山水的 seed，设置后每次加载画面相同                                                                              |
+| `hero.showSeedControl`      | `boolean`                                     | `false`    | 显示 seed 控制面板（复制 / 换一幅）                                                                                      |
+| `hero.sceneHeight`          | `number`                                      | `800`      | 山水构图的排布高度。2.x 起调大调小都是整体缩放构图（山、水、船等比缩放），800 比例最自然；不影响宽度，视口适配由裁切完成 |
+| `hero.mobileFlower.enable`  | `boolean`                                     | `true`     | 移动端首页用花卉背景代替山水                                                                                             |
+| `hero.mobileFlower.type`    | `'woody' \| 'herbal' \| 'random' \| 'season'` | `'season'` | 花卉类型；`season` 按季节自动选择                                                                                        |
+| `hero.mobileFlower.seed`    | `number`                                      | -          | 固定花卉 seed，不设则每次随机                                                                                            |
+| `hero.mobileFlower.opacity` | `number`                                      | `0.8`      | 花卉透明度 (0–1)                                                                                                         |
+| `home.postList`             | `boolean`                                     | `true`     | 首页显示文章列表                                                                                                         |
+| `preface.quote`             | `string`                                      | -          | 首页卷首语                                                                                                               |
+| `preface.source`            | `string`                                      | -          | 卷首语出处，如 `'—— 李白《静夜思》'`                                                                                     |
+
+### 装饰与纸张
+
+| 配置项                          | 类型                              | 默认值        | 说明                                                                               |
+| ------------------------------- | --------------------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| `decorations.enable`            | `boolean`                         | `true`        | 装饰总开关                                                                         |
+| `decorations.seasonAware`       | `boolean`                         | `true`        | 四季花卉自动切换                                                                   |
+| `decorations.heroLandscape`     | `boolean`                         | `true`        | 首页山水画                                                                         |
+| `decorations.curtainColor`      | `ThemeModeColor`                  | `''`          | 首页幕布颜色，默认跟随纸张底色；支持 `string` 或 `{ light, dark }`                 |
+| `decorations.curtainPaperColor` | `ThemeModeColor`                  | `''`          | 首页幕布宣纸底色，默认跟随 `xuanPaper.variant`；支持 `string` 或 `{ light, dark }` |
+| `decorations.opacity`           | `number`                          | `0.12`        | 装饰透明度                                                                         |
+| `xuanPaper.enable`              | `boolean`                         | `true`        | 启用宣纸纹理                                                                       |
+| `xuanPaper.variant`             | `'processed' \| 'aged' \| 'gold'` | `'processed'` | 纸张变体                                                                           |
+| `xuanPaper.goldDensity`         | `number`                          | `0.3`         | 洒金密度 (0–1)，仅 `variant: 'gold'` 生效                                          |
+| `brushStrokes.enable`           | `boolean`                         | `true`        | 用毛笔笔触替换 CSS 线条                                                            |
+
+### 文章页
+
+| 配置项                       | 类型      | 默认值  | 说明                        |
+| ---------------------------- | --------- | ------- | --------------------------- |
+| `toc.enable`                 | `boolean` | `true`  | 文章目录                    |
+| `toc.maxDepth`               | `2 \| 3`  | `3`     | 目录最大层级（3 = h2 + h3） |
+| `readingInfo.enable`         | `boolean` | `true`  | 阅读信息总开关              |
+| `readingInfo.wordCount`      | `boolean` | `true`  | 显示字数                    |
+| `readingInfo.readingTime`    | `boolean` | `true`  | 显示阅读时长                |
+| `readingInfo.updatedTime`    | `boolean` | `false` | 显示更新时间                |
+| `readingInfo.originalMark`   | `boolean` | `false` | 显示原创标记                |
+| `readingInfo.wordsPerMinute` | `number`  | `300`   | 中文阅读速度（字/分）       |
+| `imageCaption.enable`        | `boolean` | `true`  | 图片题注                    |
+| `imageCaption.autoNumbering` | `boolean` | `true`  | 题注自动编号                |
+| `imageCaption.prefix`        | `string`  | `'图'`  | 编号前缀                    |
+
+### 天空 / Astronomy
+
+按设定坐标计算真实的日月位置：深色模式显示月亮（含月相）与夜雾，浅色模式显示太阳与晨昏霞光。
+
+| 配置项                           | 类型                         | 默认值                                      | 说明                                                                                    |
+| -------------------------------- | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `astronomy.enable`               | `boolean`                    | `true`                                      | 总开关                                                                                  |
+| `astronomy.location`             | `{ lat, lng, name? }`        | `{ lat: 29.56, lng: 106.55, name: '重庆' }` | 博主默认坐标                                                                            |
+| `astronomy.allowVisitorOverride` | `boolean`                    | `true`                                      | 允许访客切换到自己的位置                                                                |
+| `astronomy.layers.*`             | `boolean`                    | 全部 `true`                                 | 分层开关：`moon` / `mist` / `vignette` / `sun` / `glowMorning` / `glowDusk` / `skyTint` |
+| `astronomy.moon`                 | `{ size, tiltByLatitude }`   | `{ size: 70, tiltByLatitude: true }`        | 月亮直径（px）、月相是否随纬度倾斜                                                      |
+| `astronomy.sun`                  | `{ size, color }`            | `{ size: 60, color: '#D9362E' }`            | 太阳直径（px）与颜色                                                                    |
+| `astronomy.mist`                 | `{ opacity, driftDuration }` | `{ opacity: 0.12, driftDuration: 120 }`     | 烟雾透明度、漂移周期（秒）                                                              |
+
+### 印章 / Stamp
+
+印章由 `@jobinjia/shuimo-core` 的印章 v2（`generateSealAsync`）生成，主题把下面的字段透传给它。
+
+| 配置项                        | 类型                                                                 | 默认值                   | 说明                                                                    |
+| ----------------------------- | -------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------- |
+| `stamp.enable`                | `boolean`                                                            | `true`                   | 启用印章                                                                |
+| `stamp.author`                | `string`                                                             | `'受命,于天,既寿,永昌'`  | 印章文字，用逗号分列                                                    |
+| `stamp.mode`                  | `'yin' \| 'yang'`                                                    | `'yang'`                 | 阴章（红底白字）/ 阳章（白底红字）                                      |
+| `stamp.shape`                 | `'auto' \| 'square' \| 'rect' \| 'circle' \| 'ellipse' \| 'polygon'` | `'rect'`                 | 印章形状                                                                |
+| `stamp.polygonSides`          | `number`                                                             | `6`                      | `shape: 'polygon'` 时的边数                                             |
+| `stamp.polygonOrientation`    | `'flat-top' \| 'point-top'`                                          | `'flat-top'`             | `shape: 'polygon'` 时的朝向                                             |
+| `stamp.script`                | `'xiaozhuan' \| 'dazhuan' \| 'jinwen' \| 'jiudiezhuan' \| 'custom'`  | -                        | 篆体字形风格（只改字形几何，不换字体）                                  |
+| `stamp.color`                 | `string`                                                             | `'#C8102E'`              | 印泥色                                                                  |
+| `stamp.seed`                  | `number`                                                             | `69706`                  | 随机种子，固定后印章稳定复现                                            |
+| `stamp.size`                  | `number`                                                             | `56`                     | 作者落款类印章（导航主印章、About 页、文章落款）的默认尺寸（px）        |
+| `stamp.decor.size`            | `number`                                                             | 各组件自定               | 装饰类小印章（主题切换、移动端题款、节气印）的尺寸（px）                |
+| `stamp.offsetX` / `offsetY`   | `number`                                                             | `0`                      | 文字偏移（-1 ~ 1）                                                      |
+| `stamp.padding`               | `number`                                                             | `0`                      | 印面内边距                                                              |
+| `stamp.gap`                   | `number`                                                             | `2`                      | 字间距（行列共用）                                                      |
+| `stamp.columnGap` / `rowGap`  | `number`                                                             | `2` / -                  | 分别覆盖列间距、行间距                                                  |
+| `stamp.stretch`               | `boolean`                                                            | -                        | 拉伸字形填满格子（九叠篆风格）                                          |
+| `stamp.cellHeightMode`        | `'uniform' \| 'fit'`                                                 | `'fit'`                  | `fit` 按每行最高的字分配行高                                            |
+| `stamp.border`                | `{ thickness, cornerRadius, corner, roughness }`                     | `{ 3, 8, 'round', 0.2 }` | 边框粗细、圆角、角的样式（`none` / `round` / `stone`）、残损程度（0–1） |
+| `stamp.carving`               | `{ intensity, breakage }`                                            | `{ intensity: 0.9 }`     | 刀刻强度、崩口                                                          |
+| `stamp.ink`                   | `{ density, bleed, grain, aging }`                                   | `{ bleed: 1 }`           | 印泥浓淡、晕染、颗粒、做旧                                              |
+| `stamp.notch`                 | `{ strategy, charIndex?, strokeHint?, jitter? }`                     | -                        | 边框留缺                                                                |
+| `stamp.pressing`              | `{ rotate, pressure, partialLoss, offset }`                          | -                        | 盖印时的歪斜、压力、缺印                                                |
+| `stamp.fontUrl`               | `string`                                                             | 主题自带篆书             | 印章字体文件地址（woff2/ttf/otf，不是 CSS font-family）                 |
+| `stamp.fontFallbackUrl`       | `string`                                                             | -                        | 缺字补全字体（仅 TTF/OTF），需配合 `harfbuzzSubsetWasmUrl`              |
+| `stamp.harfbuzzSubsetWasmUrl` | `string`                                                             | -                        | `harfbuzz-subset.wasm` 地址（`harfbuzzjs/dist/harfbuzz-subset.wasm`）   |
+| `stamp.nav.mode` / `shape`    | 同上                                                                 | `'yang'` / `'rect'`      | 导航菜单印章                                                            |
+| `stamp.nav.showIcon`          | `boolean`                                                            | `false`                  | 菜单印章旁显示 icon                                                     |
+| `stamp.nav.mainSize`          | `number`                                                             | 回退到 `stamp.size`      | 首页竖排导航里作者主印章的尺寸                                          |
+| `stamp.nav.mobileSize`        | `number`                                                             | `40`                     | 移动端菜单印章尺寸（px）                                                |
+| `stamp.nav.desktopSize`       | `number`                                                             | `48`                     | 桌面端菜单印章尺寸（px）                                                |
+| `stamp.curtain.*`             | `object`                                                             | 见下                     | 开屏幕布印章，独立配置、不继承 `stamp.*`                                |
+
+`stamp.curtain` 的默认值：`author: '墨韵'`、`mode: 'yin'`、`shape: 'rect'`、`seed: 69706`、`size: 200`，其余字段同 `stamp.*`。
+
+旧写法仍然兼容：`type` 等同于 `mode`，`shape: 'rectangle'` 等同于 `'rect'`，两者同时出现时新写法优先。1.x 时代的 `fontSize`、`columnSpacingPx`、`noiseAmountPx`、`textCarving`、`regularShape` 等印章 v1 参数已不再生效。
 
 ### `ThemeModeColor`
 
@@ -191,10 +250,12 @@ const themeConfigExample = {
 
 ### 依赖
 
-| 依赖                    | 用途                            | 说明                                                                         |
-| ----------------------- | ------------------------------- | ---------------------------------------------------------------------------- |
-| `@jobinjia/shuimo-core` | 宣纸纹理 + 山水画 + 印章绘制    | 必选可选依赖（缺席时 `shareCard` 自动失效）                                  |
-| `@napi-rs/canvas`       | 构建时 OG 图合成（Node Canvas） | 主题 devDependency；消费者如需 OG 图须自行安装；缺席时构建静默跳过并打印提示 |
+| 依赖                    | 用途                            | 说明                                                                                                |
+| ----------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `@jobinjia/shuimo-core` | 宣纸纹理 + 山水画 + 印章绘制    | 未安装时 `shareCard` 整体不生效                                                                     |
+| `@napi-rs/canvas`       | 构建时 OG 图合成（Node Canvas） | 需要 OG 图时自行安装（`pnpm add -D @napi-rs/canvas`）；未安装时构建照常完成，只跳过 OG 图并打印提示 |
+
+2.0.2 之前，未安装 `@napi-rs/canvas` 会导致整份主题配置加载失败（字体裁剪等主题插件随之失效）。请使用 2.0.2 及以上版本。
 
 ### 配置项
 
@@ -231,29 +292,23 @@ const themeConfigExample = {
 
 ## 印章调参 / Stamp Tuning
 
-主题层现在不再二次修改 `shuimo-core` 生成结果，而是把参数直接透传给底层 API。也就是说，用户可以只通过 `themeConfig.stamp` 来实时调整印章效果。
+主题不会二次修改 `shuimo-core` 生成的印章，只把 `themeConfig.stamp` 透传给印章 v2，所以调印章只需改配置。
 
 ```ts
 const stampConfigExample = {
   stamp: {
     author: '隔窗,听雨',
-    type: 'yang',
-    shape: 'rectangle',
-    fontSize: 70,
-    borderScale: 1,
-    columnSpacingPx: 0.35,
-    characterSpacingPx: 3.2,
-    paddingXPx: 1.5,
-    paddingYPx: 1.5,
-    borderWidthPx: 4,
-    borderPointsPx: 24,
-    cornerRadiusPx: 10,
-    noiseAmountPx: 10,
-    regularShape: true,
+    mode: 'yang',
+    shape: 'rect',
     seed: 69706,
+    gap: 2,
+    padding: 0,
+    border: { thickness: 3, cornerRadius: 8, corner: 'round', roughness: 0.2 },
+    carving: { intensity: 0.9 },
+    ink: { bleed: 1.0 },
     nav: {
-      type: 'yang',
-      shape: 'rectangle',
+      mode: 'yang',
+      shape: 'rect',
       showIcon: false,
       mobileSize: 40,
       desktopSize: 48,
@@ -262,12 +317,13 @@ const stampConfigExample = {
 }
 ```
 
-- 想让外框更规整：优先调 `regularShape`、`cornerRadiusPx`
-- 想让边缘更自然：调 `noiseAmountPx`、`borderPointsPx`
-- 想让字更松或更紧：调 `columnSpacingPx`、`characterSpacingPx`
-- 想控制印面留白：调 `paddingXPx`、`paddingYPx`
+- 想让外框更规整：`border.roughness` 调低，`border.corner` 用 `'round'` 或 `'none'`
+- 想让边缘更古旧：`border.roughness` 调高，`border.corner: 'stone'`，再加 `notch`
+- 想让字更松或更紧：调 `gap`、`columnGap`、`rowGap`
+- 想控制印面留白：调 `padding`
+- 想要刀味更重：调高 `carving.intensity`、`carving.breakage`
 - 想稳定复现同一枚印章：固定 `seed`
-- 想单独控制菜单印章：调 `stamp.nav.shape`、`stamp.nav.showIcon`、`stamp.nav.mobileSize`、`stamp.nav.desktopSize`
+- 想单独控制菜单印章：调 `stamp.nav.*`
 
 ## 开发 / Development
 
@@ -283,6 +339,9 @@ pnpm lint
 
 # 类型检查
 pnpm typecheck
+
+# 单元测试
+pnpm test
 
 # 构建 demo (SSG)
 pnpm build
