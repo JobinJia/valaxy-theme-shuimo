@@ -261,7 +261,7 @@ export function buildShareCardPlugin(
       // remove it after all cards are rendered. Leaving a fake `document` on
       // globalThis beyond this point can confuse other build tools (e.g. the
       // sass dart runtime checks for DOM APIs and throws on incomplete shims).
-      installNodeCanvasShim()
+      installNodeCanvasShim(napi)
       const g = globalThis as Record<string, unknown>
 
       try {

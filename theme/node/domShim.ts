@@ -1,4 +1,6 @@
-import { createCanvas } from '@napi-rs/canvas'
+// Type-only: the module itself is loaded lazily by the caller, so sites
+// without @napi-rs/canvas can still load the theme config.
+type NapiCanvas = typeof import('@napi-rs/canvas')
 
 /**
  * Install a minimal DOM shim so shuimo-core's canvas paths (xuanPaper,
@@ -6,7 +8,7 @@ import { createCanvas } from '@napi-rs/canvas'
  * / `new OffscreenCanvas(w, h)` internally; back both with @napi-rs/canvas.
  * Idempotent. Build-time only.
  */
-export function installNodeCanvasShim(): void {
+export function installNodeCanvasShim({ createCanvas }: NapiCanvas): void {
   const g = globalThis as Record<string, unknown>
   if (!g.document) {
     g.document = {
