@@ -26,14 +26,14 @@ function ensureStampV2Module(): Promise<GenerateSealAsync> {
   return stampV2ModulePromise
 }
 
-// 模块加载时（App.vue import useCurtainStamp 即触发）立即并行预热 stamp-v2
-// chunk + yishan woff2 fetch；fontWorker 由 useStampFontWorker 共享模块管理，
-// 模块顶部 import 即 spawn，所有 stamp 调用点（curtain / theme toggle / 文章
-// frontmatter stamp）共用一个 worker。
-if (typeof window !== 'undefined') {
+// 模块加载时（App.vue import useCurtainStamp 即触发）立即预热 stamp-v2 chunk；
+// fontWorker 由 useStampFontWorker 共享模块管理，模块顶部 import 即 spawn，
+// 所有 stamp 调用点（curtain / theme toggle / 文章 frontmatter stamp）共用一个 worker。
+// yishan woff2 不在这里预取：main.scss 的 @font-face 引用了它，Valaxy 会在每页
+// <head> 输出 <link rel="preload" as="font">，worker 取字体时直接命中 HTTP 缓存。
+// 这里再 fetch 一次在慢网下会赶在 preload 完成前发出，造成重复下载。
+if (typeof window !== 'undefined')
   ensureStampV2Module().catch(() => {})
-  fetch(yishanFontUrl).catch(() => {})
-}
 
 type ShapeStr
   = | 'auto' | 'square' | 'rect' | 'rectangle'
