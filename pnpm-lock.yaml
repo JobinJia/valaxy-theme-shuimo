@@ -16,8 +16,8 @@ catalogs:
       specifier: ^1.2.91
       version: 1.2.91
     '@jobinjia/shuimo-core':
-      specifier: 3.0.0
-      version: 3.0.0
+      specifier: 3.0.2
+      version: 3.0.2
     '@jobinjia/vite-plugin-shuimo-font-subset':
       specifier: 1.0.1-beta.2
       version: 1.0.1-beta.2
@@ -91,13 +91,13 @@ importers:
     dependencies:
       '@jobinjia/shuimo-core':
         specifier: 'catalog:'
-        version: 3.0.0
+        version: 3.0.2
       '@jobinjia/vite-plugin-shuimo-font-subset':
         specifier: 'catalog:'
-        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.9.0))
+        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(sass@1.99.0)(terser@5.46.1)(yaml@2.9.0))
       valaxy:
         specifier: 'catalog:'
-        version: 0.28.5(@babel/parser@7.29.3)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.34)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(esbuild@0.27.7)(eslint@10.7.0(jiti@2.6.1))(postcss@8.5.10)(prettier@3.8.3)(rollup@4.60.1)(terser@5.46.1)(typescript@6.0.3)(yaml@2.9.0)
+        version: 0.28.5(@babel/parser@7.29.3)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.34)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(esbuild@0.27.7)(eslint@10.7.0(jiti@2.7.0))(postcss@8.5.10)(prettier@3.8.3)(rollup@4.60.1)(terser@5.46.1)(typescript@6.0.3)(yaml@2.9.0)
       valaxy-theme-shuimo:
         specifier: workspace:@jobinjia/valaxy-theme-shuimo@*
         version: link:../theme
@@ -115,7 +115,7 @@ importers:
         version: 3.0.0
       '@jobinjia/vite-plugin-shuimo-font-subset':
         specifier: '>=1.0.1-beta.2'
-        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.7.0)(sass@1.99.0)(terser@5.46.1)(yaml@2.9.0))
+        version: 1.0.1-beta.2(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.9.0))
       '@shuimo-design/lunar':
         specifier: 'catalog:'
         version: 0.0.8
@@ -128,7 +128,7 @@ importers:
         version: 1.0.2
       valaxy:
         specifier: 'catalog:'
-        version: 0.28.5(@babel/parser@7.29.3)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.34)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(esbuild@0.27.7)(eslint@10.7.0(jiti@2.7.0))(postcss@8.5.10)(prettier@3.8.3)(rollup@4.60.1)(terser@5.46.1)(typescript@6.0.3)(yaml@2.9.0)
+        version: 0.28.5(@babel/parser@7.29.3)(@types/markdown-it@14.1.2)(@types/node@25.6.0)(@vue/compiler-dom@3.5.34)(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(change-case@5.4.4)(esbuild@0.27.7)(eslint@10.7.0(jiti@2.6.1))(postcss@8.5.10)(prettier@3.8.3)(rollup@4.60.1)(terser@5.46.1)(typescript@6.0.3)(yaml@2.9.0)
 
 packages:
 
@@ -988,6 +988,9 @@ packages:
 
   '@jobinjia/shuimo-core@3.0.0':
     resolution: {integrity: sha512-ExtP/A/vhz5ttMQN27sTLXbcgCLqooxQc45rm6Vza1PfSKcPDZswWvQ+DSNsh9KLPJq2d991NZX4Z4f7ttSC4g==}
+
+  '@jobinjia/shuimo-core@3.0.2':
+    resolution: {integrity: sha512-fsVGRk2l9DNDTxZLsWkqQYqz4JUwcGQLp8oZvidnUlnLq2PQQE849dsMfl/QbIAVeAz1aNGRIjOR4qu56rVdIw==}
 
   '@jobinjia/vite-plugin-shuimo-font-subset@1.0.1-beta.2':
     resolution: {integrity: sha512-Ahau8Hasi4tzTdj8AXZObgmVtvpIWaL6FJ6nmb60OiedYqvd4/kUswj2mTT/Ljo4xnSUnsE50HKs893pvz7ZMA==}
@@ -6239,6 +6242,13 @@ snapshots:
       vue-i18n: 11.3.2(vue@3.5.22(typescript@6.0.3))
 
   '@jobinjia/shuimo-core@3.0.0':
+    dependencies:
+      fontkit: 2.0.4
+      harfbuzzjs: 1.6.2
+      polygon-clipping: 0.15.7
+      uuid: 14.0.2
+
+  '@jobinjia/shuimo-core@3.0.2':
     dependencies:
       fontkit: 2.0.4
       harfbuzzjs: 1.6.2
