@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
-import { resolveVnavMainStampSize, useBlankSide, useThemeConfig } from '../composables'
+import { resolveVnavMainStampSize, useBlankSide, useThemeConfig, useViewport } from '../composables'
 
 defineProps<{
   revealed?: boolean
@@ -10,6 +10,8 @@ defineProps<{
 const themeConfig = useThemeConfig()
 const siteConfig = useSiteConfig()
 const { blankSide } = useBlankSide()
+// 两套菜单印章靠 CSS 按断点显隐；印章生成开销大，只生成当前断点看得见的那套
+const { isMobile, isDesktop } = useViewport()
 
 const titleFont = computed(() => themeConfig.value?.fonts?.title)
 const navStampConfig = computed(() => themeConfig.value?.stamp?.nav)
@@ -95,6 +97,7 @@ const subtitleParts = computed(() => {
         >
           <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
+            v-if="isMobile"
             :text="item.text"
             v-bind="mobileMenuStampProps"
           />
@@ -108,15 +111,16 @@ const subtitleParts = computed(() => {
         >
           <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
+            v-if="isMobile"
             :text="item.text"
             v-bind="mobileMenuStampProps"
           />
         </a>
       </template>
 
-      <!-- 大印章（移动端在最左，桌面端在最下） -->
+      <!-- 大印章：仅桌面端（移动端 header 里隐藏，不生成） -->
       <ShuimoStamp
-        v-if="themeConfig?.stamp?.enable !== false"
+        v-if="themeConfig?.stamp?.enable !== false && isDesktop"
         v-bind="mainStampProps"
         class="shuimo-vnav__stamp"
       />
@@ -134,6 +138,7 @@ const subtitleParts = computed(() => {
         >
           <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
+            v-if="isDesktop"
             :text="item.text"
             v-bind="desktopMenuStampProps"
           />
@@ -147,6 +152,7 @@ const subtitleParts = computed(() => {
         >
           <span v-if="showMenuIcon && item.icon" class="shuimo-vnav__link-icon" :class="item.icon" aria-hidden="true" />
           <ShuimoStamp
+            v-if="isDesktop"
             :text="item.text"
             v-bind="desktopMenuStampProps"
           />

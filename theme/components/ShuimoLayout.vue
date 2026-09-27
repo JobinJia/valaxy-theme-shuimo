@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { computed, inject, onMounted, ref, watch } from 'vue'
-import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useIsMobile, useThemeConfig, useThemeCssVars } from '../composables'
+import { mobileFlowerReady, mobileFlowerSeed, preheatHeroSceneWorker, preheatXuanPaperWorker, provideBlankSide, setFixedSeed, useThemeConfig, useThemeCssVars, useViewport } from '../composables'
 import { CURRENT_ROUTE_PATH_KEY, curtainPaperReady, curtainRevealed, curtainStampReady, openInitialCurtain } from '../composables/useCurtainTransition'
 import { useGlobalXuanPaper } from '../composables/useGlobalXuanPaper'
 import ShuimoMobileInscription from './ShuimoMobileInscription.vue'
@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
 const themeConfig = useThemeConfig()
 const themeCssVars = useThemeCssVars()
 const { blankSide } = provideBlankSide()
-const isMobile = useIsMobile()
+const { isMobile, isDesktop } = useViewport()
 
 const heroLandscapeEnabled = computed(() =>
   props.heroLandscape && themeConfig.value?.decorations?.heroLandscape !== false,
@@ -32,7 +32,7 @@ const mobileFlowerEnabled = computed(() =>
 const routePathRef = inject(CURRENT_ROUTE_PATH_KEY, ref('/'))
 const isHomeRoute = computed(() => (routePathRef.value.replace(/\/$/, '') || '/') === '/')
 const shouldRenderHeroLandscape = computed(() =>
-  !isMobile.value && heroLandscapeEnabled.value,
+  isDesktop.value && heroLandscapeEnabled.value,
 )
 const shouldRenderMobileFlower = computed(() =>
   isMobile.value && mobileFlowerEnabled.value && isHomeRoute.value,
@@ -107,7 +107,7 @@ onMounted(() => {
 
   preheatXuanPaperWorker()
   // 移动端不渲染 hero 山水，不预热它的 worker（~775KB）
-  if (!isMobile.value)
+  if (isDesktop.value)
     preheatHeroSceneWorker()
 })
 </script>
@@ -115,9 +115,9 @@ onMounted(() => {
 <template>
   <div class="shuimo-app" :class="[`blank-${blankSide}`, { 'has-vertical-nav': verticalNav }]" :style="themeCssVars">
     <ClientOnly>
-      <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false && !isMobile" />
+      <ShuimoLunarClock v-if="themeConfig?.decorations?.enable !== false && isDesktop" />
     </ClientOnly>
-    <ShuimoThemeToggle v-if="!isMobile" />
+    <ShuimoThemeToggle v-if="isDesktop" />
     <ShuimoHeroLandscape
       v-if="shouldRenderHeroLandscape"
       @seed-generated="onSeedGenerated"
@@ -131,11 +131,12 @@ onMounted(() => {
 
     <!-- 竖排导航：首页启用，幕布打开后淡入留白区域 -->
     <!-- 移动端：主题切换 + 导航标题放在同一 flex 行，space-between 自然对齐 -->
-    <div v-if="verticalNav && isMobile" class="shuimo-mobile-header">
-      <ShuimoThemeToggle class="shuimo-mobile-header__toggle" />
+    <!-- 桌面 / 移动共用同一个 ShuimoVerticalNav 实例：hydration 后切到移动端时
+         只换外层 class，导航和里面的印章不重新挂载、不重新生成 -->
+    <div v-if="verticalNav" :class="{ 'shuimo-mobile-header': isMobile }">
+      <ShuimoThemeToggle v-if="isMobile" class="shuimo-mobile-header__toggle" />
       <ShuimoVerticalNav :revealed="curtainRevealed" />
     </div>
-    <ShuimoVerticalNav v-else-if="verticalNav" :revealed="curtainRevealed" />
 
     <div v-if="!verticalNav" class="shuimo-app__paper">
       <ShuimoXuanPaper class="shuimo-app__paper-surface">

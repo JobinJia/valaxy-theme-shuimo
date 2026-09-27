@@ -308,7 +308,7 @@ watch(isDark, () => {
   </ClientOnly>
 
   <!-- 开屏幕布：桌面（左右） -->
-  <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
+  <div class="shuimo-curtain shuimo-curtain--left" :class="{ revealed: curtainRevealed }" :style="curtainLeftStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--left">
       <ShuimoCurtainStampSlot
         :svg="curtainStampSvg"
@@ -320,7 +320,7 @@ watch(isDark, () => {
       />
     </div>
   </div>
-  <div v-show="!isMobile" class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
+  <div class="shuimo-curtain shuimo-curtain--right" :class="{ revealed: curtainRevealed }" :style="curtainRightStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--right">
       <ShuimoCurtainStampSlot
         :svg="curtainStampSvg"
@@ -334,7 +334,7 @@ watch(isDark, () => {
   </div>
 
   <!-- 开屏幕布：移动端（上下） -->
-  <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--top" :class="{ revealed: curtainRevealed }" :style="curtainTopStyle">
+  <div class="shuimo-curtain shuimo-curtain--top" :class="{ revealed: curtainRevealed }" :style="curtainTopStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--top">
       <ShuimoCurtainStampSlot
         :svg="curtainStampSvg"
@@ -346,7 +346,7 @@ watch(isDark, () => {
       />
     </div>
   </div>
-  <div v-show="isMobile" class="shuimo-curtain shuimo-curtain--bottom" :class="{ revealed: curtainRevealed }" :style="curtainBottomStyle">
+  <div class="shuimo-curtain shuimo-curtain--bottom" :class="{ revealed: curtainRevealed }" :style="curtainBottomStyle">
     <div class="shuimo-curtain__stamp shuimo-curtain__stamp--bottom">
       <ShuimoCurtainStampSlot
         :svg="curtainStampSvg"
@@ -420,6 +420,26 @@ watch(isDark, () => {
 
   &--bottom {
     bottom: 0;
+  }
+
+  // Pick the pair by breakpoint in CSS, not v-show: the server-rendered page
+  // then covers the right way on every device before any script runs, and
+  // hydration has no viewport-dependent markup to disagree about.
+  &--top,
+  &--bottom {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    &--left,
+    &--right {
+      display: none;
+    }
+
+    &--top,
+    &--bottom {
+      display: block;
+    }
   }
 
   &__stamp {
