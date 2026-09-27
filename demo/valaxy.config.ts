@@ -59,19 +59,19 @@ export default defineConfig<ThemeConfig>({
     stamp: {
       enable: true,
       author: '隔窗,听雨',
-      type: 'yin',
-      shape: 'rectangle',
+      mode: 'yin',
+      shape: 'rect',
       nav: {
-        type: 'yang',
-        shape: 'rectangle',
+        mode: 'yang',
+        shape: 'rect',
         showIcon: false,
         mobileSize: 40,
         desktopSize: 48,
       },
       curtain: {
         author: '落梅,听雪',
-        type: 'yin',
-        shape: 'rectangle',
+        mode: 'yin',
+        shape: 'rect',
       },
     },
 
@@ -104,7 +104,6 @@ export default defineConfig<ThemeConfig>({
 
     hero: {
       showSeedControl: true,
-      sceneHeight: 600,
     },
 
     preface: {
